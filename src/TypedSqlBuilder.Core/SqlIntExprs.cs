@@ -80,3 +80,18 @@ public class SqlIntNotEquals(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : 
 	public ISqlExpr<ISqlInt> Left { get; } = left;
 	public ISqlExpr<ISqlInt> Right { get; } = right;
 }
+
+
+public class SqlIntProjection(string alias, string name) : SqlExprInt, ISqlProjectionExpr<ISqlInt>
+{
+	public string Source { get; } = alias;
+	public string Name { get; } = name;
+}
+
+/// <summary>
+/// Represents a reference to an integer column in a SQL table.
+/// Inherits from SqlIntProjection to support column references in SQL queries.
+/// </summary>
+/// <param name="source">The table name or alias that contains the column</param>
+/// <param name="name">The name of the column</param>
+public class SqlIntColumn(string source, string name) : SqlIntProjection(source, name);

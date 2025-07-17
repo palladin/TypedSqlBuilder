@@ -36,8 +36,8 @@ public class SqlExpressionOperatorTests
     public void DemonstrateUserFriendlyOperators()
     {
         // Create some SQL expressions
-        SqlExprInt age = new SqlIntColumn("age");
-        SqlExprInt salary = new SqlIntColumn("salary");
+        SqlExprInt age = new SqlIntColumn("users", "age");
+        SqlExprInt salary = new SqlIntColumn("users", "salary");
         
         // Now you can use natural C# operators for SQL expressions!
         
@@ -66,8 +66,8 @@ public class SqlExpressionOperatorTests
     public void VerifyComplexExpressionTree()
     {
         // Create columns
-        SqlExprInt id = new SqlIntColumn("id");
-        SqlExprInt count = new SqlIntColumn("count");
+        SqlExprInt id = new SqlIntColumn("table", "id");
+        SqlExprInt count = new SqlIntColumn("table", "count");
         
         // Create expression: (id == 1) || (count > 10 && count != 100)
         SqlExprBool actual = (id == 1) || (count > 10 && count != 100);
@@ -89,8 +89,8 @@ public class SqlExpressionOperatorTests
     public void VerifyArithmeticExpressionTree()
     {
         // Create columns
-        SqlExprInt salary = new SqlIntColumn("salary");
-        SqlExprInt bonus = new SqlIntColumn("bonus");
+        SqlExprInt salary = new SqlIntColumn("employees", "salary");
+        SqlExprInt bonus = new SqlIntColumn("employees", "bonus");
         
         // Create expression: (salary + bonus) * 2 - 1000
         SqlExprInt actual = (salary + bonus) * 2 - 1000;
@@ -112,9 +112,9 @@ public class SqlExpressionOperatorTests
     public void VerifyNestedBooleanExpressionTree()
     {
         // Create columns
-        SqlExprInt id = new SqlIntColumn("id");
-        SqlExprInt status = new SqlIntColumn("status");
-        SqlExprInt priority = new SqlIntColumn("priority");
+        SqlExprInt id = new SqlIntColumn("records", "id");
+        SqlExprInt status = new SqlIntColumn("records", "status");
+        SqlExprInt priority = new SqlIntColumn("records", "priority");
         
         // Create expression: (id == 1 || status == 2) && priority > 5
         SqlExprBool actual = (id == 1 || status == 2) && priority > 5;
@@ -136,8 +136,8 @@ public class SqlExpressionOperatorTests
     public void VerifyNaturalCSharpSyntaxWithDeepEquality()
     {
         // Create columns
-        SqlExprInt id = new SqlIntColumn("id");
-        SqlExprInt count = new SqlIntColumn("count");
+        SqlExprInt id = new SqlIntColumn("data", "id");
+        SqlExprInt count = new SqlIntColumn("data", "count");
         
         // Create expression using natural C# syntax
         SqlExprBool actual = (id == 1) || (count > 10 && count != 100);

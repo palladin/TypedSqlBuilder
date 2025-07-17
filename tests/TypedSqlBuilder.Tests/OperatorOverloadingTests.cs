@@ -10,7 +10,7 @@ public class OperatorOverloadingTests
         // Create some integer expressions
         SqlExprInt a = 5;
         SqlExprInt b = 10;
-        SqlExprInt c = new SqlIntColumn("id");
+        SqlExprInt c = new SqlIntColumn("table", "id");
         
         // Test the == operator (should create SqlIntEquals)
         SqlExprBool equals = a == b;

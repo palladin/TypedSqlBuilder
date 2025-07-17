@@ -42,6 +42,31 @@ public interface ISqlBinExpr<TSqlType> : ISqlExpr<TSqlType> where TSqlType : ISq
 /// </summary>
 public interface ISqlColumnExpr : ISqlExpr;
 
+/// <summary>
+/// Base marker interface for SQL projection expressions.
+/// Projection expressions represent elements that can be selected in SQL queries,
+/// such as columns, computed fields, or aliased expressions.
+/// </summary>
+public interface ISqlProjectionExpr : ISqlExpr;
+
+/// <summary>
+/// Generic interface for typed SQL projection expressions.
+/// Represents elements that can be projected (selected) in SQL queries with a specific data type.
+/// </summary>
+/// <typeparam name="TSqlType">The SQL data type of the projected value</typeparam>
+public interface ISqlProjectionExpr<TSqlType> : ISqlExpr<TSqlType>, ISqlProjectionExpr where TSqlType : ISqlType
+{
+	/// <summary>
+	/// Gets the source identifier (table name or alias) that contains this projection.
+	/// </summary>
+	string Source { get; }
+	
+	/// <summary>
+	/// Gets the name of the projected element (column name, alias, etc.).
+	/// </summary>
+	string Name { get; }
+}
+
 // Note: All SQL expression base classes use abstract class instead of record
 // to enable custom operator overloading that returns SQL expression types rather than primitive types.
 // This is essential for maintaining type safety in the fluent SQL expression building system.
@@ -108,15 +133,4 @@ public abstract class SqlExprString : ISqlExpr<ISqlString>
 	public static SqlExprBool operator <=(SqlExprString left, SqlExprString right) => new SqlStringLessThanOrEqualTo(left, right);
 	
 	public static SqlExprString operator +(SqlExprString left, SqlExprString right) => new SqlStringConcat(left, right);
-}
-
-public class SqlIntColumn(string name) : SqlExprInt, ISqlColumnExpr
-{
-	public string Name { get; } = name;
-}
-
-public class SqlIntProjection(string alias, string name) : SqlExprInt
-{
-	public string Alias { get; } = alias;
-	public string Name { get; } = name;
 }
