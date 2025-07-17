@@ -2,26 +2,45 @@ using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
 
-public interface ISqlExpr
-{
-}
+/// <summary>
+/// Marker interface for all SQL expressions. This is the base type that identifies
+/// any object that can represent a SQL expression in the builder system.
+/// </summary>
+public interface ISqlExpr;
 
-public interface ISqlExpr<TSqlType> : ISqlExpr where TSqlType : ISqlType
-{
-}
+/// <summary>
+/// Marker interface for typed SQL expressions. Extends ISqlExpr to provide compile-time
+/// type safety by associating each expression with a specific SQL data type.
+/// </summary>
+/// <typeparam name="TSqlType">The SQL data type this expression represents (e.g., ISqlInt, ISqlString, ISqlBool)</typeparam>
+public interface ISqlExpr<TSqlType> : ISqlExpr where TSqlType : ISqlType;
 
+/// <summary>
+/// Interface for unary SQL expressions that operate on a single operand.
+/// Examples: NOT, unary minus (-), etc.
+/// </summary>
+/// <typeparam name="TSqlType">The SQL data type of both the operand and result</typeparam>
 public interface ISqlUnaryExpr<TSqlType> : ISqlExpr<TSqlType> where TSqlType : ISqlType
 {
 	ISqlExpr<TSqlType> Value { get; }
 }
 
+/// <summary>
+/// Interface for binary SQL expressions that operate on two operands.
+/// Examples: AND, OR, +, -, =, !=, >, <, etc.
+/// </summary>
+/// <typeparam name="TSqlType">The SQL data type of both operands and result</typeparam>
 public interface ISqlBinExpr<TSqlType> : ISqlExpr<TSqlType> where TSqlType : ISqlType
 {
 	ISqlExpr<TSqlType> Left { get; }
 	ISqlExpr<TSqlType> Right { get; }
 }
 
-public interface ISqlColumnExpr : ISqlExpr { }
+/// <summary>
+/// Marker interface for SQL expressions that represent database columns.
+/// This allows the system to distinguish between column references and other expressions.
+/// </summary>
+public interface ISqlColumnExpr : ISqlExpr;
 
 public abstract class SqlExprBool : ISqlExpr<ISqlBool>
 {
