@@ -15,7 +15,10 @@ public abstract class SqlExpr;
 /// <summary>
 /// Abstract base class for SQL boolean expressions.
 /// </summary>
-public abstract class SqlExprBool : SqlExpr
+public abstract class SqlExprBool : SqlExpr,
+	ISqlEqualityOperators<SqlExprBool, SqlExprBool>,
+	ISqlLogicalOperators<SqlExprBool>,
+	ISqlImplicitConversion<SqlExprBool, bool>
 {
 	public static implicit operator SqlExprBool(bool value) => new SqlBoolValue(value);
 
@@ -33,7 +36,11 @@ public abstract class SqlExprBool : SqlExpr
 /// <summary>
 /// Abstract base class for SQL integer expressions.
 /// </summary>
-public abstract class SqlExprInt : SqlExpr
+public abstract class SqlExprInt : SqlExpr,
+	ISqlEqualityOperators<SqlExprInt, SqlExprBool>,
+	ISqlComparisonOperators<SqlExprInt, SqlExprBool>,
+	ISqlArithmeticOperators<SqlExprInt>,
+	ISqlImplicitConversion<SqlExprInt, int>
 {
 	public static implicit operator SqlExprInt(int x) => new SqlIntValue(x);
 
@@ -59,7 +66,11 @@ public abstract class SqlExprInt : SqlExpr
 /// Abstract base class for SQL string expressions.
 /// </summary>
 #pragma warning disable CS0660, CS0661
-public abstract class SqlExprString : SqlExpr
+public abstract class SqlExprString : SqlExpr,
+	ISqlEqualityOperators<SqlExprString, SqlExprBool>,
+	ISqlComparisonOperators<SqlExprString, SqlExprBool>,
+	ISqlConcatenationOperators<SqlExprString>,
+	ISqlImplicitConversion<SqlExprString, string>
 {
 	public static implicit operator SqlExprString(string value) => new SqlStringValue(value);
 	
