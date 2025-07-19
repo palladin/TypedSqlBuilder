@@ -99,3 +99,27 @@ public class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExprS
 	
 	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
+
+/// <summary>
+/// Represents a projection of a string column or expression in SQL queries.
+/// This class serves as a base for referencing string values from tables or subqueries,
+/// typically used in SELECT clauses or other projection contexts.
+/// </summary>
+/// <param name="source">The table alias or source identifier</param>
+/// <param name="name">The column or expression name</param>
+public class SqlStringProjection(string source, string name) : SqlExprString
+{
+	public void Deconstruct(out string sourceOut, out string nameOut)
+	{
+		sourceOut = source;
+		nameOut = name;
+	}
+}
+
+/// <summary>
+/// Represents a reference to a string column in a SQL table.
+/// Inherits from SqlStringProjection to support column references in SQL queries.
+/// </summary>
+/// <param name="source">The table name or alias that contains the column</param>
+/// <param name="name">The name of the column</param>
+public class SqlStringColumn(string source, string name) : SqlStringProjection(source, name);
