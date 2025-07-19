@@ -4,33 +4,50 @@ namespace TypedSqlBuilder.Tests;
 
 public class SqlExpressionOperatorTests
 {
-    // Helper method for deep tree value equality
-    private static bool AreEqual(ISqlExpr expected, ISqlExpr actual)
+    // Helper method for deep tree value equality using pattern matching
+    private static bool AreEqual(SqlExpr expected, SqlExpr actual) => (expected, actual) switch
     {
-        if (expected.GetType() != actual.GetType()) return false;
+        // Value comparisons
+        (SqlIntValue(var eVal), SqlIntValue(var aVal)) => eVal == aVal,
+        (SqlBoolValue(var eVal), SqlBoolValue(var aVal)) => eVal == aVal,
+        (SqlStringValue(var eVal), SqlStringValue(var aVal)) => eVal == aVal,
         
-        return (expected, actual) switch
-        {
-            (SqlIntValue e, SqlIntValue a) => e.Value == a.Value,
-            (SqlBoolValue e, SqlBoolValue a) => e.Value == a.Value,
-            (SqlStringValue e, SqlStringValue a) => e.Value == a.Value,
-            (SqlIntColumn e, SqlIntColumn a) => e.Name == a.Name,
-            (SqlIntEquals e, SqlIntEquals a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntNotEquals e, SqlIntNotEquals a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntGreaterThan e, SqlIntGreaterThan a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntLessThan e, SqlIntLessThan a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntGreaterThanOrEqualTo e, SqlIntGreaterThanOrEqualTo a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntLessThanOrEqualTo e, SqlIntLessThanOrEqualTo a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntAdd e, SqlIntAdd a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntSub e, SqlIntSub a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntMult e, SqlIntMult a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlIntDiv e, SqlIntDiv a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlBoolAnd e, SqlBoolAnd a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlBoolOr e, SqlBoolOr a) => AreEqual(e.Left, a.Left) && AreEqual(e.Right, a.Right),
-            (SqlBoolNot e, SqlBoolNot a) => AreEqual(e.Value, a.Value),
-            _ => false
-        };
-    }
+        // Column comparisons
+        (SqlIntColumn(var eSource, var eName), SqlIntColumn(var aSource, var aName)) => 
+            eSource == aSource && eName == aName,
+        
+        // Binary operations - all follow same pattern
+        (SqlIntEquals(var eL, var eR), SqlIntEquals(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntNotEquals(var eL, var eR), SqlIntNotEquals(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntGreaterThan(var eL, var eR), SqlIntGreaterThan(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntLessThan(var eL, var eR), SqlIntLessThan(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntGreaterThanOrEqualTo(var eL, var eR), SqlIntGreaterThanOrEqualTo(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntLessThanOrEqualTo(var eL, var eR), SqlIntLessThanOrEqualTo(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntAdd(var eL, var eR), SqlIntAdd(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntSub(var eL, var eR), SqlIntSub(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntMult(var eL, var eR), SqlIntMult(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlIntDiv(var eL, var eR), SqlIntDiv(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlBoolAnd(var eL, var eR), SqlBoolAnd(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        (SqlBoolOr(var eL, var eR), SqlBoolOr(var aL, var aR)) => 
+            AreEqual(eL, aL) && AreEqual(eR, aR),
+        
+        // Unary operations
+        (SqlBoolNot(var eVal), SqlBoolNot(var aVal)) => AreEqual(eVal, aVal),
+        
+        // Different types or unhandled cases
+        _ => false
+    };
 
     [Fact]
     public void DemonstrateUserFriendlyOperators()

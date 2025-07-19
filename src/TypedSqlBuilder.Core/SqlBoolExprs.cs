@@ -12,49 +12,61 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public class SqlBoolValue(bool value) : SqlExprBool
 {
-	public bool Value { get; } = value;
+	private readonly bool _value = value;
+	
+	public void Deconstruct(out bool value) => value = _value;
 }
 
 /// <summary>
 /// Represents a SQL NOT operation (logical negation).
 /// </summary>
-public class SqlBoolNot(ISqlExpr<ISqlBool> value) : SqlExprBool, ISqlUnaryExpr<ISqlBool>
+public class SqlBoolNot(SqlExprBool value) : SqlExprBool
 {
-	public ISqlExpr<ISqlBool> Value { get; } = value;
+	private readonly SqlExprBool _value = value;
+	
+	public void Deconstruct(out SqlExprBool value) => value = _value;
 }
 
 /// <summary>
 /// Represents a SQL AND operation (logical conjunction).
 /// </summary>
-public class SqlBoolAnd(ISqlExpr<ISqlBool> left, ISqlExpr<ISqlBool> right) : SqlExprBool, ISqlBinExpr<ISqlBool>
+public class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	public ISqlExpr<ISqlBool> Left { get; } = left;
-	public ISqlExpr<ISqlBool> Right { get; } = right;
+	private readonly SqlExprBool _left = left;
+	private readonly SqlExprBool _right = right;
+	
+	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL OR operation (logical disjunction).
 /// </summary>
-public class SqlBoolOr(ISqlExpr<ISqlBool> left, ISqlExpr<ISqlBool> right) : SqlExprBool, ISqlBinExpr<ISqlBool>
+public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	public ISqlExpr<ISqlBool> Left { get; } = left;
-	public ISqlExpr<ISqlBool> Right { get; } = right;
+	private readonly SqlExprBool _left = left;
+	private readonly SqlExprBool _right = right;
+	
+	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL equality comparison between two boolean expressions (=).
 /// </summary>
-public class SqlBoolEquals(ISqlExpr<ISqlBool> left, ISqlExpr<ISqlBool> right) : SqlExprBool, ISqlBinExpr<ISqlBool>
+public class SqlBoolEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	public ISqlExpr<ISqlBool> Left { get; } = left;
-	public ISqlExpr<ISqlBool> Right { get; } = right;
+	private readonly SqlExprBool _left = left;
+	private readonly SqlExprBool _right = right;
+	
+	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL inequality comparison between two boolean expressions (!=).
 /// </summary>
-public class SqlBoolNotEquals(ISqlExpr<ISqlBool> left, ISqlExpr<ISqlBool> right) : SqlExprBool, ISqlBinExpr<ISqlBool>
+public class SqlBoolNotEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	public ISqlExpr<ISqlBool> Left { get; } = left;
-	public ISqlExpr<ISqlBool> Right { get; } = right;
+	private readonly SqlExprBool _left = left;
+	private readonly SqlExprBool _right = right;
+	
+	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
 }

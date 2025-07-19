@@ -2,86 +2,26 @@ using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
 
-/// <summary>
-/// Marker interface for all SQL expressions. This is the base type that identifies
-/// any object that can represent a SQL expression in the builder system.
-/// </summary>
-public interface ISqlExpr;
-
-/// <summary>
-/// Marker interface for typed SQL expressions. Extends ISqlExpr to provide compile-time
-/// type safety by associating each expression with a specific SQL data type.
-/// </summary>
-/// <typeparam name="TSqlType">The SQL data type this expression represents (e.g., ISqlInt, ISqlString, ISqlBool)</typeparam>
-public interface ISqlExpr<TSqlType> : ISqlExpr where TSqlType : ISqlType;
-
-/// <summary>
-/// Interface for unary SQL expressions that operate on a single operand.
-/// Examples: NOT, unary minus (-), etc.
-/// </summary>
-/// <typeparam name="TSqlType">The SQL data type of both the operand and result</typeparam>
-public interface ISqlUnaryExpr<TSqlType> : ISqlExpr<TSqlType> where TSqlType : ISqlType
-{
-	ISqlExpr<TSqlType> Value { get; }
-}
-
-/// <summary>
-/// Interface for binary SQL expressions that operate on two operands.
-/// Examples: AND, OR, +, -, =, !=, >, <, etc.
-/// </summary>
-/// <typeparam name="TSqlType">The SQL data type of both operands and result</typeparam>
-public interface ISqlBinExpr<TSqlType> : ISqlExpr<TSqlType> where TSqlType : ISqlType
-{
-	ISqlExpr<TSqlType> Left { get; }
-	ISqlExpr<TSqlType> Right { get; }
-}
-
-/// <summary>
-/// Marker interface for SQL expressions that represent database columns.
-/// This allows the system to distinguish between column references and other expressions.
-/// </summary>
-public interface ISqlColumnExpr : ISqlExpr;
-
-/// <summary>
-/// Base marker interface for SQL projection expressions.
-/// Projection expressions represent elements that can be selected in SQL queries,
-/// such as columns, computed fields, or aliased expressions.
-/// </summary>
-public interface ISqlProjectionExpr : ISqlExpr;
-
-/// <summary>
-/// Generic interface for typed SQL projection expressions.
-/// Represents elements that can be projected (selected) in SQL queries with a specific data type.
-/// </summary>
-/// <typeparam name="TSqlType">The SQL data type of the projected value</typeparam>
-public interface ISqlProjectionExpr<TSqlType> : ISqlExpr<TSqlType>, ISqlProjectionExpr where TSqlType : ISqlType
-{
-	/// <summary>
-	/// Gets the source identifier (table name or alias) that contains this projection.
-	/// </summary>
-	string Source { get; }
-	
-	/// <summary>
-	/// Gets the name of the projected element (column name, alias, etc.).
-	/// </summary>
-	string Name { get; }
-}
-
 // Note: All SQL expression base classes use abstract class instead of record
 // to enable custom operator overloading that returns SQL expression types rather than primitive types.
+// The problem was that records implement their own ==, != operators which would conflict with our SQL expression operators.
 // This is essential for maintaining type safety in the fluent SQL expression building system.
+
+public abstract class SqlExpr;
+
+
 
 #pragma warning disable CS0660, CS0661
 /// <summary>
 /// Abstract base class for SQL boolean expressions.
 /// </summary>
-public abstract class SqlExprBool : ISqlExpr<ISqlBool>
+public abstract class SqlExprBool : SqlExpr
 {
 	public static implicit operator SqlExprBool(bool value) => new SqlBoolValue(value);
-	
+
 	public static SqlExprBool operator ==(SqlExprBool left, SqlExprBool right) => new SqlBoolEquals(left, right);
 	public static SqlExprBool operator !=(SqlExprBool left, SqlExprBool right) => new SqlBoolNotEquals(left, right);
-	
+
 	public static SqlExprBool operator &(SqlExprBool left, SqlExprBool right) => new SqlBoolAnd(left, right);
 	public static SqlExprBool operator |(SqlExprBool left, SqlExprBool right) => new SqlBoolOr(left, right);
 	public static SqlExprBool operator !(SqlExprBool value) => new SqlBoolNot(value);
@@ -93,7 +33,7 @@ public abstract class SqlExprBool : ISqlExpr<ISqlBool>
 /// <summary>
 /// Abstract base class for SQL integer expressions.
 /// </summary>
-public abstract class SqlExprInt : ISqlExpr<ISqlInt>
+public abstract class SqlExprInt : SqlExpr
 {
 	public static implicit operator SqlExprInt(int x) => new SqlIntValue(x);
 
@@ -119,7 +59,7 @@ public abstract class SqlExprInt : ISqlExpr<ISqlInt>
 /// Abstract base class for SQL string expressions.
 /// </summary>
 #pragma warning disable CS0660, CS0661
-public abstract class SqlExprString : ISqlExpr<ISqlString>
+public abstract class SqlExprString : SqlExpr
 {
 	public static implicit operator SqlExprString(string value) => new SqlStringValue(value);
 	

@@ -13,73 +13,89 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public class SqlStringValue(string value) : SqlExprString
 {
-	public string Value { get; } = value;
+	private readonly string _value = value;
+	
+	public void Deconstruct(out string value) => value = _value;
 }
 
 /// <summary>
 /// Represents a SQL equality comparison between two string expressions (=).
 /// </summary>
-public class SqlStringEquals(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringEquals(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL inequality comparison between two string expressions (!=).
 /// </summary>
-public class SqlStringNotEquals(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringNotEquals(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL greater-than comparison between two string expressions (>).
 /// Uses lexicographic (alphabetical) ordering.
 /// </summary>
-public class SqlStringGreaterThan(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringGreaterThan(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL less-than comparison between two string expressions (<).
 /// Uses lexicographic (alphabetical) ordering.
 /// </summary>
-public class SqlStringLessThan(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringLessThan(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL greater-than-or-equal comparison between two string expressions (>=).
 /// Uses lexicographic (alphabetical) ordering.
 /// </summary>
-public class SqlStringGreaterThanOrEqualTo(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringGreaterThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL less-than-or-equal comparison between two string expressions (<=).
 /// Uses lexicographic (alphabetical) ordering.
 /// </summary>
-public class SqlStringLessThanOrEqualTo(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprBool, ISqlBinExpr<ISqlString>
+public class SqlStringLessThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }
 
 /// <summary>
 /// Represents a SQL string concatenation operation between two string expressions.
 /// Equivalent to the SQL CONCAT function or || operator in some databases.
 /// </summary>
-public class SqlStringConcat(ISqlExpr<ISqlString> left, ISqlExpr<ISqlString> right) : SqlExprString, ISqlBinExpr<ISqlString>
+public class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExprString
 {
-	public ISqlExpr<ISqlString> Left { get; } = left;
-	public ISqlExpr<ISqlString> Right { get; } = right;
+	private readonly SqlExprString _left = left;
+	private readonly SqlExprString _right = right;
+	
+	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
 }

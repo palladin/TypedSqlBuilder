@@ -7,9 +7,9 @@ namespace TypedSqlBuilder.Core;
 /// 
 /// The classes in this file fall into several categories:
 /// - Value expressions: SqlIntValue (literal integers)
-/// - Unary operations: SqlIntPlus, SqlIntMinus, SqlIntAbs (unary operators and functions)
+/// - Unary operations: SqlIntMinus, SqlIntAbs (unary operators and functions)
 /// - Binary arithmetic: SqlIntAdd, SqlIntSub, SqlIntMult, SqlIntDiv (mathematical operations)
-/// - Comparison operations: SqlIntEquals, SqlIntNotEquals, SqlIntGreaterThan, SqlIntLessThan, etc.
+/// - Comparison operations: SqlIntEquals, SqlIntNotEquals, SqlIntGreaterThan, SqlIntLessThan, SqlIntGreaterThanOrEqualTo, SqlIntLessThanOrEqualTo
 /// - Projection expressions: SqlIntProjection, SqlIntColumn (column references and projections)
 /// 
 /// All classes inherit from SqlExprInt which provides operator overloading for intuitive
@@ -25,23 +25,7 @@ namespace TypedSqlBuilder.Core;
 /// <param name="value">The integer value to be represented in the SQL expression</param>
 public class SqlIntValue(int value) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the integer value represented by this SQL expression.
-	/// </summary>
-	public int Value { get; } = value;
-}
-
-/// <summary>
-/// Represents a unary plus operation in SQL expressions (+value).
-/// This class applies a unary plus operator to an integer expression.
-/// </summary>
-/// <param name="value">The integer expression to apply the unary plus operator to</param>
-public class SqlIntPlus(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<ISqlInt>
-{
-	/// <summary>
-	/// Gets the integer expression that the unary plus operator is applied to.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Value { get; } = value;
+	public void Deconstruct(out int valueOut) => valueOut = value;
 }
 
 /// <summary>
@@ -49,12 +33,13 @@ public class SqlIntPlus(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<ISq
 /// This class applies a unary minus operator to an integer expression, negating its value.
 /// </summary>
 /// <param name="value">The integer expression to apply the unary minus operator to</param>
-public class SqlIntMinus(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<ISqlInt>
+public class SqlIntMinus(SqlExprInt value) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the integer expression that the unary minus operator is applied to.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Value { get; } = value;
+	public void Deconstruct(out SqlExprInt valueOut)
+	{
+		valueOut = value;
+	}
+
 }
 
 /// <summary>
@@ -62,12 +47,13 @@ public class SqlIntMinus(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<IS
 /// This class applies the SQL ABS function to an integer expression, returning its absolute value.
 /// </summary>
 /// <param name="value">The integer expression to apply the absolute value function to</param>
-public class SqlIntAbs(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<ISqlInt>
+public class SqlIntAbs(SqlExprInt value) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the integer expression that the absolute value function is applied to.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Value { get; } = value;
+	public void Deconstruct(out SqlExprInt valueOut)
+	{
+		valueOut = value;
+	}
+
 }
 
 /// <summary>
@@ -76,16 +62,13 @@ public class SqlIntAbs(ISqlExpr<ISqlInt> value) : SqlExprInt, ISqlUnaryExpr<ISql
 /// </summary>
 /// <param name="left">The left operand of the addition</param>
 /// <param name="right">The right operand of the addition</param>
-public class SqlIntAdd(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprInt, ISqlBinExpr<ISqlInt>
+public class SqlIntAdd(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the left operand of the addition operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the addition operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
 }
 
 /// <summary>
@@ -94,16 +77,13 @@ public class SqlIntAdd(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExp
 /// </summary>
 /// <param name="left">The left operand of the subtraction</param>
 /// <param name="right">The right operand of the subtraction</param>
-public class SqlIntSub(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprInt, ISqlBinExpr<ISqlInt>
+public class SqlIntSub(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the left operand of the subtraction operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the subtraction operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
 }
 
 /// <summary>
@@ -112,16 +92,14 @@ public class SqlIntSub(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExp
 /// </summary>
 /// <param name="left">The left operand of the multiplication</param>
 /// <param name="right">The right operand of the multiplication</param>
-public class SqlIntMult(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprInt, ISqlBinExpr<ISqlInt>
+public class SqlIntMult(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the left operand of the multiplication operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the multiplication operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -130,16 +108,14 @@ public class SqlIntMult(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlEx
 /// </summary>
 /// <param name="left">The left operand (dividend) of the division</param>
 /// <param name="right">The right operand (divisor) of the division</param>
-public class SqlIntDiv(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprInt, ISqlBinExpr<ISqlInt>
+public class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the left operand (dividend) of the division operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand (divisor) of the division operation.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -148,16 +124,14 @@ public class SqlIntDiv(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExp
 /// </summary>
 /// <param name="left">The left operand of the comparison</param>
 /// <param name="right">The right operand of the comparison</param>
-public class SqlIntGreaterThan(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntGreaterThan(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the greater than comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the greater than comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -166,16 +140,14 @@ public class SqlIntGreaterThan(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) 
 /// </summary>
 /// <param name="left">The left operand of the comparison</param>
 /// <param name="right">The right operand of the comparison</param>
-public class SqlIntLessThan(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntLessThan(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the less than comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the less than comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -184,16 +156,14 @@ public class SqlIntLessThan(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : S
 /// </summary>
 /// <param name="left">The left operand of the comparison</param>
 /// <param name="right">The right operand of the comparison</param>
-public class SqlIntGreaterThanOrEqualTo(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntGreaterThanOrEqualTo(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the greater than or equal to comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the greater than or equal to comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -202,16 +172,14 @@ public class SqlIntGreaterThanOrEqualTo(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt
 /// </summary>
 /// <param name="left">The left operand of the comparison</param>
 /// <param name="right">The right operand of the comparison</param>
-public class SqlIntLessThanOrEqualTo(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntLessThanOrEqualTo(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the less than or equal to comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the less than or equal to comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -220,16 +188,14 @@ public class SqlIntLessThanOrEqualTo(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> r
 /// </summary>
 /// <param name="left">The left operand of the equality comparison</param>
 /// <param name="right">The right operand of the equality comparison</param>
-public class SqlIntEquals(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntEquals(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the equality comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the equality comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 /// <summary>
@@ -238,16 +204,14 @@ public class SqlIntEquals(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : Sql
 /// </summary>
 /// <param name="left">The left operand of the inequality comparison</param>
 /// <param name="right">The right operand of the inequality comparison</param>
-public class SqlIntNotEquals(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : SqlExprBool, ISqlBinExpr<ISqlInt>
+public class SqlIntNotEquals(SqlExprInt left, SqlExprInt right) : SqlExprBool
 {
-	/// <summary>
-	/// Gets the left operand of the not equal comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Left { get; } = left;
-	/// <summary>
-	/// Gets the right operand of the not equal comparison.
-	/// </summary>
-	public ISqlExpr<ISqlInt> Right { get; } = right;
+	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
+	{
+		leftOut = left;
+		rightOut = right;
+	}
+
 }
 
 
@@ -256,18 +220,15 @@ public class SqlIntNotEquals(ISqlExpr<ISqlInt> left, ISqlExpr<ISqlInt> right) : 
 /// This class serves as a base for referencing integer values from tables or subqueries,
 /// typically used in SELECT clauses or other projection contexts.
 /// </summary>
-/// <param name="alias">The table alias or source identifier</param>
+/// <param name="source">The table alias or source identifier</param>
 /// <param name="name">The column or expression name</param>
-public class SqlIntProjection(string alias, string name) : SqlExprInt, ISqlProjectionExpr<ISqlInt>
+public class SqlIntProjection(string source, string name) : SqlExprInt
 {
-	/// <summary>
-	/// Gets the source (table name or alias) that contains the projected integer value.
-	/// </summary>
-	public string Source { get; } = alias;
-	/// <summary>
-	/// Gets the name of the column or expression being projected.
-	/// </summary>
-	public string Name { get; } = name;
+	public void Deconstruct(out string sourceOut, out string nameOut)
+	{
+		sourceOut = source;
+		nameOut = name;
+	}
 }
 
 /// <summary>
