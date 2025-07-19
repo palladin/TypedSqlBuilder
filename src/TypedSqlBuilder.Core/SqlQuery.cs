@@ -10,7 +10,7 @@ public abstract record SqlQuery
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 }
-public abstract record SqlQuery<TColumns> : SqlQuery where TColumns : ITuple;
+public abstract record SqlQuery<TSource> : SqlQuery;
 
 public record SqlTable<TColumns>(string Name, TColumns columns) : SqlQuery<TColumns>
     where TColumns : ITuple;
@@ -25,6 +25,23 @@ public static class SqlQueryExtensions
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 
+    public static SqlQuery<SqlExprInt> Select<TSource>(this SqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
+        where TSource : ITuple
+    {
+        throw new NotImplementedException("This method should be implemented in derived classes.");
+    }
+
+    public static SqlExprInt Sum(this SqlQuery<SqlExprInt> query)          
+    {
+        throw new NotImplementedException("This method should be implemented in derived classes.");
+    }
+
+    public static SqlExprInt Count<TSource>(this SqlQuery<TSource> query) 
+        where TSource : ITuple
+    {
+        throw new NotImplementedException("This method should be implemented in derived classes.");
+    }       
+    
     public static SqlQuery<TSource> Where<TSource>(this SqlQuery<TSource> query, Func<TSource, SqlExprBool> predicate)
         where TSource : ITuple
     {
