@@ -4,42 +4,42 @@ namespace TypedSqlBuilder.Core;
 
 public abstract record SqlQuery
 { 
-    public static SqlQuery<T> From<T>(T columns)
-        where T : ITuple
+    public static SqlQuery<TColumns> From<TColumns>(TColumns columns)
+        where TColumns : ITuple
     {
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 }
-public abstract record SqlQuery<T> : SqlQuery where T : ITuple;
+public abstract record SqlQuery<TColumns> : SqlQuery where TColumns : ITuple;
 
-public record SqlTable<T>(string Name, T columns) : SqlQuery<T>
-    where T : ITuple;
+public record SqlTable<TColumns>(string Name, TColumns columns) : SqlQuery<TColumns>
+    where TColumns : ITuple;
 
 
 public static class SqlQueryExtensions
 {
-    public static SqlQuery<T> Select<T, R>(this SqlQuery<T> query, Func<T, R> selector)
-        where T : ITuple
-        where R : ITuple
+    public static SqlQuery<TSource> Select<TSource, TResult>(this SqlQuery<TSource> query, Func<TSource, TResult> selector)
+        where TSource : ITuple
+        where TResult : ITuple
     {
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 
-    public static SqlQuery<T> Where<T>(this SqlQuery<T> query, Func<T, SqlExprBool> predicate)
-        where T : ITuple
+    public static SqlQuery<TSource> Where<TSource>(this SqlQuery<TSource> query, Func<TSource, SqlExprBool> predicate)
+        where TSource : ITuple
     {
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 
-    public static SqlQuery<T> OrderBy<T, TKey>(this SqlQuery<T> query, Func<T, TKey> keySelector)
-        where T : ITuple
+    public static SqlQuery<TSource> OrderBy<TSource, TKey>(this SqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+        where TSource : ITuple
         where TKey : SqlExpr
     {
         throw new NotImplementedException("This method should be implemented in derived classes.");
     }
 
-    public static SqlQuery<T> OrderByDescending<T, TKey>(this SqlQuery<T> query, Func<T, TKey> keySelector)
-        where T : ITuple
+    public static SqlQuery<TSource> OrderByDescending<TSource, TKey>(this SqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+        where TSource : ITuple
         where TKey : SqlExpr
     {
         throw new NotImplementedException("This method should be implemented in derived classes.");

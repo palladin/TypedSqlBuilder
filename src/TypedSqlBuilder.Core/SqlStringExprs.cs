@@ -13,9 +13,7 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public class SqlStringValue(string value) : SqlExprString
 {
-	private readonly string _value = value;
-	
-	public void Deconstruct(out string value) => value = _value;
+	public void Deconstruct(out string valueOut) => valueOut = value;
 }
 
 /// <summary>
@@ -23,10 +21,7 @@ public class SqlStringValue(string value) : SqlExprString
 /// </summary>
 public class SqlStringEquals(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -34,10 +29,7 @@ public class SqlStringEquals(SqlExprString left, SqlExprString right) : SqlExprB
 /// </summary>
 public class SqlStringNotEquals(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -46,10 +38,7 @@ public class SqlStringNotEquals(SqlExprString left, SqlExprString right) : SqlEx
 /// </summary>
 public class SqlStringGreaterThan(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -58,10 +47,7 @@ public class SqlStringGreaterThan(SqlExprString left, SqlExprString right) : Sql
 /// </summary>
 public class SqlStringLessThan(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -70,10 +56,7 @@ public class SqlStringLessThan(SqlExprString left, SqlExprString right) : SqlExp
 /// </summary>
 public class SqlStringGreaterThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -82,10 +65,7 @@ public class SqlStringGreaterThanOrEqualTo(SqlExprString left, SqlExprString rig
 /// </summary>
 public class SqlStringLessThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -94,10 +74,7 @@ public class SqlStringLessThanOrEqualTo(SqlExprString left, SqlExprString right)
 /// </summary>
 public class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExprString
 {
-	private readonly SqlExprString _left = left;
-	private readonly SqlExprString _right = right;
-	
-	public void Deconstruct(out SqlExprString left, out SqlExprString right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>

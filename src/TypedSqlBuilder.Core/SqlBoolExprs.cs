@@ -12,9 +12,7 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public class SqlBoolValue(bool value) : SqlExprBool
 {
-	private readonly bool _value = value;
-	
-	public void Deconstruct(out bool value) => value = _value;
+	public void Deconstruct(out bool valueOut) => valueOut = value;
 }
 
 /// <summary>
@@ -22,9 +20,7 @@ public class SqlBoolValue(bool value) : SqlExprBool
 /// </summary>
 public class SqlBoolNot(SqlExprBool value) : SqlExprBool
 {
-	private readonly SqlExprBool _value = value;
-	
-	public void Deconstruct(out SqlExprBool value) => value = _value;
+	public void Deconstruct(out SqlExprBool valueOut) => valueOut = value;
 }
 
 /// <summary>
@@ -32,10 +28,7 @@ public class SqlBoolNot(SqlExprBool value) : SqlExprBool
 /// </summary>
 public class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	private readonly SqlExprBool _left = left;
-	private readonly SqlExprBool _right = right;
-	
-	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -43,10 +36,7 @@ public class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// </summary>
 public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	private readonly SqlExprBool _left = left;
-	private readonly SqlExprBool _right = right;
-	
-	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -54,10 +44,7 @@ public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// </summary>
 public class SqlBoolEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	private readonly SqlExprBool _left = left;
-	private readonly SqlExprBool _right = right;
-	
-	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -65,10 +52,7 @@ public class SqlBoolEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// </summary>
 public class SqlBoolNotEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
-	private readonly SqlExprBool _left = left;
-	private readonly SqlExprBool _right = right;
-	
-	public void Deconstruct(out SqlExprBool left, out SqlExprBool right) => (left, right) = (_left, _right);
+	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
