@@ -12,7 +12,7 @@ var customers = (
 
 SqlQuery query =
     SqlQuery.From(customers)
-            .Where(c => c.Age > 18)
+            .Where(c => c.Age > ":age".AsIntParam())
             .OrderBy(c => c.Name)
-            .Select(c => (c.Id, c.Name, c.Age));
+            .Select(c => (c.Id + 1, c.Name + "!", c.Age > 20 ? "Adult" : "Minor"));
     

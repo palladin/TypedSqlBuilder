@@ -78,3 +78,13 @@ public class SqlBoolProjection(string source, string name) : SqlExprBool
 /// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
 public class SqlBoolColumn(string source, string name) : SqlBoolProjection(source, name);
+
+/// <summary>
+/// Represents a named boolean parameter in SQL expressions.
+/// This class is used for parameterized queries where boolean values need to be bound at execution time.
+/// </summary>
+/// <param name="name">The name of the parameter (e.g., "@isActive", ":enabled")</param>
+public class SqlParameterBool(string name) : SqlExprBool
+{
+	public void Deconstruct(out string nameOut) => nameOut = name;
+}

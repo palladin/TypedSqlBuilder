@@ -100,3 +100,24 @@ public class SqlStringProjection(string source, string name) : SqlExprString
 /// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
 public class SqlStringColumn(string source, string name) : SqlStringProjection(source, name);
+
+/// <summary>
+/// Represents a named string parameter in SQL expressions.
+/// This class is used for parameterized queries where string values need to be bound at execution time.
+/// </summary>
+/// <param name="name">The name of the parameter (e.g., "@userName", ":email")</param>
+public class SqlParameterString(string name) : SqlExprString
+{
+	public void Deconstruct(out string nameOut) => nameOut = name;
+}
+
+/// <summary>
+/// Represents a SQL LIKE operation for pattern matching in string expressions.
+/// This class applies the SQL LIKE operator to compare a string expression against a pattern.
+/// </summary>
+/// <param name="value">The string expression to match against the pattern</param>
+/// <param name="pattern">The pattern to match (can include wildcards like % and _)</param>
+public class SqlStringLike(SqlExprString value, string pattern) : SqlExprBool
+{
+	public void Deconstruct(out SqlExprString valueOut, out string patternOut) => (valueOut, patternOut) = (value, pattern);
+}

@@ -57,6 +57,34 @@ public class SqlIntAbs(SqlExprInt value) : SqlExprInt
 }
 
 /// <summary>
+/// Represents a SQL COUNT() aggregate function.
+/// This class applies the SQL COUNT function to count rows or non-null values.
+/// </summary>
+public class SqlIntCount() : SqlExprInt
+{
+}
+
+/// <summary>
+/// Represents a SQL SUM() aggregate function in SQL expressions.
+/// This class applies the SQL SUM function to an integer expression, summing all values.
+/// </summary>
+/// <param name="value">The integer expression to apply the sum function to</param>
+public class SqlIntSum(SqlExprInt value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL AVG() aggregate function in SQL expressions.
+/// This class applies the SQL AVG function to an integer expression, calculating the average value.
+/// </summary>
+/// <param name="value">The integer expression to apply the average function to</param>
+public class SqlIntAvg(SqlExprInt value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
+}
+
+/// <summary>
 /// Represents an addition operation in SQL expressions (left + right).
 /// This class performs binary addition between two integer expressions.
 /// </summary>
@@ -238,3 +266,13 @@ public class SqlIntProjection(string source, string name) : SqlExprInt
 /// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
 public class SqlIntColumn(string source, string name) : SqlIntProjection(source, name);
+
+/// <summary>
+/// Represents a named integer parameter in SQL expressions.
+/// This class is used for parameterized queries where integer values need to be bound at execution time.
+/// </summary>
+/// <param name="name">The name of the parameter (e.g., "@userId", ":count")</param>
+public class SqlParameterInt(string name) : SqlExprInt
+{
+	public void Deconstruct(out string nameOut) => nameOut = name;
+}
