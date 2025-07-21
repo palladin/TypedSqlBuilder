@@ -10,7 +10,7 @@ var customers = (
     Age: new SqlIntColumn(customersTableName, "age")
 );
 
-SqlQuery query =
+ISqlQuery query =
     SqlQuery.From(customers)
             .Where(c => c.Age > ":age".AsIntParam())
             .OrderBy(c => c.Name)
