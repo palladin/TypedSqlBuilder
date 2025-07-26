@@ -99,7 +99,10 @@ public class SqlStringProjection(string source, string name) : SqlExprString
 /// </summary>
 /// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
-public class SqlStringColumn(string source, string name) : SqlStringProjection(source, name);
+public class SqlStringColumn(string source, string name) : SqlStringProjection(source, name), ISqlColumn
+{
+	public SqlStringColumn(string name) : this("", name) { }
+}
 
 /// <summary>
 /// Represents a named string parameter in SQL expressions.
@@ -120,4 +123,17 @@ public class SqlParameterString(string name) : SqlExprString
 public class SqlStringLike(SqlExprString value, string pattern) : SqlExprBool
 {
 	public void Deconstruct(out SqlExprString valueOut, out string patternOut) => (valueOut, patternOut) = (value, pattern);
+}
+
+/// <summary>
+/// Represents a SQL CASE expression for conditional string values.
+/// This class applies the SQL CASE WHEN condition THEN trueValue ELSE falseValue END construct.
+/// </summary>
+/// <param name="condition">The boolean condition to evaluate</param>
+/// <param name="trueValue">The string expression returned when condition is true</param>
+/// <param name="falseValue">The string expression returned when condition is false</param>
+public class SqlStringCase(SqlExprBool condition, SqlExprString trueValue, SqlExprString falseValue) : SqlExprString
+{
+	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprString trueValueOut, out SqlExprString falseValueOut) => 
+		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
 }

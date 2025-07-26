@@ -7,20 +7,20 @@ A type-safe SQL expression builder DSL for C# that provides fluent syntax for co
 ```csharp
 using TypedSqlBuilder.Core;
 
-// Define table schema as a tuple
-var customersTableName = "customers";
-var customers = (
-    Id: new SqlIntColumn(customersTableName, "id"),
-    Name: new SqlStringColumn(customersTableName, "name"), 
-    Age: new SqlIntColumn(customersTableName, "age")
-);
+// Define table schema 
+public record Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers", new("Id"), new("Age"), new("Name"))
+{ 
+    public SqlIntColumn Id => Column1;
+    public SqlIntColumn Age => Column2;
+    public SqlStringColumn Name => Column3;
+}
 
 // Build complex queries with fluent syntax
-SqlQuery query =
-    SqlQuery.From(customers)
-            .Where(c => c.Age > ":age".AsIntParam())
+ISqlQuery query =
+    SqlQuery.From<Customer>()
+            .Where(c => c.Age > 18)
             .OrderBy(c => c.Name)
-            .Select(c => (c.Id + 1, c.Name + "!", c.Age > 20 ? "Adult" : "Minor"));
+            .Select(c => (c.Id + 1, c.Name + "!"));
 ```
 
 ## Motivation

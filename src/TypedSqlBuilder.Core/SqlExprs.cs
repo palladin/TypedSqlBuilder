@@ -85,3 +85,5 @@ public abstract class SqlExprString : SqlExpr,
 	
 	public static SqlExprString operator +(SqlExprString left, SqlExprString right) => new SqlStringConcat(left, right);
 }
+
+public interface ISqlColumn;

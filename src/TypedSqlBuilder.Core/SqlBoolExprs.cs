@@ -88,3 +88,16 @@ public class SqlParameterBool(string name) : SqlExprBool
 {
 	public void Deconstruct(out string nameOut) => nameOut = name;
 }
+
+/// <summary>
+/// Represents a SQL CASE expression for conditional boolean values.
+/// This class applies the SQL CASE WHEN condition THEN trueValue ELSE falseValue END construct.
+/// </summary>
+/// <param name="condition">The boolean condition to evaluate</param>
+/// <param name="trueValue">The boolean expression returned when condition is true</param>
+/// <param name="falseValue">The boolean expression returned when condition is false</param>
+public class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBool falseValue) : SqlExprBool
+{
+	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprBool trueValueOut, out SqlExprBool falseValueOut) => 
+		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
+}

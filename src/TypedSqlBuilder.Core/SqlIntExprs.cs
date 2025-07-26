@@ -265,7 +265,10 @@ public class SqlIntProjection(string source, string name) : SqlExprInt
 /// </summary>
 /// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
-public class SqlIntColumn(string source, string name) : SqlIntProjection(source, name);
+public class SqlIntColumn(string source, string name) : SqlIntProjection(source, name), ISqlColumn
+{ 
+	public SqlIntColumn(string name) : this("", name) { }
+}
 
 /// <summary>
 /// Represents a named integer parameter in SQL expressions.
@@ -275,4 +278,17 @@ public class SqlIntColumn(string source, string name) : SqlIntProjection(source,
 public class SqlParameterInt(string name) : SqlExprInt
 {
 	public void Deconstruct(out string nameOut) => nameOut = name;
+}
+
+/// <summary>
+/// Represents a SQL CASE expression for conditional integer values.
+/// This class applies the SQL CASE WHEN condition THEN trueValue ELSE falseValue END construct.
+/// </summary>
+/// <param name="condition">The boolean condition to evaluate</param>
+/// <param name="trueValue">The integer expression returned when condition is true</param>
+/// <param name="falseValue">The integer expression returned when condition is false</param>
+public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt falseValue) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprInt trueValueOut, out SqlExprInt falseValueOut) => 
+		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
 }
