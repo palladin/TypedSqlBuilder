@@ -21,43 +21,7 @@ public interface ISqlQuery<TSource> : ISqlQuery;
 /// </summary>
 public static class SqlQuery
 {
-    /// <summary>
-    /// Creates a query from the specified column tuple using a default table name.
-    /// </summary>
-    /// <typeparam name="TColumns">The tuple type representing the table columns</typeparam>
-    /// <param name="columns">The column definitions for the table</param>
-    /// <returns>A typed SQL query that can be further composed</returns>
-    /// <example>
-    /// <code>
-    /// var columns = (Id: new SqlIntExpr(), Name: new SqlStringExpr());
-    /// var query = SqlQuery.From(columns);
-    /// </code>
-    /// </example>
-    public static ISqlQuery<TColumns> From<TColumns>(TColumns columns)
-        where TColumns : ITuple
-    {
-        return new FromClause<TColumns>(new SqlTable("table", columns));
-    }
-
-    /// <summary>
-    /// Creates a query from the specified table name and column definitions.
-    /// </summary>
-    /// <typeparam name="TColumns">The tuple type representing the table columns</typeparam>
-    /// <param name="tableName">The name of the table to query</param>
-    /// <param name="columns">The column definitions for the table</param>
-    /// <returns>A typed SQL query that can be further composed</returns>
-    /// <example>
-    /// <code>
-    /// var columns = (Id: new SqlIntExpr(), Name: new SqlStringExpr());
-    /// var query = SqlQuery.From("users", columns);
-    /// </code>
-    /// </example>
-    public static ISqlQuery<TColumns> From<TColumns>(string tableName, TColumns columns)
-        where TColumns : ITuple
-    {
-        return new FromClause<TColumns>(new SqlTable(tableName, columns));
-    }
-
+        
     /// <summary>
     /// Creates a query from a predefined SqlTable subclass.
     /// The table structure is defined by the SqlTable implementation.

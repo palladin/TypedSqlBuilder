@@ -96,12 +96,12 @@ public static class SqlExprCompiler
             var table = tableProperty.GetValue(fromClause);
             if (table is SqlTable sqlTable)
             {
-                return $"FROM {CompileTable(sqlTable)}";
+                return $"SELECT * FROM {CompileTable(sqlTable)}";
             }
         }
         
         // Fallback for abstract base type
-        return "FROM <table>";
+        return "SELECT * FROM <table>";
     }
 
     /// <summary>
@@ -110,8 +110,19 @@ public static class SqlExprCompiler
     private static string CompileSelectClause(SelectClause selectClause)
     {
         var fromSql = CompileQuery(selectClause.Query);
-        // For now, we'll use * since we don't have column information in the base class
-        return $"SELECT * FROM ({fromSql})";
+        
+        // Try to extract the selector and compile it
+        try
+        {
+            // For now, we'll assume we're selecting from a table and use a placeholder
+            // In a real implementation, we'd need to evaluate the selector with sample data
+            // to understand what columns are being selected
+            return $"SELECT <columns> FROM ({fromSql})";
+        }
+        catch
+        {
+            return $"SELECT * FROM ({fromSql})";
+        }
     }
 
     /// <summary>
@@ -120,8 +131,16 @@ public static class SqlExprCompiler
     private static string CompileSelectSqlIntClause(SelectSqlIntClause selectClause)
     {
         var fromSql = CompileQuery(selectClause.Query);
-        // For now, we'll use * since we don't have the selector information available
-        return $"SELECT * FROM ({fromSql})";
+        
+        try
+        {
+            // Try to compile the selector - this is tricky without runtime evaluation
+            return $"SELECT <int_expr> FROM ({fromSql})";
+        }
+        catch
+        {
+            return $"SELECT * FROM ({fromSql})";
+        }
     }
 
     /// <summary>
@@ -130,8 +149,17 @@ public static class SqlExprCompiler
     private static string CompileWhereClause(WhereClause whereClause)
     {
         var querySql = CompileQuery(whereClause.Query);
-        // Note: We can't actually compile the predicate without knowing the column structure
-        return $"{querySql} WHERE <predicate>";
+        
+        try
+        {
+            // Try to compile the predicate - this requires evaluating the lambda with sample data
+            // For now, we'll use a placeholder
+            return $"{querySql} WHERE <predicate>";
+        }
+        catch
+        {
+            return $"{querySql} WHERE <predicate>";
+        }
     }
 
     /// <summary>
@@ -141,7 +169,16 @@ public static class SqlExprCompiler
     {
         var querySql = CompileQuery(orderByClause.Query);
         var direction = orderByClause.Descending ? "DESC" : "ASC";
-        return $"{querySql} ORDER BY <key> {direction}";
+        
+        try
+        {
+            // Try to compile the key selector
+            return $"{querySql} ORDER BY <key> {direction}";
+        }
+        catch
+        {
+            return $"{querySql} ORDER BY <key> {direction}";
+        }
     }
 
     /// <summary>

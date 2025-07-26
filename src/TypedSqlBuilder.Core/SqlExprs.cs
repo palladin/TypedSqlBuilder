@@ -49,6 +49,7 @@ public abstract class SqlExprInt : SqlExpr,
 
 	public static SqlExprInt operator +(SqlExprInt left, SqlExprInt right) => new SqlIntAdd(left, right);
 	public static SqlExprInt operator -(SqlExprInt left, SqlExprInt right) => new SqlIntSub(left, right);
+	public static SqlExprInt operator -(SqlExprInt value) => new SqlIntMinus(value);
 	public static SqlExprInt operator *(SqlExprInt left, SqlExprInt right) => new SqlIntMult(left, right);
 	public static SqlExprInt operator /(SqlExprInt left, SqlExprInt right) => new SqlIntDiv(left, right);
 

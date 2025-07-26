@@ -1,24 +1,3 @@
-using System.Security.Cryptography;
-using TypedSqlBuilder.Core;
-
-namespace TypedSqlBuilder.Tests;
-
-public class Program
-{
-    public record Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers", new("Id"), new("Age"), new("Name"))
-    { 
-        public SqlIntColumn Id => Column1;
-        public SqlIntColumn Age => Column2;
-        public SqlStringColumn Name => Column3;
-    }
-    public static void Main(string[] args)
-    {
-        Console.WriteLine("TypedSqlBuilder Design Testing");
-
-        ISqlQuery query =
-            SqlQuery.From<Customer>()
-                    .Where(c => c.Age > 18)
-                    .OrderBy(c => c.Name)
-                    .Select(c => (c.Id + 1, c.Name + "!"));
-    }
-}
+// This file is kept for backwards compatibility but is no longer needed
+// since we've moved to xUnit testing. The Customer record is now defined
+// in the individual test files.

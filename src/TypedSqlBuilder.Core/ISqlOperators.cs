@@ -37,6 +37,7 @@ public interface ISqlArithmeticOperators<TSelf>
     static abstract TSelf operator -(TSelf left, TSelf right);
     static abstract TSelf operator *(TSelf left, TSelf right);
     static abstract TSelf operator /(TSelf left, TSelf right);
+    static abstract TSelf operator -(TSelf value);
 }
 
 /// <summary>
