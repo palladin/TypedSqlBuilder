@@ -11,33 +11,11 @@ namespace TypedSqlBuilder.Core;
 public static class SqlQueryCompiler
 {
     /// <summary>
-    /// Compiles any SQL query or expression to its SQL string representation.
-    /// This is the main entry point that handles both expressions and clauses.
-    /// </summary>
-    /// <param name="item">The SQL query, clause, or expression to compile</param>
-    /// <returns>The SQL string representation</returns>
-    public static string Compile(object item)
-    {
-        return item switch
-        {
-            // SQL expressions
-            SqlExprBool boolExpr => CompileBoolExpr(boolExpr),
-            SqlExprInt intExpr => CompileIntExpr(intExpr),
-            SqlExprString stringExpr => CompileStringExpr(stringExpr),
-            
-            // SQL clauses and queries
-            ISqlQuery query => CompileQuery(query),
-            
-            _ => throw new NotSupportedException($"Type {item.GetType().Name} is not supported")
-        };
-    }
-
-    /// <summary>
     /// Compiles SQL queries and clauses to SQL string representation.
     /// </summary>
     /// <param name="query">The SQL query or clause to compile</param>
     /// <returns>The SQL string representation</returns>
-    private static string CompileQuery(ISqlQuery query)
+    public static string Compile(ISqlQuery query)
     {
         return query switch
         {
@@ -59,6 +37,153 @@ public static class SqlQueryCompiler
     }
 
     /// <summary>
+    /// Compiles boolean expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The boolean expression to compile</param>
+    /// <returns>The SQL string representation</returns>
+    public static string Compile(SqlExprBool expr)
+    {
+        return expr switch
+        {
+            // Literal values
+            SqlBoolValue(var value) => value ? "TRUE" : "FALSE",
+            
+            // Logical operations
+            SqlBoolNot(var operand) => $"NOT ({Compile(operand)})",
+            SqlBoolAnd(var left, var right) => $"({Compile(left)}) AND ({Compile(right)})",
+            SqlBoolOr(var left, var right) => $"({Compile(left)}) OR ({Compile(right)})",
+            
+            // Boolean equality/inequality
+            SqlBoolEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
+            SqlBoolNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
+            
+            // Integer comparisons (return bool)
+            SqlIntEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
+            SqlIntNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
+            SqlIntGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
+            SqlIntLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
+            SqlIntGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
+            SqlIntLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
+            
+            // String comparisons (return bool)
+            SqlStringEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
+            SqlStringNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
+            SqlStringGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
+            SqlStringLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
+            SqlStringGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
+            SqlStringLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
+            
+            // String pattern matching
+            SqlStringLike(var value, var pattern) => $"{Compile(value)} LIKE '{EscapeSqlString(pattern)}'",
+            
+            // Column references and projections
+            SqlBoolProjection(var source, var name) => FormatColumnReference(source, name),
+            
+            // Parameters
+            SqlParameterBool(var name) => name,
+            
+            // CASE expressions
+            SqlBoolCase(var condition, var trueValue, var falseValue) => 
+                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
+            
+            _ => throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported")
+        };
+    }
+
+    /// <summary>
+    /// Compiles integer expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The integer expression to compile</param>
+    /// <returns>The SQL string representation</returns>
+    public static string Compile(SqlExprInt expr)
+    {
+        return expr switch
+        {
+            // Literal values
+            SqlIntValue(var value) => value.ToString(),
+            
+            // Unary operations
+            SqlIntMinus(var operand) => $"-{Compile(operand)}",
+            SqlIntAbs(var operand) => $"ABS({Compile(operand)})",
+            
+            // Binary arithmetic operations
+            SqlIntAdd(var left, var right) => $"({Compile(left)} + {Compile(right)})",
+            SqlIntSub(var left, var right) => $"({Compile(left)} - {Compile(right)})",
+            SqlIntMult(var left, var right) => $"({Compile(left)} * {Compile(right)})",
+            SqlIntDiv(var left, var right) => $"({Compile(left)} / {Compile(right)})",
+            
+            // Column references and projections (more specific patterns first)
+            SqlIntColumn(var source, var name) => FormatColumnReference(source, name),
+            SqlIntProjection(var source, var name) => FormatColumnReference(source, name),
+            
+            // Parameters
+            SqlParameterInt(var name) => name,
+            
+            // Aggregate functions
+            SqlIntCount => "COUNT(*)",
+            SqlIntSum(var operand) => $"SUM({Compile(operand)})",
+            SqlIntAvg(var operand) => $"AVG({Compile(operand)})",
+            
+            // Aggregate functions that are also queries (need special handling)
+            SumSqlIntClause sumClause => CompileSumClause(sumClause),
+            CountClause countClause => CompileCountClause(countClause),
+            
+            // CASE expressions
+            SqlIntCase(var condition, var trueValue, var falseValue) => 
+                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
+            
+            _ => throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported")
+        };
+    }
+
+    /// <summary>
+    /// Compiles string expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The string expression to compile</param>
+    /// <returns>The SQL string representation</returns>
+    public static string Compile(SqlExprString expr)
+    {
+        return expr switch
+        {
+            // Literal values
+            SqlStringValue(var value) => $"'{EscapeSqlString(value)}'",
+            
+            // String concatenation - use CONCAT function for better compatibility
+            SqlStringConcat(var left, var right) => $"CONCAT({Compile(left)}, {Compile(right)})",
+            
+            // Column references and projections (more specific patterns first)
+            SqlStringColumn(var source, var name) => FormatColumnReference(source, name),
+            SqlStringProjection(var source, var name) => FormatColumnReference(source, name),
+            
+            // Parameters
+            SqlParameterString(var name) => name,
+            
+            // CASE expressions
+            SqlStringCase(var condition, var trueValue, var falseValue) => 
+                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
+            
+            _ => throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported")
+        };
+    }
+
+    /// <summary>
+    /// Compiles any SQL expression to SQL string representation.
+    /// This method uses pattern matching to determine the specific expression type.
+    /// </summary>
+    /// <param name="expr">The SQL expression to compile</param>
+    /// <returns>The SQL string representation</returns>
+    public static string Compile(SqlExpr expr)
+    {
+        return expr switch
+        {
+            SqlExprBool boolExpr => Compile(boolExpr),
+            SqlExprInt intExpr => Compile(intExpr),
+            SqlExprString stringExpr => Compile(stringExpr),
+            _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
+        };
+    }
+
+    /// <summary>
     /// Compiles a FROM clause, handling both generic and non-generic versions.
     /// </summary>
     private static string CompileFromClause(FromClause fromClause)
@@ -72,7 +197,7 @@ public static class SqlQueryCompiler
     /// </summary>
     private static string CompileSelectClause(SelectClause selectClause)
     {
-        var baseQuery = CompileQuery(selectClause.Query);
+        var baseQuery = Compile(selectClause.Query);
         
         // Extract SELECT part if the base query is a full SELECT statement
         var fromPart = ExtractFromPart(baseQuery);
@@ -101,7 +226,7 @@ public static class SqlQueryCompiler
     /// </summary>
     private static string CompileSelectSqlIntClause(SelectSqlIntClause selectIntClause)
     {
-        var baseQuery = CompileQuery(selectIntClause.Query);
+        var baseQuery = Compile(selectIntClause.Query);
         var fromPart = ExtractFromPart(baseQuery);
         
         try
@@ -127,7 +252,7 @@ public static class SqlQueryCompiler
     /// </summary>
     private static string CompileWhereClause(WhereClause whereClause)
     {
-        var baseQuery = CompileQuery(whereClause.Query);
+        var baseQuery = Compile(whereClause.Query);
         var fromPart = ExtractFromPart(baseQuery);
         
         try
@@ -153,7 +278,7 @@ public static class SqlQueryCompiler
     /// </summary>
     private static string CompileOrderByClause(OrderByClause orderByClause)
     {
-        var baseQuery = CompileQuery(orderByClause.Query);
+        var baseQuery = Compile(orderByClause.Query);
         var direction = orderByClause.Descending ? "DESC" : "ASC";
         
         try
@@ -262,7 +387,7 @@ public static class SqlQueryCompiler
     private static string CompileSumClause(SumSqlIntClause sumClause)
     {
         sumClause.Deconstruct(out var query);
-        var subQuery = CompileQuery(query);
+        var subQuery = Compile(query);
         
         // Extract the SELECT expression from the subquery
         if (subQuery.StartsWith("SELECT "))
@@ -290,7 +415,7 @@ public static class SqlQueryCompiler
         
         if (queryField != null && queryField.GetValue(countClause) is ISqlQuery query)
         {
-            var baseQuery = CompileQuery(query);
+            var baseQuery = Compile(query);
             var fromPart = ExtractFromPart(baseQuery);
             return $"COUNT(*){fromPart}";
         }
@@ -304,101 +429,6 @@ public static class SqlQueryCompiler
     private static string CompileTable(SqlTable table)
     {
         return table.TableName;
-    }
-
-    /// <summary>
-    /// Compiles boolean expressions to SQL.
-    /// </summary>
-    private static string CompileBoolExpr(SqlExprBool expr)
-    {
-        return expr switch
-        {
-            // Literal values
-            SqlBoolValue(var value) => value ? "TRUE" : "FALSE",
-            
-            // Logical operations
-            SqlBoolNot(var operand) => $"NOT ({Compile(operand)})",
-            SqlBoolAnd(var left, var right) => $"({Compile(left)}) AND ({Compile(right)})",
-            SqlBoolOr(var left, var right) => $"({Compile(left)}) OR ({Compile(right)})",
-            
-            // Boolean equality/inequality
-            SqlBoolEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlBoolNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            
-            // Integer comparisons (return bool)
-            SqlIntEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlIntNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            SqlIntGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
-            SqlIntLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
-            SqlIntGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
-            SqlIntLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
-            
-            // String comparisons (return bool)
-            SqlStringEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlStringNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            SqlStringGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
-            SqlStringLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
-            SqlStringGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
-            SqlStringLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
-            
-            // Column references and projections
-            SqlBoolProjection(var source, var name) => FormatColumnReference(source, name),
-            
-            _ => throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported")
-        };
-    }
-
-    /// <summary>
-    /// Compiles integer expressions to SQL.
-    /// </summary>
-    private static string CompileIntExpr(SqlExprInt expr)
-    {
-        return expr switch
-        {
-            // Literal values
-            SqlIntValue(var value) => value.ToString(),
-            
-            // Unary operations
-            SqlIntMinus(var operand) => $"-{Compile(operand)}",
-            SqlIntAbs(var operand) => $"ABS({Compile(operand)})",
-            
-            // Binary arithmetic operations
-            SqlIntAdd(var left, var right) => $"({Compile(left)} + {Compile(right)})",
-            SqlIntSub(var left, var right) => $"({Compile(left)} - {Compile(right)})",
-            SqlIntMult(var left, var right) => $"({Compile(left)} * {Compile(right)})",
-            SqlIntDiv(var left, var right) => $"({Compile(left)} / {Compile(right)})",
-            
-            // Column references and projections (more specific patterns first)
-            SqlIntColumn(var source, var name) => FormatColumnReference(source, name),
-            SqlIntProjection(var source, var name) => FormatColumnReference(source, name),
-            
-            // Aggregate functions that are also queries (need special handling)
-            SumSqlIntClause sumClause => CompileSumClause(sumClause),
-            CountClause countClause => CompileCountClause(countClause),
-            
-            _ => throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported")
-        };
-    }
-
-    /// <summary>
-    /// Compiles string expressions to SQL.
-    /// </summary>
-    private static string CompileStringExpr(SqlExprString expr)
-    {
-        return expr switch
-        {
-            // Literal values
-            SqlStringValue(var value) => $"'{EscapeSqlString(value)}'",
-            
-            // String concatenation - use CONCAT function for better compatibility
-            SqlStringConcat(var left, var right) => $"CONCAT({Compile(left)}, {Compile(right)})",
-            
-            // Column references and projections (more specific patterns first)
-            SqlStringColumn(var source, var name) => FormatColumnReference(source, name),
-            SqlStringProjection(var source, var name) => FormatColumnReference(source, name),
-            
-            _ => throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported")
-        };
     }
 
     /// <summary>
@@ -419,5 +449,34 @@ public static class SqlQueryCompiler
     private static string EscapeSqlString(string value)
     {
         return value.Replace("'", "''");
+    }
+
+    /// <summary>
+    /// Compiles a collection of expressions with a separator.
+    /// Useful for SELECT lists, parameter lists, etc.
+    /// </summary>
+    /// <param name="expressions">The expressions to compile</param>
+    /// <param name="separator">The separator between expressions (default: ", ")</param>
+    /// <returns>The compiled expressions joined by the separator</returns>
+    public static string CompileList(IEnumerable<SqlExpr> expressions, string separator = ", ")
+    {
+        return string.Join(separator, expressions.Select(Compile));
+    }
+
+    /// <summary>
+    /// Compiles expressions with optional aliasing.
+    /// Used for SELECT clause compilation where expressions can have aliases.
+    /// </summary>
+    /// <param name="expressionsWithAliases">Tuples of (expression, alias)</param>
+    /// <returns>The compiled expression list with aliases</returns>
+    public static string CompileSelectList(IEnumerable<(SqlExpr expr, string? alias)> expressionsWithAliases)
+    {
+        var compiledExpressions = expressionsWithAliases.Select(item =>
+        {
+            var compiledExpr = Compile(item.expr);
+            return string.IsNullOrEmpty(item.alias) ? compiledExpr : $"{compiledExpr} AS {item.alias}";
+        });
+        
+        return string.Join(", ", compiledExpressions);
     }
 }
