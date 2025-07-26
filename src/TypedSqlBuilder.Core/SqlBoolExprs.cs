@@ -75,9 +75,26 @@ public class SqlBoolProjection(string source, string name) : SqlExprBool
 /// Represents a reference to a boolean column in a SQL table.
 /// Inherits from SqlBoolProjection to support column references in SQL queries.
 /// </summary>
-/// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
-public class SqlBoolColumn(string source, string name) : SqlBoolProjection(source, name);
+public class SqlBoolColumn : SqlBoolProjection, ISqlColumn<SqlBoolColumn>
+{
+	public SqlBoolColumn(string name) : base("", name)
+	{
+		ColumnName = name;
+	}
+	
+	/// <summary>
+	/// Internal constructor for creating a column with both source and name.
+	/// </summary>
+	private SqlBoolColumn(string source, string name, bool isInternal) : base(source, name)
+	{
+		ColumnName = name;
+	}
+	
+	public string ColumnName { get; }
+	
+	public SqlBoolColumn WithName(string source, string columnName) => new SqlBoolColumn(source, columnName, true);
+}
 
 /// <summary>
 /// Represents a named boolean parameter in SQL expressions.

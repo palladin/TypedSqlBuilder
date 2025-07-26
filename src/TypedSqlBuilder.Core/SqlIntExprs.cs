@@ -263,11 +263,25 @@ public class SqlIntProjection(string source, string name) : SqlExprInt
 /// Represents a reference to an integer column in a SQL table.
 /// Inherits from SqlIntProjection to support column references in SQL queries.
 /// </summary>
-/// <param name="source">The table name or alias that contains the column</param>
 /// <param name="name">The name of the column</param>
-public class SqlIntColumn(string source, string name) : SqlIntProjection(source, name), ISqlColumn
+public class SqlIntColumn : SqlIntProjection, ISqlColumn<SqlIntColumn>
 { 
-	public SqlIntColumn(string name) : this("", name) { }
+	public SqlIntColumn(string name) : base("", name)
+	{
+		ColumnName = name;
+	}
+	
+	/// <summary>
+	/// Internal constructor for creating a column with both source and name.
+	/// </summary>
+	private SqlIntColumn(string source, string name, bool isInternal) : base(source, name)
+	{
+		ColumnName = name;
+	}
+	
+	public string ColumnName { get; }
+	
+	public SqlIntColumn WithName(string source, string columnName) => new SqlIntColumn(source, columnName, true);
 }
 
 /// <summary>

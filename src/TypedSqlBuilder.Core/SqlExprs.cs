@@ -74,17 +74,25 @@ public abstract class SqlExprString : SqlExpr,
 	ISqlImplicitConversion<SqlExprString, string>
 {
 	public static implicit operator SqlExprString(string value) => new SqlStringValue(value);
-	
+
 	public static SqlExprBool operator ==(SqlExprString left, SqlExprString right) => new SqlStringEquals(left, right);
 	public static SqlExprBool operator !=(SqlExprString left, SqlExprString right) => new SqlStringNotEquals(left, right);
-	
+
 	public static SqlExprBool operator >(SqlExprString left, SqlExprString right) => new SqlStringGreaterThan(left, right);
 	public static SqlExprBool operator <(SqlExprString left, SqlExprString right) => new SqlStringLessThan(left, right);
-	
+
 	public static SqlExprBool operator >=(SqlExprString left, SqlExprString right) => new SqlStringGreaterThanOrEqualTo(left, right);
 	public static SqlExprBool operator <=(SqlExprString left, SqlExprString right) => new SqlStringLessThanOrEqualTo(left, right);
-	
+
 	public static SqlExprString operator +(SqlExprString left, SqlExprString right) => new SqlStringConcat(left, right);
 }
 
-public interface ISqlColumn;
+public interface ISqlColumn
+{ 
+	public string ColumnName { get; }
+}
+
+public interface ISqlColumn<TCol> : ISqlColumn where TCol : ISqlColumn<TCol>
+{
+	TCol WithName(string source, string name);
+}

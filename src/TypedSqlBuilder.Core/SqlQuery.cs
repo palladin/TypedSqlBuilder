@@ -52,8 +52,9 @@ public interface ISqlTable : ITuple;
 /// </summary>
 /// <param name="TableName">The name of the table</param>
 /// <param name="Columns">The tuple containing column definitions</param>
-public record SqlTable(string TableName, ITuple Columns) : ISqlTable
+public abstract record SqlTable(string TableName, ITuple Columns) : ISqlTable
 {
+
     /// <summary>
     /// Gets the column at the specified index.
     /// </summary>
@@ -76,9 +77,14 @@ public record SqlTable(string TableName, ITuple Columns) : ISqlTable
 /// <param name="Name">The name of the table</param>
 /// <param name="Column1">The first column definition</param>
 /// <param name="Column2">The second column definition</param>
-public abstract record SqlTable<TCol1, TCol2>(string Name, TCol1 Column1, TCol2 Column2) : SqlTable(Name, (Column1, Column2))
-    where TCol1 : ISqlColumn
-    where TCol2 : ISqlColumn;
+public abstract record SqlTable<TCol1, TCol2>(string TableName, TCol1 col1, TCol2 col2) 
+    : SqlTable(TableName, (col1.WithName(TableName, col1.ColumnName), col2.WithName(TableName, col2.ColumnName)))
+    where TCol1 : ISqlColumn<TCol1>
+    where TCol2 : ISqlColumn<TCol2>
+{
+    public TCol1 Column1 { get; } = col1.WithName(TableName, col1.ColumnName);
+    public TCol2 Column2 { get; } = col2.WithName(TableName, col2.ColumnName);
+}
 
 /// <summary>
 /// Abstract base class for strongly-typed SQL tables with three columns.
@@ -91,10 +97,16 @@ public abstract record SqlTable<TCol1, TCol2>(string Name, TCol1 Column1, TCol2 
 /// <param name="Column1">The first column definition</param>
 /// <param name="Column2">The second column definition</param>
 /// <param name="Column3">The third column definition</param>
-public abstract record SqlTable<TCol1, TCol2, TCol3>(string TableName, TCol1 Column1, TCol2 Column2, TCol3 Column3) : SqlTable(TableName, (Column1, Column2, Column3))
-    where TCol1 : ISqlColumn
-    where TCol2 : ISqlColumn
-    where TCol3 : ISqlColumn;
+public abstract record SqlTable<TCol1, TCol2, TCol3>(string TableName, TCol1 col1, TCol2 col2, TCol3 col3) 
+    : SqlTable(TableName, (col1.WithName(TableName, col1.ColumnName), col2.WithName(TableName, col2.ColumnName), col3.WithName(TableName, col3.ColumnName)))
+    where TCol1 : ISqlColumn<TCol1>
+    where TCol2 : ISqlColumn<TCol2>
+    where TCol3 : ISqlColumn<TCol3>
+{
+    public TCol1 Column1 { get; } = col1.WithName(TableName, col1.ColumnName);
+    public TCol2 Column2 { get; } = col2.WithName(TableName, col2.ColumnName);
+    public TCol3 Column3 { get; } = col3.WithName(TableName, col3.ColumnName);
+}
 
 
 
