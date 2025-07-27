@@ -151,31 +151,11 @@ public abstract record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Select
 /// <typeparam name="TResult">The output tuple type after projection</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedSelector">Function that transforms source tuples to result tuples</param>
-public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector) : SelectClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<TResult>
+public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector) 
+    : SelectClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<TResult>
     where TSource : ITuple
     where TResult : ITuple;
 
-/// <summary>
-/// Base record representing a SQL SELECT clause that projects to scalar SQL expressions.
-/// Transforms query results into SQL expressions that can be used in aggregate functions or nested queries.
-/// </summary>
-/// <param name="Query">The source query</param>
-/// <param name="Selector">Function that transforms input tuples to SQL expressions</param>
-public abstract record SelectSqlScalarClause(ISqlQuery Query, Func<ITuple, SqlExpr> Selector) : ISqlQuery;
-
-/// <summary>
-/// Strongly-typed SELECT clause for scalar SQL expression projections.
-/// Provides type-safe transformation from source tuples to specific SQL expression types.
-/// This is used when selecting computed values, columns, or preparing data for aggregate operations.
-/// </summary>
-/// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-/// <typeparam name="TResult">The output SQL expression type after projection</typeparam>
-/// <param name="TypedQuery">The strongly-typed source query</param>
-/// <param name="TypedSelector">Function that transforms source tuples to SQL expressions</param>
-public record SelectSqlScalarClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector) 
-    : SelectSqlScalarClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<TResult>
-    where TSource : ITuple
-    where TResult : SqlExpr;
 
 /// <summary>
 /// Base record representing a SQL WHERE clause with filtering conditions.
@@ -250,7 +230,8 @@ public abstract record OrderByClause(ISqlQuery Query, Func<ITuple, SqlExpr> KeyS
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys from source tuples</param>
 /// <param name="Descending">Whether to sort in descending order</param>
-public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) : OrderByClause(TypedQuery, x => TypedKeySelector((TSource) x), Descending), ISqlQuery<TSource>
+public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) 
+    : OrderByClause(TypedQuery, x => TypedKeySelector((TSource) x), Descending), ISqlQuery<TSource>
     where TSource : ITuple
     where TKey : SqlExpr;
 
@@ -294,10 +275,10 @@ public static class SqlQueryExtensions
     /// var ageQuery = userQuery.Select(user => user.Age);
     /// </code>
     /// </example>
-    public static ISqlQuery<SqlExprInt> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
-        where TSource : ITuple        
+    public static ISqlQuery<ValueTuple<SqlExprInt>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
+        where TSource : ITuple
     {
-        return new SelectSqlScalarClause<TSource, SqlExprInt>(query, selector);
+        return new SelectClause<TSource, ValueTuple<SqlExprInt>>(query, x => ValueTuple.Create(selector(x)));
     }
 
     /// <summary>
@@ -313,10 +294,10 @@ public static class SqlQueryExtensions
     /// var adultQuery = userQuery.Select(user => user.Age >= 18);
     /// </code>
     /// </example>
-    public static ISqlQuery<SqlExprBool> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector)
-        where TSource : ITuple        
+    public static ISqlQuery<ValueTuple<SqlExprBool>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector)
+        where TSource : ITuple
     {
-        return new SelectSqlScalarClause<TSource, SqlExprBool>(query, selector);
+        return new SelectClause<TSource, ValueTuple<SqlExprBool>>(query, x => ValueTuple.Create(selector(x)));
     }
 
     /// <summary>
@@ -332,10 +313,10 @@ public static class SqlQueryExtensions
     /// var nameQuery = userQuery.Select(user => user.FirstName + " " + user.LastName);
     /// </code>
     /// </example>
-    public static ISqlQuery<SqlExprString> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector)
-        where TSource : ITuple        
+    public static ISqlQuery<ValueTuple<SqlExprString>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector)
+        where TSource : ITuple
     {
-        return new SelectSqlScalarClause<TSource, SqlExprString>(query, selector);
+        return new SelectClause<TSource, ValueTuple<SqlExprString>>(query, x => ValueTuple.Create(selector(x)));
     }
 
 

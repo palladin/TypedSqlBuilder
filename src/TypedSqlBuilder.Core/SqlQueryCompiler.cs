@@ -19,30 +19,26 @@ public static class SqlQueryCompiler
     {
         return query switch
         {
-            FromClause(var table) => 
-                $"SELECT * FROM {table.TableName}",
+            
             SelectClause(FromClause(var table), var selector) =>
                 $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName}",
-            SelectSqlScalarClause(FromClause(var table), var selector) =>
-                $"SELECT {Compile(selector(table))} FROM {table.TableName}",
-            WhereClause(FromClause(var table), var predicate) =>
-                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))}",
-            OrderByClause(FromClause(var table), var orderBy, var desc) =>
-                $"SELECT * FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
             SelectClause(WhereClause(FromClause(var table), var predicate), var selector) =>
                 $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))}",
-            SelectSqlScalarClause(WhereClause(FromClause(var table), var predicate), var selector) =>
-                $"SELECT {Compile(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))}",
-            OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc) =>
-                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
             SelectClause(OrderByClause(FromClause(var table), var orderBy, var desc), var selector) =>
-                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
-            SelectSqlScalarClause(OrderByClause(FromClause(var table), var orderBy, var desc), var selector) =>
-                $"SELECT {Compile(selector(table))} FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
+                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",            
             SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc), var selector) =>
                 $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
-            SelectSqlScalarClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc), var selector) =>
-                $"SELECT {Compile(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
+
+            WhereClause(FromClause(var table), var predicate) =>
+                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))}",
+
+            OrderByClause(FromClause(var table), var orderBy, var desc) =>
+                $"SELECT * FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
+            OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc) =>
+                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
+            
+            FromClause(var table) => 
+                $"SELECT * FROM {table.TableName}",
 
             _ => throw new NotSupportedException($"Query type {query.GetType().Name} is not supported")
         };
