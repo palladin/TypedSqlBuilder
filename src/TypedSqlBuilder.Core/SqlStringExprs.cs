@@ -95,27 +95,30 @@ public class SqlStringProjection(string source, string name) : SqlExprString
 
 /// <summary>
 /// Represents a reference to a string column in a SQL table.
-/// Inherits from SqlStringProjection to support column references in SQL queries.
+/// This class is used for column references in SQL queries.
 /// </summary>
-/// <param name="name">The name of the column</param>
-public class SqlStringColumn : SqlStringProjection, ISqlColumn<SqlStringColumn>
+public class SqlStringColumn : SqlExprString, ISqlColumn<SqlStringColumn>
 {
-	public SqlStringColumn(string name) : base("", name)
+		
+	public SqlStringColumn(string columnName)
 	{
-		ColumnName = name;
-	}
-	
-	/// <summary>
-	/// Internal constructor for creating a column with both source and name.
-	/// </summary>
-	private SqlStringColumn(string source, string name, bool isInternal) : base(source, name)
+		ColumnName = columnName;
+	}		
+	private SqlStringColumn(string tableName, string columnName)
 	{
-		ColumnName = name;
+		TableName = tableName;
+		ColumnName = columnName;		
 	}
-	
+	public string TableName { get; } = string.Empty;
 	public string ColumnName { get; }
 	
-	public SqlStringColumn WithName(string source, string columnName) => new SqlStringColumn(source, columnName, true);
+	public SqlStringColumn WithName(string source, string columnName) => new SqlStringColumn(source, columnName);
+	
+	public void Deconstruct(out string sourceOut, out string nameOut)
+	{
+		sourceOut = TableName;
+		nameOut = ColumnName;
+	}
 }
 
 /// <summary>
