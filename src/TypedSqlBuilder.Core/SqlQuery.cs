@@ -156,23 +156,26 @@ public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func
     where TResult : ITuple;
 
 /// <summary>
-/// Base record representing a SQL SELECT clause that projects to integer expressions.
-/// Used for selecting computed integer values or preparing for aggregation.
+/// Base record representing a SQL SELECT clause that projects to scalar SQL expressions.
+/// Transforms query results into SQL expressions that can be used in aggregate functions or nested queries.
 /// </summary>
 /// <param name="Query">The source query</param>
-/// <param name="Selector">Function that transforms input tuples to SQL integer expressions</param>
-public abstract record SelectSqlIntClause(ISqlQuery Query, Func<ITuple, SqlExprInt> Selector) : ISqlQuery;
+/// <param name="Selector">Function that transforms input tuples to SQL expressions</param>
+public abstract record SelectSqlScalarClause(ISqlQuery Query, Func<ITuple, SqlExpr> Selector) : ISqlQuery;
 
 /// <summary>
-/// Strongly-typed SELECT clause for integer expressions.
-/// Enables type-safe selection of computed integer values from source data.
+/// Strongly-typed SELECT clause for scalar SQL expression projections.
+/// Provides type-safe transformation from source tuples to specific SQL expression types.
+/// This is used when selecting computed values, columns, or preparing data for aggregate operations.
 /// </summary>
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+/// <typeparam name="TResult">The output SQL expression type after projection</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
-/// <param name="TypedSelector">Function that transforms source tuples to SQL integer expressions</param>
-public record SelectSqlIntClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, SqlExprInt> TypedSelector) 
-    : SelectSqlIntClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<SqlExprInt>
-    where TSource : ITuple;
+/// <param name="TypedSelector">Function that transforms source tuples to SQL expressions</param>
+public record SelectSqlScalarClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector) 
+    : SelectSqlScalarClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<TResult>
+    where TSource : ITuple
+    where TResult : SqlExpr;
 
 /// <summary>
 /// Base record representing a SQL WHERE clause with filtering conditions.
@@ -292,10 +295,50 @@ public static class SqlQueryExtensions
     /// </code>
     /// </example>
     public static ISqlQuery<SqlExprInt> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
-        where TSource : ITuple
+        where TSource : ITuple        
     {
-        return new SelectSqlIntClause<TSource>(query, selector);
+        return new SelectSqlScalarClause<TSource, SqlExprInt>(query, selector);
     }
+
+    /// <summary>
+    /// Projects the query result to a SQL boolean expression.
+    /// Used for selecting computed boolean values or preparing conditional expressions.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL boolean expressions</param>
+    /// <returns>A new query that produces SQL boolean expressions</returns>
+    /// <example>
+    /// <code>
+    /// var adultQuery = userQuery.Select(user => user.Age >= 18);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<SqlExprBool> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector)
+        where TSource : ITuple        
+    {
+        return new SelectSqlScalarClause<TSource, SqlExprBool>(query, selector);
+    }
+
+    /// <summary>
+    /// Projects the query result to a SQL string expression.
+    /// Used for selecting computed string values or preparing string operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL string expressions</param>
+    /// <returns>A new query that produces SQL string expressions</returns>
+    /// <example>
+    /// <code>
+    /// var nameQuery = userQuery.Select(user => user.FirstName + " " + user.LastName);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<SqlExprString> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector)
+        where TSource : ITuple        
+    {
+        return new SelectSqlScalarClause<TSource, SqlExprString>(query, selector);
+    }
+
+
 
     /// <summary>
     /// Applies the SUM aggregate function to a query of integer expressions.
