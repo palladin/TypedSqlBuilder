@@ -30,7 +30,7 @@ public static class SqlQueryCompiler
             CountClause countClause => CompileCountClause(countClause),
             
             // Tables
-            SqlTable table => CompileTable(table),
+            ISqlTable table => CompileTable(table),
             
             _ => throw new NotSupportedException($"Query type {query.GetType().Name} is not supported")
         };
@@ -322,28 +322,24 @@ public static class SqlQueryCompiler
             return null;
         }
     }
-
+    
     /// <summary>
-    /// Creates a sample tuple from a table definition.
+    /// Creates a sample tuple from a table that represents the columns available.
+    /// This is used to evaluate lambda expressions and extract SQL expressions.
     /// </summary>
-    private static ITuple? CreateSampleTupleFromTable(SqlTable table)
+    private static ITuple? CreateSampleTupleFromTable(ISqlTable table)
     {
         try
         {
-            // If the table itself implements ITuple, return it
-            if (table is ITuple tableTuple)
-            {
-                return tableTuple;
-            }
-            
-            // Otherwise, return the Columns tuple
-            return table.Columns;
+            // Return the table itself since ISqlTable extends ITuple
+            return table;
         }
         catch
         {
             return null;
         }
     }
+    
 
     /// <summary>
     /// Extracts the FROM part of a SQL query string.
@@ -426,7 +422,7 @@ public static class SqlQueryCompiler
     /// <summary>
     /// Compiles a table reference.
     /// </summary>
-    private static string CompileTable(SqlTable table)
+    private static string CompileTable(ISqlTable table)
     {
         return table.TableName;
     }

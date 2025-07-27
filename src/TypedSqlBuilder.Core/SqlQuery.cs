@@ -34,7 +34,7 @@ public static class SqlQuery
     /// </code>
     /// </example>
     public static ISqlQuery<TSqlTable> From<TSqlTable>()
-        where TSqlTable : SqlTable, new()
+        where TSqlTable : ISqlTable, new()
     {        
         return new FromClause<TSqlTable>(new TSqlTable());
     }
@@ -44,29 +44,11 @@ public static class SqlQuery
 /// Interface for SQL table representations that support tuple-like indexing.
 /// Extends ITuple to provide column access capabilities.
 /// </summary>
-public interface ISqlTable : ITuple;
-
-/// <summary>
-/// Base record representing a SQL table with a name and column definitions.
-/// Implements tuple indexing to access columns by position.
-/// </summary>
-/// <param name="TableName">The name of the table</param>
-/// <param name="Columns">The tuple containing column definitions</param>
-public abstract record SqlTable(string TableName, ITuple Columns) : ISqlTable
-{
-
-    /// <summary>
-    /// Gets the column at the specified index.
-    /// </summary>
-    /// <param name="index">The zero-based index of the column</param>
-    /// <returns>The column at the specified index</returns>
-    public object? this[int index] => Columns[index];
-    
-    /// <summary>
-    /// Gets the number of columns in this table.
-    /// </summary>
-    public int Length => Columns.Length;
+public interface ISqlTable : ITuple
+{ 
+    string TableName { get; }
 }
+
 
 /// <summary>
 /// Abstract base class for strongly-typed SQL tables with two columns.
@@ -77,13 +59,28 @@ public abstract record SqlTable(string TableName, ITuple Columns) : ISqlTable
 /// <param name="Name">The name of the table</param>
 /// <param name="Column1">The first column definition</param>
 /// <param name="Column2">The second column definition</param>
-public abstract record SqlTable<TCol1, TCol2>(string TableName, TCol1 col1, TCol2 col2) 
-    : SqlTable(TableName, (col1.WithName(TableName, col1.ColumnName), col2.WithName(TableName, col2.ColumnName)))
+public abstract class SqlTable<TCol1, TCol2> : ISqlTable 
     where TCol1 : ISqlColumn<TCol1>
     where TCol2 : ISqlColumn<TCol2>
 {
-    public TCol1 Column1 { get; } = col1.WithName(TableName, col1.ColumnName);
-    public TCol2 Column2 { get; } = col2.WithName(TableName, col2.ColumnName);
+    private readonly object[] columns;
+
+    protected SqlTable(string tableName, TCol1 col1, TCol2 col2)
+    {
+        TableName = tableName;
+        Column1 = col1.WithName(tableName, col1.ColumnName);
+        Column2 = col2.WithName(tableName, col2.ColumnName);
+        columns = [Column1, Column2];
+    }
+
+    public object? this[int index] => columns[index];
+
+    public TCol1 Column1 { get; } 
+    public TCol2 Column2 { get; } 
+
+    public string TableName { get; }
+
+    public int Length => columns.Length;
 }
 
 /// <summary>
@@ -93,19 +90,31 @@ public abstract record SqlTable<TCol1, TCol2>(string TableName, TCol1 col1, TCol
 /// <typeparam name="TCol1">The type of the first column</typeparam>
 /// <typeparam name="TCol2">The type of the second column</typeparam>
 /// <typeparam name="TCol3">The type of the third column</typeparam>
-/// <param name="Name">The name of the table</param>
-/// <param name="Column1">The first column definition</param>
-/// <param name="Column2">The second column definition</param>
-/// <param name="Column3">The third column definition</param>
-public abstract record SqlTable<TCol1, TCol2, TCol3>(string TableName, TCol1 col1, TCol2 col2, TCol3 col3) 
-    : SqlTable(TableName, (col1.WithName(TableName, col1.ColumnName), col2.WithName(TableName, col2.ColumnName), col3.WithName(TableName, col3.ColumnName)))
+public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable 
     where TCol1 : ISqlColumn<TCol1>
     where TCol2 : ISqlColumn<TCol2>
     where TCol3 : ISqlColumn<TCol3>
 {
-    public TCol1 Column1 { get; } = col1.WithName(TableName, col1.ColumnName);
-    public TCol2 Column2 { get; } = col2.WithName(TableName, col2.ColumnName);
-    public TCol3 Column3 { get; } = col3.WithName(TableName, col3.ColumnName);
+    private readonly object[] columns;
+
+    protected SqlTable(string tableName, TCol1 col1, TCol2 col2, TCol3 col3)
+    {
+        TableName = tableName;
+        Column1 = col1.WithName(tableName, col1.ColumnName);
+        Column2 = col2.WithName(tableName, col2.ColumnName);
+        Column3 = col3.WithName(tableName, col3.ColumnName);
+        columns = [Column1, Column2, Column3];
+    }
+
+    public object? this[int index] => columns[index];
+
+    public TCol1 Column1 { get; } 
+    public TCol2 Column2 { get; } 
+    public TCol3 Column3 { get; }
+
+    public string TableName { get; }
+
+    public int Length => columns.Length;
 }
 
 
@@ -115,7 +124,7 @@ public abstract record SqlTable<TCol1, TCol2, TCol3>(string TableName, TCol1 col
 /// Establishes the source table for a query.
 /// </summary>
 /// <param name="Table">The table being queried</param>
-public abstract record FromClause(SqlTable Table) : ISqlQuery;
+public abstract record FromClause(ISqlTable Table) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed FROM clause that preserves column type information.
@@ -123,7 +132,7 @@ public abstract record FromClause(SqlTable Table) : ISqlQuery;
 /// </summary>
 /// <typeparam name="TColumns">The tuple type representing the table's columns</typeparam>
 /// <param name="Table">The table being queried</param>
-public record FromClause<TColumns>(SqlTable Table) : FromClause(Table), ISqlQuery<TColumns>
+public record FromClause<TColumns>(ISqlTable Table) : FromClause(Table), ISqlQuery<TColumns>
     where TColumns : ITuple;
 
 /// <summary>
