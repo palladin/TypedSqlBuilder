@@ -202,7 +202,7 @@ public static class SqlQueryCompiler
     private static string CompileTupleProjection(ITuple tuple)
     {
         var items = new List<string>();
-        
+
         for (int i = 0; i < tuple.Length; i++)
         {
             var item = tuple[i];
@@ -210,9 +210,13 @@ public static class SqlQueryCompiler
             {
                 items.Add(Compile(expr));
             }
+            else if (item is ITuple subTuple)
+            {
+                items.Add(CompileTupleProjection(subTuple));
+            }
             else
             {
-                items.Add(item?.ToString() ?? "NULL");
+                throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported in projections");
             }
         }
         
