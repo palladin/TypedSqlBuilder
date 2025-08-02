@@ -20,7 +20,7 @@ public interface ISqlQuery<TSource> : ISqlQuery;
 /// Factory class for creating SQL queries.
 /// Provides entry points for building type-safe SQL queries starting with FROM clauses.
 /// </summary>
-public static class SqlQuery
+public static class TypedSql
 {
         
     /// <summary>

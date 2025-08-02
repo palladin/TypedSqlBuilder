@@ -8,7 +8,8 @@ A type-safe SQL expression builder DSL for C# that provides fluent syntax for co
 using TypedSqlBuilder.Core;
 
 // Define table schema 
-public class Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers", new("Id"), new("Age"), new("Name"))
+public class Customer() 
+    : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers", new("Id"), new("Age"), new("Name"))
 { 
     public SqlIntColumn Id => Column1;
     public SqlIntColumn Age => Column2;
@@ -16,11 +17,12 @@ public class Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>(
 }
 
 // Build complex queries with fluent syntax
-ISqlQuery query =
-    SqlQuery.From<Customer>()
+var (query, params)  =
+    TypedSql.From<Customer>()
             .Where(c => c.Age > 18)
             .OrderBy(c => c.Name)
-            .Select(c => (c.Id + 1, c.Name + "!"));
+            .Select(c => (c.Id + 1, c.Name + "!"))
+            .ToSqlServerRaw();
 ```
 
 ## Motivation
