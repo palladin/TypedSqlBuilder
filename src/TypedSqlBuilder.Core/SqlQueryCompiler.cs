@@ -1,177 +1,399 @@
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using System.Collections.Immutable;
 
 namespace TypedSqlBuilder.Core;
 
+public record Context
+{ 
+    ImmutableDictionary<string, object> Parameters { get; init; } = ImmutableDictionary<string, object>.Empty;
+}
+
 /// <summary>
-/// Enhanced SQL Compiler that can properly handle typed queries and lambda expressions.
-/// This version can evaluate selectors and predicates to generate correct SQL.
+/// Abstract base class for SQL compilation that can properly handle typed queries and lambda expressions.
+/// This version can evaluate selectors and predicates to generate correct SQL for different database providers.
 /// </summary>
-public static class SqlQueryCompiler
+public abstract class SqlQueryCompilerBase
 {
     /// <summary>
     /// Compiles SQL queries and clauses to SQL string representation.
     /// </summary>
     /// <param name="query">The SQL query or clause to compile</param>
     /// <returns>The SQL string representation</returns>
-    public static string Compile(ISqlQuery query)
+    public virtual (string, Context) Compile(ISqlQuery query, Context context)
     {
-        return query switch
+        switch (query)
         {
-            
-            SelectClause(FromClause(var table), var selector) =>
-                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName}",
-            SelectClause(WhereClause(FromClause(var table), var predicate), var selector) =>
-                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))}",
-            SelectClause(OrderByClause(FromClause(var table), var orderBy, var desc), var selector) =>
-                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",            
-            SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc), var selector) =>
-                $"SELECT {CompileTupleProjection(selector(table))} FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
+            case SelectClause(FromClause(var table), var selector):
+            {
+                var (projection, projectionCtx) = CompileTupleProjection(selector(table), context);
+                return ($"SELECT {projection} FROM {table.TableName}", projectionCtx);
+            }
 
-            WhereClause(FromClause(var table), var predicate) =>
-                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))}",
+            case SelectClause(WhereClause(FromClause(var table), var predicate), var selector):
+            {
+                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                var (projection, projectionCtx) = CompileTupleProjection(selector(table), whereCtx);
+                return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause}", projectionCtx);
+            }
 
-            OrderByClause(FromClause(var table), var orderBy, var desc) =>
-                $"SELECT * FROM {table.TableName} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
-            OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc) =>
-                $"SELECT * FROM {table.TableName} WHERE {Compile(predicate(table))} ORDER BY {Compile(orderBy(table))} {(desc ? "DESC" : "ASC")}",
-            
-            FromClause(var table) => 
-                $"SELECT * FROM {table.TableName}",
+            case SelectClause(OrderByClause(FromClause(var table), var orderBy, var desc), var selector):
+            {
+                var (orderByClause, orderCtx) = Compile(orderBy(table), context);
+                var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
+                return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", projectionCtx);
+            }
 
-            _ => throw new NotSupportedException($"Query type {query.GetType().Name} is not supported")
-        };
+            case SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc), var selector):
+            {
+                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                var (orderByClause, orderCtx) = Compile(orderBy(table), whereCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
+                return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", projectionCtx);
+            }
+
+            case WhereClause(FromClause(var table), var predicate):
+            {
+                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                return ($"SELECT * FROM {table.TableName} WHERE {whereClause}", whereCtx);
+            }
+
+            case OrderByClause(FromClause(var table), var orderBy, var desc):
+            {
+                var (orderByClause, orderCtx) = Compile(orderBy(table), context);
+                return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", orderCtx);
+            }
+
+            case OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc):
+            {
+                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                var (orderByClause, orderCtx) = Compile(orderBy(table), whereCtx);
+                return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", orderCtx);
+            }
+
+            case FromClause(var table):
+                return ($"SELECT * FROM {table.TableName}", context);
+
+            default:
+                throw new NotSupportedException($"Query type {query.GetType().Name} is not supported");
+        }
     }
 
     /// <summary>
     /// Compiles boolean expressions to SQL string representation.
     /// </summary>
     /// <param name="expr">The boolean expression to compile</param>
-    /// <returns>The SQL string representation</returns>
-    public static string Compile(SqlExprBool expr)
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(SqlExprBool expr, Context context)
     {
-        return expr switch
+        switch (expr)
         {
             // Literal values
-            SqlBoolValue(var value) => value ? "TRUE" : "FALSE",
-            
+            case SqlBoolValue(var value):
+                return (value ? "TRUE" : "FALSE", context);
+
             // Logical operations
-            SqlBoolNot(var operand) => $"NOT ({Compile(operand)})",
-            SqlBoolAnd(var left, var right) => $"({Compile(left)}) AND ({Compile(right)})",
-            SqlBoolOr(var left, var right) => $"({Compile(left)}) OR ({Compile(right)})",
-            
+            case SqlBoolNot(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"NOT ({compiled})", ctx);
+            }
+
+            case SqlBoolAnd(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql}) AND ({rightSql})", rightCtx);
+            }
+
+            case SqlBoolOr(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql}) OR ({rightSql})", rightCtx);
+            }
+
             // Boolean equality/inequality
-            SqlBoolEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlBoolNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            
+            case SqlBoolEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlBoolNotEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} != {rightSql}", rightCtx);
+            }
+
             // Integer comparisons (return bool)
-            SqlIntEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlIntNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            SqlIntGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
-            SqlIntLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
-            SqlIntGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
-            SqlIntLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
-            
+            case SqlIntEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlIntNotEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} != {rightSql}", rightCtx);
+            }
+
+            case SqlIntGreaterThan(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} > {rightSql}", rightCtx);
+            }
+
+            case SqlIntLessThan(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} < {rightSql}", rightCtx);
+            }
+
+            case SqlIntGreaterThanOrEqualTo(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} >= {rightSql}", rightCtx);
+            }
+
+            case SqlIntLessThanOrEqualTo(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} <= {rightSql}", rightCtx);
+            }
+
             // String comparisons (return bool)
-            SqlStringEquals(var left, var right) => $"{Compile(left)} = {Compile(right)}",
-            SqlStringNotEquals(var left, var right) => $"{Compile(left)} != {Compile(right)}",
-            SqlStringGreaterThan(var left, var right) => $"{Compile(left)} > {Compile(right)}",
-            SqlStringLessThan(var left, var right) => $"{Compile(left)} < {Compile(right)}",
-            SqlStringGreaterThanOrEqualTo(var left, var right) => $"{Compile(left)} >= {Compile(right)}",
-            SqlStringLessThanOrEqualTo(var left, var right) => $"{Compile(left)} <= {Compile(right)}",
-            
+            case SqlStringEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlStringNotEquals(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} != {rightSql}", rightCtx);
+            }
+
+            case SqlStringGreaterThan(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} > {rightSql}", rightCtx);
+            }
+
+            case SqlStringLessThan(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} < {rightSql}", rightCtx);
+            }
+
+            case SqlStringGreaterThanOrEqualTo(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} >= {rightSql}", rightCtx);
+            }
+
+            case SqlStringLessThanOrEqualTo(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"{leftSql} <= {rightSql}", rightCtx);
+            }
+
             // String pattern matching
-            SqlStringLike(var value, var pattern) => $"{Compile(value)} LIKE '{EscapeSqlString(pattern)}'",
-            
+            case SqlStringLike(var value, var pattern):
+            {
+                var (valueSql, valueCtx) = Compile(value, context);
+                return ($"{valueSql} LIKE '{EscapeSqlString(pattern)}'", valueCtx);
+            }
+
             // Column references and projections
-            SqlBoolProjection(var source, var name) => $"{source}.{name}",
+            case SqlBoolProjection(var source, var name):
+                return ($"{source}.{name}", context);
 
             // Parameters
-            SqlParameterBool(var name) => name,
-            
+            case SqlParameterBool(var name):
+                return (name, context);
+
             // CASE expressions
-            SqlBoolCase(var condition, var trueValue, var falseValue) => 
-                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
-            
-            _ => throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported")
-        };
+            case SqlBoolCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            default:
+                throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported");
+        }
     }
 
     /// <summary>
     /// Compiles integer expressions to SQL string representation.
     /// </summary>
     /// <param name="expr">The integer expression to compile</param>
-    /// <returns>The SQL string representation</returns>
-    public static string Compile(SqlExprInt expr)
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(SqlExprInt expr, Context context)
     {
-        return expr switch
+        switch (expr)
         {
             // Literal values
-            SqlIntValue(var value) => value.ToString(),
-            
+            case SqlIntValue(var value):
+                return (value.ToString(), context);
+
             // Unary operations
-            SqlIntMinus(var operand) => $"-{Compile(operand)}",
-            SqlIntAbs(var operand) => $"ABS({Compile(operand)})",
-            
+            case SqlIntMinus(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"-{compiled}", ctx);
+            }
+
+            case SqlIntAbs(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"ABS({compiled})", ctx);
+            }
+
             // Binary arithmetic operations
-            SqlIntAdd(var left, var right) => $"({Compile(left)} + {Compile(right)})",
-            SqlIntSub(var left, var right) => $"({Compile(left)} - {Compile(right)})",
-            SqlIntMult(var left, var right) => $"({Compile(left)} * {Compile(right)})",
-            SqlIntDiv(var left, var right) => $"({Compile(left)} / {Compile(right)})",
-            
+            case SqlIntAdd(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql} + {rightSql})", rightCtx);
+            }
+
+            case SqlIntSub(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql} - {rightSql})", rightCtx);
+            }
+
+            case SqlIntMult(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql} * {rightSql})", rightCtx);
+            }
+
+            case SqlIntDiv(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"({leftSql} / {rightSql})", rightCtx);
+            }
+
             // Column references and projections (more specific patterns first)
-            SqlIntColumn(var source, var name) => $"{source}.{name}",
-            SqlIntProjection(var source, var name) => $"{source}.{name}",
+            case SqlIntColumn(var source, var name):
+                return ($"{source}.{name}", context);
+
+            case SqlIntProjection(var source, var name):
+                return ($"{source}.{name}", context);
 
             // Parameters
-            SqlParameterInt(var name) => name,
-            
+            case SqlParameterInt(var name):
+                return (name, context);
+
             // Aggregate functions
-            SqlIntCount => "COUNT(*)",
-            SqlIntSum(var operand) => $"SUM({Compile(operand)})",
-            SqlIntAvg(var operand) => $"AVG({Compile(operand)})",
-            
+            case SqlIntCount:
+                return ("COUNT(*)", context);
+
+            case SqlIntSum(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"SUM({compiled})", ctx);
+            }
+
+            case SqlIntAvg(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"AVG({compiled})", ctx);
+            }
+
             // Aggregate functions that are also queries (need special handling)
-            SumSqlIntClause sumClause => throw new NotImplementedException(),
-            CountClause countClause => throw new NotImplementedException(),
-            
+            case SumSqlIntClause sumClause:
+                throw new NotImplementedException();
+
+            case CountClause countClause:
+                throw new NotImplementedException();
+
             // CASE expressions
-            SqlIntCase(var condition, var trueValue, var falseValue) => 
-                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
-            
-            _ => throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported")
-        };
+            case SqlIntCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            default:
+                throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported");
+        }
     }
 
     /// <summary>
     /// Compiles string expressions to SQL string representation.
     /// </summary>
     /// <param name="expr">The string expression to compile</param>
-    /// <returns>The SQL string representation</returns>
-    public static string Compile(SqlExprString expr)
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(SqlExprString expr, Context context)
     {
-        return expr switch
+        switch (expr)
         {
             // Literal values
-            SqlStringValue(var value) => $"'{EscapeSqlString(value)}'",
-            
+            case SqlStringValue(var value):
+                return ($"'{EscapeSqlString(value)}'", context);
+
             // String concatenation - use CONCAT function for better compatibility
-            SqlStringConcat(var left, var right) => $"CONCAT({Compile(left)}, {Compile(right)})",
-            
+            case SqlStringConcat(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context);
+                var (rightSql, rightCtx) = Compile(right, leftCtx);
+                return ($"CONCAT({leftSql}, {rightSql})", rightCtx);
+            }
+
             // Column references and projections (more specific patterns first)
-            SqlStringColumn(var source, var name) => $"{source}.{name}",
-            SqlStringProjection(var source, var name) => $"{source}.{name}",
-            
+            case SqlStringColumn(var source, var name):
+                return ($"{source}.{name}", context);
+
+            case SqlStringProjection(var source, var name):
+                return ($"{source}.{name}", context);
+
             // Parameters
-            SqlParameterString(var name) => name,
-            
+            case SqlParameterString(var name):
+                return (name, context);
+
             // CASE expressions
-            SqlStringCase(var condition, var trueValue, var falseValue) => 
-                $"CASE WHEN {Compile(condition)} THEN {Compile(trueValue)} ELSE {Compile(falseValue)} END",
-            
-            _ => throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported")
-        };
+            case SqlStringCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            default:
+                throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported");
+        }
     }
 
     /// <summary>
@@ -179,52 +401,71 @@ public static class SqlQueryCompiler
     /// This method uses pattern matching to determine the specific expression type.
     /// </summary>
     /// <param name="expr">The SQL expression to compile</param>
-    /// <returns>The SQL string representation</returns>
-    public static string Compile(SqlExpr expr)
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(SqlExpr expr, Context context)
     {
-        return expr switch
+        switch (expr)
         {
-            SqlExprBool boolExpr => Compile(boolExpr),
-            SqlExprInt intExpr => Compile(intExpr),
-            SqlExprString stringExpr => Compile(stringExpr),
-            _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
-        };
+            case SqlExprBool boolExpr:
+                return Compile(boolExpr, context);
+
+            case SqlExprInt intExpr:
+                return Compile(intExpr, context);
+
+            case SqlExprString stringExpr:
+                return Compile(stringExpr, context);
+
+            default:
+                throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
+        }
     }
-    
+
 
     /// <summary>
     /// Compiles a tuple projection into a SELECT list.
     /// </summary>
-    private static string CompileTupleProjection(ITuple tuple)
+    /// <param name="tuple">The tuple to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    protected virtual (string, Context) CompileTupleProjection(ITuple tuple, Context context)
     {
         var items = new List<string>();
+        var ctx = context;
 
         for (int i = 0; i < tuple.Length; i++)
         {
             var item = tuple[i];
-            if (item is SqlExpr expr)
+            switch (item)
             {
-                items.Add(Compile(expr));
-            }
-            else if (item is ITuple subTuple)
-            {
-                items.Add(CompileTupleProjection(subTuple));
-            }
-            else
-            {
-                throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported in projections");
+                case SqlExpr expr:
+                {
+                    var (compiled, newCtx) = Compile(expr, ctx);
+                    items.Add(compiled);
+                    ctx = newCtx;
+                    break;
+                }
+                case ITuple subTuple:
+                {
+                    var (compiled, newCtx) = CompileTupleProjection(subTuple, ctx);
+                    items.Add(compiled);
+                    ctx = newCtx;
+                    break;
+                }
+                default:
+                    throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported in projections");
             }
         }
-        
-        return string.Join(", ", items);
+
+        return (string.Join(", ", items), ctx);
     }
 
-   
+
 
     /// <summary>
     /// Escapes special characters in SQL string literals.
     /// </summary>
-    private static string EscapeSqlString(string value)
+    protected virtual string EscapeSqlString(string value)
     {
         return value.Replace("'", "''");
     }
