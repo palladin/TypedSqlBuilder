@@ -79,4 +79,54 @@ public static class SqlQueryCompiler
         var (result, _) = _defaultCompiler.Compile(expr, new Context());
         return result;
     }
+
+    /// <summary>
+    /// Compiles SQL queries with parameter collection using the default compiler (SQL Server).
+    /// </summary>
+    /// <param name="query">The SQL query to compile</param>
+    /// <returns>The SQL string representation and parameter context</returns>
+    public static (string sql, Context context) CompileWithParameters(ISqlQuery query)
+    {
+        return _defaultCompiler.Compile(query, new Context());
+    }
+
+    /// <summary>
+    /// Compiles boolean expressions with parameter collection using the default compiler (SQL Server).
+    /// </summary>
+    /// <param name="expr">The boolean expression to compile</param>
+    /// <returns>The SQL string representation and parameter context</returns>
+    public static (string sql, Context context) CompileWithParameters(SqlExprBool expr)
+    {
+        return _defaultCompiler.Compile(expr, new Context());
+    }
+
+    /// <summary>
+    /// Compiles integer expressions with parameter collection using the default compiler (SQL Server).
+    /// </summary>
+    /// <param name="expr">The integer expression to compile</param>
+    /// <returns>The SQL string representation and parameter context</returns>
+    public static (string sql, Context context) CompileWithParameters(SqlExprInt expr)
+    {
+        return _defaultCompiler.Compile(expr, new Context());
+    }
+
+    /// <summary>
+    /// Compiles string expressions with parameter collection using the default compiler (SQL Server).
+    /// </summary>
+    /// <param name="expr">The string expression to compile</param>
+    /// <returns>The SQL string representation and parameter context</returns>
+    public static (string sql, Context context) CompileWithParameters(SqlExprString expr)
+    {
+        return _defaultCompiler.Compile(expr, new Context());
+    }
+
+    /// <summary>
+    /// Compiles any SQL expression with parameter collection using the default compiler (SQL Server).
+    /// </summary>
+    /// <param name="expr">The SQL expression to compile</param>
+    /// <returns>The SQL string representation and parameter context</returns>
+    public static (string sql, Context context) CompileWithParameters(SqlExpr expr)
+    {
+        return _defaultCompiler.Compile(expr, new Context());
+    }
 }

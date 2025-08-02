@@ -15,10 +15,14 @@ public class ComplexQueryTests
             .Select(c => (c.Id + 1, c.Name + "!"));
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT (customers.Id + 1), CONCAT(customers.Name, '!') FROM customers WHERE customers.Age > 18 ORDER BY customers.Name ASC", sql);
+        Assert.Equal("SELECT (customers.Id + @p1), CONCAT(customers.Name, @p2) FROM customers WHERE customers.Age > @p0 ORDER BY customers.Name ASC", sql);
+        Assert.Equal(3, context.Parameters.Count);
+        Assert.Equal(18, context.Parameters["@p0"]);
+        Assert.Equal(1, context.Parameters["@p1"]);
+        Assert.Equal("!", context.Parameters["@p2"]);
     }
 
     [Fact]
@@ -30,10 +34,12 @@ public class ComplexQueryTests
             .Select(c => (c.Id, c.Name));
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE customers.Age >= 21", sql);
+        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE customers.Age >= @p0", sql);
+        Assert.Single(context.Parameters);
+        Assert.Equal(21, context.Parameters["@p0"]);
     }
 
     [Fact]
@@ -44,10 +50,14 @@ public class ComplexQueryTests
             .Where(c => (c.Age > 18 & c.Age < 65) || c.Name == "VIP");
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE ((customers.Age > 18) AND (customers.Age < 65)) OR (customers.Name = 'VIP')", sql);
+        Assert.Equal("SELECT * FROM customers WHERE ((customers.Age > @p0) AND (customers.Age < @p1)) OR (customers.Name = @p2)", sql);
+        Assert.Equal(3, context.Parameters.Count);
+        Assert.Equal(18, context.Parameters["@p0"]);
+        Assert.Equal(65, context.Parameters["@p1"]);
+        Assert.Equal("VIP", context.Parameters["@p2"]);
     }
 
     [Fact]
@@ -58,10 +68,13 @@ public class ComplexQueryTests
             .Select(c => (c.Id * 100 + c.Age, c.Name + " - Customer"));
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT ((customers.Id * 100) + customers.Age), CONCAT(customers.Name, ' - Customer') FROM customers", sql);
+        Assert.Equal("SELECT ((customers.Id * @p0) + customers.Age), CONCAT(customers.Name, @p1) FROM customers", sql);
+        Assert.Equal(2, context.Parameters.Count);
+        Assert.Equal(100, context.Parameters["@p0"]);
+        Assert.Equal(" - Customer", context.Parameters["@p1"]);
     }
 
     [Fact]
@@ -74,9 +87,13 @@ public class ComplexQueryTests
             .Select(c => (c.Id, c.Name, c.Age + 10));
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + 10) FROM customers WHERE (customers.Age > 21) AND (customers.Name != '') ORDER BY customers.Age ASC", sql);
+        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + @p2) FROM customers WHERE (customers.Age > @p0) AND (customers.Name != @p1) ORDER BY customers.Age ASC", sql);
+        Assert.Equal(3, context.Parameters.Count);
+        Assert.Equal(21, context.Parameters["@p0"]);
+        Assert.Equal("", context.Parameters["@p1"]);
+        Assert.Equal(10, context.Parameters["@p2"]);
     }
 }

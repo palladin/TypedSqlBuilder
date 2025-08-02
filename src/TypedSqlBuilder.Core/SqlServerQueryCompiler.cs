@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
@@ -9,6 +8,11 @@ namespace TypedSqlBuilder.Core;
 public class SqlServerQueryCompiler : SqlQueryCompilerBase
 {
     /// <summary>
+    /// SQL Server uses @ as parameter prefix (which is the default)
+    /// </summary>
+    protected override string ParameterPrefix => "@";
+
+    /// <summary>
     /// Compiles boolean expressions with SQL Server-specific handling.
     /// </summary>
     public override (string, Context) Compile(SqlExprBool expr, Context context)
@@ -16,7 +20,7 @@ public class SqlServerQueryCompiler : SqlQueryCompilerBase
         return expr switch
         {
             // SQL Server uses 1/0 for boolean literals instead of TRUE/FALSE
-            SqlBoolValue(var value) => (value ? "1" : "0", context),
+            SqlBoolValue(var value) => GenerateParameter(context, value ? 1 : 0),
             
             // For all other expressions, use base implementation
             _ => base.Compile(expr, context)

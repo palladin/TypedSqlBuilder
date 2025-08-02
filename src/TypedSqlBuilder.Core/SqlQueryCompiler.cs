@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Collections.Immutable;
@@ -7,7 +6,18 @@ namespace TypedSqlBuilder.Core;
 
 public record Context
 { 
-    ImmutableDictionary<string, object> Parameters { get; init; } = ImmutableDictionary<string, object>.Empty;
+    public ImmutableDictionary<string, object> Parameters { get; init; } = ImmutableDictionary<string, object>.Empty;
+    
+    public Context AddParameter(string name, object value)
+    {
+        return this with { Parameters = Parameters.Add(name, value) };
+    }
+    
+    public (string paramName, Context newContext) GenerateParameter(object value, string prefix = "@")
+    {
+        var paramName = $"{prefix}p{Parameters.Count}";
+        return (paramName, AddParameter(paramName, value));
+    }
 }
 
 /// <summary>
@@ -16,6 +26,18 @@ public record Context
 /// </summary>
 public abstract class SqlQueryCompilerBase
 {
+    /// <summary>
+    /// Gets the parameter prefix used by this database provider.
+    /// </summary>
+    protected virtual string ParameterPrefix => "@";
+
+    /// <summary>
+    /// Generates a parameter for the given value using the database-specific parameter prefix.
+    /// </summary>
+    protected (string paramName, Context newContext) GenerateParameter(Context context, object value)
+    {
+        return context.GenerateParameter(value, ParameterPrefix);
+    }
     /// <summary>
     /// Compiles SQL queries and clauses to SQL string representation.
     /// </summary>
@@ -92,7 +114,10 @@ public abstract class SqlQueryCompilerBase
         {
             // Literal values
             case SqlBoolValue(var value):
-                return (value ? "TRUE" : "FALSE", context);
+            {
+                var (paramName, newContext) = GenerateParameter(context, value);
+                return (paramName, newContext);
+            }
 
             // Logical operations
             case SqlBoolNot(var operand):
@@ -220,7 +245,8 @@ public abstract class SqlQueryCompilerBase
             case SqlStringLike(var value, var pattern):
             {
                 var (valueSql, valueCtx) = Compile(value, context);
-                return ($"{valueSql} LIKE '{EscapeSqlString(pattern)}'", valueCtx);
+                var (patternParam, patternCtx) = GenerateParameter(valueCtx, pattern);
+                return ($"{valueSql} LIKE {patternParam}", patternCtx);
             }
 
             // Column references and projections
@@ -257,7 +283,10 @@ public abstract class SqlQueryCompilerBase
         {
             // Literal values
             case SqlIntValue(var value):
-                return (value.ToString(), context);
+            {
+                var (paramName, newContext) = GenerateParameter(context, value);
+                return (paramName, newContext);
+            }
 
             // Unary operations
             case SqlIntMinus(var operand):
@@ -361,7 +390,10 @@ public abstract class SqlQueryCompilerBase
         {
             // Literal values
             case SqlStringValue(var value):
-                return ($"'{EscapeSqlString(value)}'", context);
+            {
+                var (paramName, newContext) = GenerateParameter(context, value);
+                return (paramName, newContext);
+            }
 
             // String concatenation - use CONCAT function for better compatibility
             case SqlStringConcat(var left, var right):
@@ -458,15 +490,5 @@ public abstract class SqlQueryCompilerBase
         }
 
         return (string.Join(", ", items), ctx);
-    }
-
-
-
-    /// <summary>
-    /// Escapes special characters in SQL string literals.
-    /// </summary>
-    protected virtual string EscapeSqlString(string value)
-    {
-        return value.Replace("'", "''");
     }
 }

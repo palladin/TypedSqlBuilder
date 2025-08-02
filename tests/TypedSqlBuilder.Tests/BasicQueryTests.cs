@@ -54,10 +54,13 @@ public class BasicQueryTests
             .Where(c => c.Age > 18);
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age > 18", sql);
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age > @p0", sql);
+        Assert.Single(context.Parameters);
+        Assert.Contains("@p0", context.Parameters.Keys);
+        Assert.Equal(18, context.Parameters["@p0"]);
     }
 
     [Fact]
@@ -68,10 +71,13 @@ public class BasicQueryTests
             .Where(c => c.Name == "John");
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Name = 'John'", sql);
+        Assert.Equal("SELECT * FROM customers WHERE customers.Name = @p0", sql);
+        Assert.Single(context.Parameters);
+        Assert.Contains("@p0", context.Parameters.Keys);
+        Assert.Equal("John", context.Parameters["@p0"]);
     }
 
     [Fact]
@@ -82,10 +88,15 @@ public class BasicQueryTests
             .Where(c => c.Age > 18 & c.Name != "Admin");
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > 18) AND (customers.Name != 'Admin')", sql);
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > @p0) AND (customers.Name != @p1)", sql);
+        Assert.Equal(2, context.Parameters.Count);
+        Assert.Contains("@p0", context.Parameters.Keys);
+        Assert.Contains("@p1", context.Parameters.Keys);
+        Assert.Equal(18, context.Parameters["@p0"]);
+        Assert.Equal("Admin", context.Parameters["@p1"]);
     }
 
     [Fact]
