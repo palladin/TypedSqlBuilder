@@ -93,6 +93,6 @@ public interface ISqlColumn
 }
 
 public interface ISqlColumn<TCol> : ISqlColumn where TCol : ISqlColumn<TCol>
-{
-	TCol WithName(string source, string name);
+{	
+	static abstract TCol Create(string source, string columnName);
 }

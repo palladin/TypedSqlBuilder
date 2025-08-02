@@ -89,7 +89,7 @@ public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
 	public string TableName { get; } = string.Empty;
 	public string ColumnName { get; }
 	
-	public SqlBoolColumn WithName(string source, string columnName) => new SqlBoolColumn(source, columnName);
+	public static SqlBoolColumn Create(string source, string columnName) => new SqlBoolColumn(source, columnName);
 	
 	public void Deconstruct(out string sourceOut, out string nameOut)
 	{

@@ -9,11 +9,11 @@ using TypedSqlBuilder.Core;
 
 // Define table schema 
 public class Customer() 
-    : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers", new("Id"), new("Age"), new("Name"))
+    : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers")
 { 
-    public SqlIntColumn Id => Column1;
-    public SqlIntColumn Age => Column2;
-    public SqlStringColumn Name => Column3;
+    public SqlIntColumn Id => Column1("Id");
+    public SqlIntColumn Age => Column2("Age");
+    public SqlStringColumn Name => Column3("Name");
 }
 
 // Build complex queries with fluent syntax

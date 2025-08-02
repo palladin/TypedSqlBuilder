@@ -112,7 +112,7 @@ public class SqlStringColumn : SqlExprString, ISqlColumn<SqlStringColumn>
 	public string TableName { get; } = string.Empty;
 	public string ColumnName { get; }
 	
-	public SqlStringColumn WithName(string source, string columnName) => new SqlStringColumn(source, columnName);
+	public static SqlStringColumn Create(string source, string columnName) => new SqlStringColumn(source, columnName);
 	
 	public void Deconstruct(out string sourceOut, out string nameOut)
 	{

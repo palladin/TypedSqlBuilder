@@ -57,27 +57,33 @@ public interface ISqlTable : ITuple
 /// </summary>
 /// <typeparam name="TCol1">The type of the first column</typeparam>
 /// <typeparam name="TCol2">The type of the second column</typeparam>
-/// <param name="Name">The name of the table</param>
-/// <param name="Column1">The first column definition</param>
-/// <param name="Column2">The second column definition</param>
 public abstract class SqlTable<TCol1, TCol2> : ISqlTable 
     where TCol1 : ISqlColumn<TCol1>
     where TCol2 : ISqlColumn<TCol2>
 {
     private readonly object[] columns;
 
-    protected SqlTable(string tableName, TCol1 col1, TCol2 col2)
+    protected SqlTable(string tableName)
     {
         TableName = tableName;
-        Column1 = col1.WithName(tableName, col1.ColumnName);
-        Column2 = col2.WithName(tableName, col2.ColumnName);
-        columns = [Column1, Column2];
+        columns = new object[2];
     }
 
     public object? this[int index] => columns[index];
 
-    public TCol1 Column1 { get; } 
-    public TCol2 Column2 { get; } 
+    public TCol1 Column1(string columnName)
+    {
+        var column1 = TCol1.Create(TableName, columnName);
+        columns[0] = column1;
+        return column1;
+    }
+    
+    public TCol2 Column2(string columnName)
+    {
+        var column2 = TCol2.Create(TableName, columnName);
+        columns[1] = column2;
+        return column2;
+    }
 
     public string TableName { get; }
 
@@ -98,20 +104,34 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 {
     private readonly object[] columns;
 
-    protected SqlTable(string tableName, TCol1 col1, TCol2 col2, TCol3 col3)
+    protected SqlTable(string tableName)
     {
         TableName = tableName;
-        Column1 = col1.WithName(tableName, col1.ColumnName);
-        Column2 = col2.WithName(tableName, col2.ColumnName);
-        Column3 = col3.WithName(tableName, col3.ColumnName);
-        columns = [Column1, Column2, Column3];
+        columns = new object[3];
     }
 
     public object? this[int index] => columns[index];
 
-    public TCol1 Column1 { get; } 
-    public TCol2 Column2 { get; } 
-    public TCol3 Column3 { get; }
+    public TCol1 Column1(string columnName)
+    {
+        var column1 = TCol1.Create(TableName, columnName);
+        columns[0] = column1;
+        return column1;
+    }
+    
+    public TCol2 Column2(string columnName)
+    {
+        var column2 = TCol2.Create(TableName, columnName);
+        columns[1] = column2;
+        return column2;
+    }
+    
+    public TCol3 Column3(string columnName)
+    {
+        var column3 = TCol3.Create(TableName, columnName);
+        columns[2] = column3;
+        return column3;
+    }
 
     public string TableName { get; }
 

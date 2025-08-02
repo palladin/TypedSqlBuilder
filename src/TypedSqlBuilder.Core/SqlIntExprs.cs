@@ -277,7 +277,7 @@ public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
 	public string TableName { get; } = string.Empty;
 	public string ColumnName { get; }
 	
-	public SqlIntColumn WithName(string source, string columnName) => new SqlIntColumn(source, columnName);
+	public static SqlIntColumn Create(string source, string columnName) => new SqlIntColumn(source, columnName);
 	
 	public void Deconstruct(out string sourceOut, out string nameOut)
 	{
