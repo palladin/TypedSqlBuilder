@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
@@ -411,5 +412,37 @@ public static class SqlQueryExtensions
         where TKey : SqlExpr
     {
         return new OrderByClause<TSource, TKey>(query, keySelector, true);
+    }
+
+    /// <summary>
+    /// Compiles the SQL query to SQL Server syntax with parameters.
+    /// </summary>
+    /// <param name="query">The SQL query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = query.ToSqlServerRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlQuery query)
+    {
+        var (sql, context) = SqlQueryCompiler.SqlServer.Compile(query, new Context());
+        return (sql, context.Parameters);
+    }
+
+    /// <summary>
+    /// Compiles the SQL query to SQLite syntax with parameters.
+    /// </summary>
+    /// <param name="query">The SQL query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = query.ToSqliteRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlQuery query)
+    {
+        var (sql, context) = SqlQueryCompiler.Sqlite.Compile(query, new Context());
+        return (sql, context.Parameters);
     }
 }    

@@ -15,16 +15,16 @@ public class ParameterPrefixTests
         var query = SqlQuery.From<Customer>()
             .Where(c => c.Age > 18 && c.Name == "John");
         
-        // Act - Using SQL Server compiler
-        var (sql, context) = SqlQueryCompiler.SqlServer.Compile(query, new Context());
+        // Act - Using SQL Server extension method
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Contains("@p0", sql);
         Assert.Contains("@p1", sql);
         Assert.Equal("SELECT * FROM customers WHERE (customers.Age > @p0) AND (customers.Name = @p1)", sql);
-        Assert.Equal(2, context.Parameters.Count);
-        Assert.Equal(18, context.Parameters["@p0"]);
-        Assert.Equal("John", context.Parameters["@p1"]);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters["@p0"]);
+        Assert.Equal("John", parameters["@p1"]);
     }
 
     [Fact]
@@ -34,16 +34,16 @@ public class ParameterPrefixTests
         var query = SqlQuery.From<Customer>()
             .Where(c => c.Age > 18 && c.Name == "John");
         
-        // Act - Using SQLite compiler
-        var (sql, context) = SqlQueryCompiler.Sqlite.Compile(query, new Context());
+        // Act - Using SQLite extension method
+        var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
         Assert.Contains(":p0", sql);
         Assert.Contains(":p1", sql);
         Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name = :p1)", sql);
-        Assert.Equal(2, context.Parameters.Count);
-        Assert.Equal(18, context.Parameters[":p0"]);
-        Assert.Equal("John", context.Parameters[":p1"]);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("John", parameters[":p1"]);
     }
 
     [Fact]
@@ -53,12 +53,12 @@ public class ParameterPrefixTests
         var query = SqlQuery.From<Customer>()
             .Where(c => c.Age > 18);
         
-        // Act - Using SQL Server compiler  
-        var (sql, context) = SqlQueryCompiler.SqlServer.Compile(query, new Context());
+        // Act - Using SQL Server extension method  
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Contains("@p0", sql);
-        Assert.Equal(18, context.Parameters["@p0"]);
+        Assert.Equal(18, parameters["@p0"]);
     }
 
     [Fact]
@@ -68,11 +68,11 @@ public class ParameterPrefixTests
         var query = SqlQuery.From<Customer>()
             .Where(c => c.Age > 18);
         
-        // Act - Using SQLite compiler
-        var (sql, context) = SqlQueryCompiler.Sqlite.Compile(query, new Context());
+        // Act - Using SQLite extension method
+        var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
         Assert.Contains(":p0", sql);
-        Assert.Equal(18, context.Parameters[":p0"]);
+        Assert.Equal(18, parameters[":p0"]);
     }
 }

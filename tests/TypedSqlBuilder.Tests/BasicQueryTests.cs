@@ -12,7 +12,7 @@ public class BasicQueryTests
         var query = SqlQuery.From<Customer>();
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, _) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers", sql);
@@ -26,7 +26,7 @@ public class BasicQueryTests
             .Select(c => (c.Id, c.Name));
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, _) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT customers.Id, customers.Name FROM customers", sql);
@@ -40,7 +40,7 @@ public class BasicQueryTests
             .Select(c => c.Age);
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, _) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT customers.Age FROM customers", sql);
@@ -54,13 +54,13 @@ public class BasicQueryTests
             .Where(c => c.Age > 18);
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers WHERE customers.Age > @p0", sql);
-        Assert.Single(context.Parameters);
-        Assert.Contains("@p0", context.Parameters.Keys);
-        Assert.Equal(18, context.Parameters["@p0"]);
+        Assert.Single(parameters);
+        Assert.Contains("@p0", parameters.Keys);
+        Assert.Equal(18, parameters["@p0"]);
     }
 
     [Fact]
@@ -71,13 +71,13 @@ public class BasicQueryTests
             .Where(c => c.Name == "John");
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers WHERE customers.Name = @p0", sql);
-        Assert.Single(context.Parameters);
-        Assert.Contains("@p0", context.Parameters.Keys);
-        Assert.Equal("John", context.Parameters["@p0"]);
+        Assert.Single(parameters);
+        Assert.Contains("@p0", parameters.Keys);
+        Assert.Equal("John", parameters["@p0"]);
     }
 
     [Fact]
@@ -88,15 +88,15 @@ public class BasicQueryTests
             .Where(c => c.Age > 18 & c.Name != "Admin");
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers WHERE (customers.Age > @p0) AND (customers.Name != @p1)", sql);
-        Assert.Equal(2, context.Parameters.Count);
-        Assert.Contains("@p0", context.Parameters.Keys);
-        Assert.Contains("@p1", context.Parameters.Keys);
-        Assert.Equal(18, context.Parameters["@p0"]);
-        Assert.Equal("Admin", context.Parameters["@p1"]);
+        Assert.Equal(2, parameters.Count);
+        Assert.Contains("@p0", parameters.Keys);
+        Assert.Contains("@p1", parameters.Keys);
+        Assert.Equal(18, parameters["@p0"]);
+        Assert.Equal("Admin", parameters["@p1"]);
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class BasicQueryTests
             .OrderBy(c => c.Name);
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, _) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC", sql);
@@ -121,7 +121,7 @@ public class BasicQueryTests
             .OrderByDescending(c => c.Age);
         
         // Act
-        var sql = SqlQueryCompiler.Compile(query);
+        var (sql, _) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT * FROM customers ORDER BY customers.Age DESC", sql);

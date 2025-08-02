@@ -19,16 +19,16 @@ public class IntegrationTests
             ));
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         var expectedSql = "SELECT customers.Id, CONCAT(customers.Name, @p2), (customers.Age + @p3) FROM customers WHERE (customers.Age >= @p0) AND (customers.Name != @p1) ORDER BY customers.Name ASC";
         Assert.Equal(expectedSql, sql);
-        Assert.Equal(4, context.Parameters.Count);
-        Assert.Equal(21, context.Parameters["@p0"]);
-        Assert.Equal("", context.Parameters["@p1"]);
-        Assert.Equal(" (Customer)", context.Parameters["@p2"]);
-        Assert.Equal(5, context.Parameters["@p3"]);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal("", parameters["@p1"]);
+        Assert.Equal(" (Customer)", parameters["@p2"]);
+        Assert.Equal(5, parameters["@p3"]);
     }
 
     [Fact]
@@ -40,12 +40,12 @@ public class IntegrationTests
             .Select(p => (p.ProductId, p.ProductName));
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(productQuery);
+        var (sql, parameters) = productQuery.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT products.ProductId, products.ProductName FROM products WHERE products.ProductName != @p0", sql);
-        Assert.Single(context.Parameters);
-        Assert.Equal("Discontinued", context.Parameters["@p0"]);
+        Assert.Single(parameters);
+        Assert.Equal("Discontinued", parameters["@p0"]);
     }
 
     [Theory]
@@ -60,14 +60,14 @@ public class IntegrationTests
             .Select(c => (c.Id, c.Name));
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert - The structure should be consistent regardless of parameter values
         Assert.Contains("SELECT customers.Id, customers.Name", sql);
         Assert.Contains("WHERE (customers.Age >= @p0) AND (customers.Age <= @p1)", sql);
-        Assert.Equal(2, context.Parameters.Count);
-        Assert.Equal(minAge, context.Parameters["@p0"]);
-        Assert.Equal(maxAge, context.Parameters["@p1"]);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(minAge, parameters["@p0"]);
+        Assert.Equal(maxAge, parameters["@p1"]);
     }
 
     [Fact]
@@ -83,13 +83,13 @@ public class IntegrationTests
             ));
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT customers.Id, ((customers.Id * @p1) + customers.Age), customers.Name FROM customers WHERE customers.Age > @p0", sql);
-        Assert.Equal(2, context.Parameters.Count);
-        Assert.Equal(18, context.Parameters["@p0"]);
-        Assert.Equal(100, context.Parameters["@p1"]);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters["@p0"]);
+        Assert.Equal(100, parameters["@p1"]);
     }
 
     [Fact]
@@ -102,13 +102,13 @@ public class IntegrationTests
             .Select(c => (c.Id, c.Name, c.Age + 10));
         
         // Act
-        var (sql, context) = SqlQueryCompiler.CompileWithParameters(query);
+        var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
         Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + @p2) FROM customers WHERE (customers.Age > @p0) AND (customers.Name != @p1) ORDER BY customers.Age ASC", sql);
-        Assert.Equal(3, context.Parameters.Count);
-        Assert.Equal(21, context.Parameters["@p0"]);
-        Assert.Equal("", context.Parameters["@p1"]);
-        Assert.Equal(10, context.Parameters["@p2"]);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal("", parameters["@p1"]);
+        Assert.Equal(10, parameters["@p2"]);
     }
 }
