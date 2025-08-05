@@ -6,7 +6,7 @@ namespace TypedSqlBuilder.Tests;
 /// <summary>
 /// SQL Server-specific tests using queries from TestQueries
 /// </summary>
-public class SqlServerTests
+public class SqlServerQueryTests
 {
     [Fact]
     public void From_GeneratesCorrectSql()
@@ -216,8 +216,6 @@ public class SqlServerTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Contains("@p0", sql);
-        Assert.Contains("@p1", sql);
         Assert.Equal("SELECT * FROM customers WHERE (customers.Age > @p0) AND (customers.Name = @p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
@@ -234,7 +232,6 @@ public class SqlServerTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Contains("@p0", sql);
         Assert.Equal(18, parameters["@p0"]);
     }
 
@@ -285,8 +282,7 @@ public class SqlServerTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert - The structure should be consistent regardless of parameter values
-        Assert.Contains("SELECT customers.Id, customers.Name", sql);
-        Assert.Contains("WHERE (customers.Age >= @p0) AND (customers.Age <= @p1)", sql);
+        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= @p0) AND (customers.Age <= @p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(minAge, parameters["@p0"]);
         Assert.Equal(maxAge, parameters["@p1"]);
@@ -318,8 +314,7 @@ public class SqlServerTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Contains("@p", sql); // SQL Server uses @ prefix
-        Assert.Contains("SELECT customers.Id, customers.Name, (customers.Age + ", sql);
+        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + @p0) FROM customers ORDER BY customers.Name ASC", sql);
         Assert.Single(parameters);
     }
 
@@ -333,7 +328,7 @@ public class SqlServerTests
         var (sql, parameters) = query.ToSqlServerRaw();
 
         // Assert
-        Assert.Contains("@p0", sql); // SQL Server uses @
+        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= @p0) AND (customers.Name != @p1)", sql);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
         Assert.True(true, "Clean architecture with extension methods works perfectly!");

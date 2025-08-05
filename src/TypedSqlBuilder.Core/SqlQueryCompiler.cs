@@ -116,6 +116,55 @@ public abstract class SqlQueryCompiler
     }
 
     /// <summary>
+    /// Compiles SQL statements to SQL string representation.
+    /// </summary>
+    /// <param name="statement">The SQL statement to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(ISqlStatement statement, Context context)
+    {
+        switch (statement)
+        {
+            // ========== DELETE STATEMENTS ==========
+            case DeleteStatement(var table):
+                return ($"DELETE FROM {table.TableName}", context);
+
+            case DeleteWhereStatement(var table, var predicate):
+            {
+                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                return ($"DELETE FROM {table.TableName} WHERE {whereClause}", whereCtx);
+            }
+
+            // ========== UPDATE STATEMENTS ==========
+            case UpdateStatement(var table, var setClauses):
+            {
+                var (setClause, setCtx) = CompileSetClauses(setClauses, table, context);
+                return ($"UPDATE {table.TableName} SET {setClause}", setCtx);
+            }
+
+            case UpdateWhereStatement(var table, var setClauses, var predicate):
+            {
+                var (setClause, setCtx) = CompileSetClauses(setClauses, table, context);
+                var (whereClause, whereCtx) = Compile(predicate(table), setCtx);
+                return ($"UPDATE {table.TableName} SET {setClause} WHERE {whereClause}", whereCtx);
+            }
+
+            // ========== INSERT STATEMENTS ==========
+            case InsertStatement(var table, var valueClauses) when valueClauses.Length == 0:
+                return ($"INSERT INTO {table.TableName} DEFAULT VALUES", context);
+
+            case InsertStatement(var table, var valueClauses) when valueClauses.Length > 0:
+            {
+                var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(valueClauses, table, context);
+                return ($"INSERT INTO {table.TableName} ({columnsClause}) VALUES ({valuesClause})", valuesCtx);
+            }
+
+            default:
+                throw new NotSupportedException($"Statement type {statement.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
     /// Compiles boolean expressions to SQL string representation.
     /// </summary>
     /// <param name="expr">The boolean expression to compile</param>
@@ -504,6 +553,121 @@ public abstract class SqlQueryCompiler
 
         return (string.Join(", ", items), ctx);
     }
+
+    /// <summary>
+    /// Compiles SET clauses for UPDATE statements.
+    /// </summary>
+    /// <param name="setClauses">The SET clauses to compile</param>
+    /// <param name="table">The table being updated</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    protected virtual (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, ISqlTable table, Context context)
+    {
+        var items = new List<string>();
+        var ctx = context;
+
+        foreach (var setClause in setClauses)
+        {
+            switch (setClause)
+            {
+                case SetIntClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    items.Add($"{columnSql} = {valueSql}");
+                    ctx = valueCtx;
+                    break;
+                }
+                case SetStringClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    items.Add($"{columnSql} = {valueSql}");
+                    ctx = valueCtx;
+                    break;
+                }
+                case SetBoolClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    items.Add($"{columnSql} = {valueSql}");
+                    ctx = valueCtx;
+                    break;
+                }
+                default:
+                    throw new NotSupportedException($"Set clause type {setClause.GetType().Name} is not supported");
+            }
+        }
+
+        return (string.Join(", ", items), ctx);
+    }    
+
+    /// <summary>
+    /// Compiles INSERT VALUE clauses.
+    /// </summary>
+    /// <param name="valueClauses">The VALUE clauses to compile</param>
+    /// <param name="table">The table being inserted into</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The columns clause, values clause, and updated context</returns>
+    protected virtual (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, ISqlTable table, Context context)
+    {
+        var columns = new List<string>();
+        var valuesSql = new List<string>();
+        var ctx = context;
+
+        foreach (var valueClause in valueClauses)
+        {
+            switch (valueClause)
+            {
+                case InsertIntClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    if (column is ISqlColumn sqlColumn)
+                        columns.Add(sqlColumn.ColumnName);
+                    else
+                        throw new NotSupportedException($"Column must implement ISqlColumn");
+                    valuesSql.Add(valueSql);
+                    ctx = valueCtx;
+                    break;
+                }
+                case InsertStringClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    if (column is ISqlColumn sqlColumn)
+                        columns.Add(sqlColumn.ColumnName);
+                    else
+                        throw new NotSupportedException($"Column must implement ISqlColumn");
+                    valuesSql.Add(valueSql);
+                    ctx = valueCtx;
+                    break;
+                }
+                case InsertBoolClause(var columnSelector, var value):
+                {
+                    var column = columnSelector(table);
+                    var (columnSql, columnCtx) = Compile(column, ctx);
+                    var (valueSql, valueCtx) = Compile(value, columnCtx);
+                    if (column is ISqlColumn sqlColumn)
+                        columns.Add(sqlColumn.ColumnName);
+                    else
+                        throw new NotSupportedException($"Column must implement ISqlColumn");
+                    valuesSql.Add(valueSql);
+                    ctx = valueCtx;
+                    break;
+                }
+                default:
+                    throw new NotSupportedException($"Value clause type {valueClause.GetType().Name} is not supported");
+            }
+        }
+
+        return (string.Join(", ", columns), string.Join(", ", valuesSql), ctx);
+    }
 }
 
 /// <summary>
@@ -549,6 +713,11 @@ public class SqliteQueryCompiler : SqlQueryCompiler
                 return base.Compile(expr, context);
         }
     }
+
+    public override (string, Context) Compile(ISqlStatement statement, Context context)
+    {
+        return base.Compile(statement, context);
+    }
 }
 
 /// <summary>
@@ -574,6 +743,11 @@ public class SqlServerQueryCompiler : SqlQueryCompiler
             // For all other expressions, use base implementation
             _ => base.Compile(expr, context)
         };
+    }
+
+    public override (string, Context) Compile(ISqlStatement statement, Context context)
+    {
+        return base.Compile(statement, context);
     }
 
     // SQL Server uses CONCAT for string concatenation, which is already the default in base class
