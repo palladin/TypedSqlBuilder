@@ -568,38 +568,11 @@ public abstract class SqlQueryCompiler
 
         foreach (var setClause in setClauses)
         {
-            switch (setClause)
-            {
-                case SetIntClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    items.Add($"{columnSql} = {valueSql}");
-                    ctx = valueCtx;
-                    break;
-                }
-                case SetStringClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    items.Add($"{columnSql} = {valueSql}");
-                    ctx = valueCtx;
-                    break;
-                }
-                case SetBoolClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    items.Add($"{columnSql} = {valueSql}");
-                    ctx = valueCtx;
-                    break;
-                }
-                default:
-                    throw new NotSupportedException($"Set clause type {setClause.GetType().Name} is not supported");
-            }
+            var column = setClause.ColumnSelector(table);
+            var (columnSql, columnCtx) = Compile(column, ctx);
+            var (valueSql, valueCtx) = Compile(setClause.Value, columnCtx);
+            items.Add($"{columnSql} = {valueSql}");
+            ctx = valueCtx;
         }
 
         return (string.Join(", ", items), ctx);
@@ -620,50 +593,17 @@ public abstract class SqlQueryCompiler
 
         foreach (var valueClause in valueClauses)
         {
-            switch (valueClause)
-            {
-                case InsertIntClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    if (column is ISqlColumn sqlColumn)
-                        columns.Add(sqlColumn.ColumnName);
-                    else
-                        throw new NotSupportedException($"Column must implement ISqlColumn");
-                    valuesSql.Add(valueSql);
-                    ctx = valueCtx;
-                    break;
-                }
-                case InsertStringClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    if (column is ISqlColumn sqlColumn)
-                        columns.Add(sqlColumn.ColumnName);
-                    else
-                        throw new NotSupportedException($"Column must implement ISqlColumn");
-                    valuesSql.Add(valueSql);
-                    ctx = valueCtx;
-                    break;
-                }
-                case InsertBoolClause(var columnSelector, var value):
-                {
-                    var column = columnSelector(table);
-                    var (columnSql, columnCtx) = Compile(column, ctx);
-                    var (valueSql, valueCtx) = Compile(value, columnCtx);
-                    if (column is ISqlColumn sqlColumn)
-                        columns.Add(sqlColumn.ColumnName);
-                    else
-                        throw new NotSupportedException($"Column must implement ISqlColumn");
-                    valuesSql.Add(valueSql);
-                    ctx = valueCtx;
-                    break;
-                }
-                default:
-                    throw new NotSupportedException($"Value clause type {valueClause.GetType().Name} is not supported");
-            }
+            var column = valueClause.ColumnSelector(table);
+            var (columnSql, columnCtx) = Compile(column, ctx);
+            var (valueSql, valueCtx) = Compile(valueClause.Value, columnCtx);
+            
+            if (column is ISqlColumn sqlColumn)
+                columns.Add(sqlColumn.ColumnName);
+            else
+                throw new NotSupportedException($"Column must implement ISqlColumn");
+            
+            valuesSql.Add(valueSql);
+            ctx = valueCtx;
         }
 
         return (string.Join(", ", columns), string.Join(", ", valuesSql), ctx);

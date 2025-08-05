@@ -101,42 +101,108 @@ public interface ISqlUpdateWhereStatement<TSqlTable> : ISqlUpdateWhereStatement,
 /// <summary>
 /// Represents a SET clause in an UPDATE statement.
 /// </summary>
-public abstract record SetClause;
+public abstract record SetClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// SET clause for integer columns.
 /// </summary>
-public record SetIntClause(Func<ISqlTable, SqlExprInt> ColumnSelector, SqlExprInt Value) : SetClause;
+public record SetIntClause : SetClause
+{
+    public Func<ISqlTable, SqlExprInt> IntColumnSelector { get; }
+    public SqlExprInt IntValue { get; }
+
+    public SetIntClause(Func<ISqlTable, SqlExprInt> columnSelector, SqlExprInt value) 
+        : base(table => columnSelector(table), value)
+    {
+        IntColumnSelector = columnSelector;
+        IntValue = value;
+    }
+}
 
 /// <summary>
 /// SET clause for string columns.
 /// </summary>
-public record SetStringClause(Func<ISqlTable, SqlExprString> ColumnSelector, SqlExprString Value) : SetClause;
+public record SetStringClause : SetClause
+{
+    public Func<ISqlTable, SqlExprString> StringColumnSelector { get; }
+    public SqlExprString StringValue { get; }
+
+    public SetStringClause(Func<ISqlTable, SqlExprString> columnSelector, SqlExprString value) 
+        : base(table => columnSelector(table), value)
+    {
+        StringColumnSelector = columnSelector;
+        StringValue = value;
+    }
+}
 
 /// <summary>
 /// SET clause for boolean columns.
 /// </summary>
-public record SetBoolClause(Func<ISqlTable, SqlExprBool> ColumnSelector, SqlExprBool Value) : SetClause;
+public record SetBoolClause : SetClause
+{
+    public Func<ISqlTable, SqlExprBool> BoolColumnSelector { get; }
+    public SqlExprBool BoolValue { get; }
+
+    public SetBoolClause(Func<ISqlTable, SqlExprBool> columnSelector, SqlExprBool value) 
+        : base(table => columnSelector(table), value)
+    {
+        BoolColumnSelector = columnSelector;
+        BoolValue = value;
+    }
+}
 
 /// <summary>
 /// Represents a VALUE clause in an INSERT statement.
 /// </summary>
-public abstract record ValueClause;
+public abstract record ValueClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// VALUE clause for integer columns.
 /// </summary>
-public record InsertIntClause(Func<ISqlTable, SqlExprInt> ColumnSelector, SqlExprInt Value) : ValueClause;
+public record InsertIntClause : ValueClause
+{
+    public Func<ISqlTable, SqlExprInt> IntColumnSelector { get; }
+    public SqlExprInt IntValue { get; }
+
+    public InsertIntClause(Func<ISqlTable, SqlExprInt> columnSelector, SqlExprInt value) 
+        : base(table => columnSelector(table), value)
+    {
+        IntColumnSelector = columnSelector;
+        IntValue = value;
+    }
+}
 
 /// <summary>
 /// VALUE clause for string columns.
 /// </summary>
-public record InsertStringClause(Func<ISqlTable, SqlExprString> ColumnSelector, SqlExprString Value) : ValueClause;
+public record InsertStringClause : ValueClause
+{
+    public Func<ISqlTable, SqlExprString> StringColumnSelector { get; }
+    public SqlExprString StringValue { get; }
+
+    public InsertStringClause(Func<ISqlTable, SqlExprString> columnSelector, SqlExprString value) 
+        : base(table => columnSelector(table), value)
+    {
+        StringColumnSelector = columnSelector;
+        StringValue = value;
+    }
+}
 
 /// <summary>
 /// VALUE clause for boolean columns.
 /// </summary>
-public record InsertBoolClause(Func<ISqlTable, SqlExprBool> ColumnSelector, SqlExprBool Value) : ValueClause;
+public record InsertBoolClause : ValueClause
+{
+    public Func<ISqlTable, SqlExprBool> BoolColumnSelector { get; }
+    public SqlExprBool BoolValue { get; }
+
+    public InsertBoolClause(Func<ISqlTable, SqlExprBool> columnSelector, SqlExprBool value) 
+        : base(table => columnSelector(table), value)
+    {
+        BoolColumnSelector = columnSelector;
+        BoolValue = value;
+    }
+}
 
 /// <summary>
 /// Base record representing a SQL DELETE statement.
