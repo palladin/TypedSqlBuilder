@@ -75,7 +75,7 @@ public abstract class SqlQueryCompiler
 
             case SelectClause(OrderByClause(FromClause(var table), var keySelectors), var selector):
             {
-                var orderByClause = CompileOrderBy(keySelectors, table, context, out var orderCtx);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, context);
                 var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause}", projectionCtx);
             }
@@ -83,7 +83,7 @@ public abstract class SqlQueryCompiler
             case SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors), var selector):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var orderByClause = CompileOrderBy(keySelectors, table, whereCtx, out var orderCtx);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
                 var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
             }
@@ -96,14 +96,14 @@ public abstract class SqlQueryCompiler
 
             case OrderByClause(FromClause(var table), var keySelectors):
             {
-                var orderByClause = CompileOrderBy(keySelectors, table, context, out var orderCtx);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, context);
                 return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause}", orderCtx);
             }
 
             case OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var orderByClause = CompileOrderBy(keySelectors, table, whereCtx, out var orderCtx);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
                 return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", orderCtx);
             }
 
@@ -560,9 +560,8 @@ public abstract class SqlQueryCompiler
     /// <param name="keySelectors">The key selectors and their sort directions</param>
     /// <param name="table">The table being queried</param>
     /// <param name="context">The compilation context</param>
-    /// <param name="resultContext">The resulting compilation context</param>
-    /// <returns>The compiled ORDER BY clause</returns>
-    protected virtual string CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ISqlTable table, Context context, out Context resultContext)
+    /// <returns>The compiled ORDER BY clause and updated context</returns>
+    protected virtual (string, Context) CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ISqlTable table, Context context)
     {
         var orderItems = new List<string>();
         var ctx = context;
@@ -574,8 +573,7 @@ public abstract class SqlQueryCompiler
             ctx = orderCtx;
         }
 
-        resultContext = ctx;
-        return string.Join(", ", orderItems);
+        return (string.Join(", ", orderItems), ctx);
     }
 
     /// <summary>
@@ -618,9 +616,8 @@ public abstract class SqlQueryCompiler
         foreach (var valueClause in valueClauses)
         {
             var column = valueClause.ColumnSelector(table);
-            var (columnSql, columnCtx) = Compile(column, ctx);
-            var (valueSql, valueCtx) = Compile(valueClause.Value, columnCtx);
-            
+            var (valueSql, valueCtx) = Compile(valueClause.Value, ctx);
+
             if (column is ISqlColumn sqlColumn)
                 columns.Add(sqlColumn.ColumnName);
             else
