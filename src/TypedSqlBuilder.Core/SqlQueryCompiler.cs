@@ -73,19 +73,19 @@ public abstract class SqlQueryCompiler
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause}", projectionCtx);
             }
 
-            case SelectClause(OrderByClause(FromClause(var table), var orderBy, var desc), var selector):
+            case SelectClause(OrderByClause(FromClause(var table), var keySelectors), var selector):
             {
-                var (orderByClause, orderCtx) = Compile(orderBy(table), context);
+                var orderByClause = CompileOrderBy(keySelectors, table, context, out var orderCtx);
                 var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
-                return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", projectionCtx);
+                return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause}", projectionCtx);
             }
 
-            case SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc), var selector):
+            case SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors), var selector):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var (orderByClause, orderCtx) = Compile(orderBy(table), whereCtx);
+                var orderByClause = CompileOrderBy(keySelectors, table, whereCtx, out var orderCtx);
                 var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
-                return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", projectionCtx);
+                return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
             }
 
             case WhereClause(FromClause(var table), var predicate):
@@ -94,17 +94,17 @@ public abstract class SqlQueryCompiler
                 return ($"SELECT * FROM {table.TableName} WHERE {whereClause}", whereCtx);
             }
 
-            case OrderByClause(FromClause(var table), var orderBy, var desc):
+            case OrderByClause(FromClause(var table), var keySelectors):
             {
-                var (orderByClause, orderCtx) = Compile(orderBy(table), context);
-                return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", orderCtx);
+                var orderByClause = CompileOrderBy(keySelectors, table, context, out var orderCtx);
+                return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause}", orderCtx);
             }
 
-            case OrderByClause(WhereClause(FromClause(var table), var predicate), var orderBy, var desc):
+            case OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var (orderByClause, orderCtx) = Compile(orderBy(table), whereCtx);
-                return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause} {(desc ? "DESC" : "ASC")}", orderCtx);
+                var orderByClause = CompileOrderBy(keySelectors, table, whereCtx, out var orderCtx);
+                return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", orderCtx);
             }
 
             case FromClause(var table):
@@ -552,6 +552,30 @@ public abstract class SqlQueryCompiler
         }
 
         return (string.Join(", ", items), ctx);
+    }
+
+    /// <summary>
+    /// Compiles ORDER BY clauses with multiple key selectors.
+    /// </summary>
+    /// <param name="keySelectors">The key selectors and their sort directions</param>
+    /// <param name="table">The table being queried</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="resultContext">The resulting compilation context</param>
+    /// <returns>The compiled ORDER BY clause</returns>
+    protected virtual string CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ISqlTable table, Context context, out Context resultContext)
+    {
+        var orderItems = new List<string>();
+        var ctx = context;
+
+        foreach (var (keySelector, descending) in keySelectors)
+        {
+            var (orderByClause, orderCtx) = Compile(keySelector(table), ctx);
+            orderItems.Add($"{orderByClause} {(descending ? "DESC" : "ASC")}");
+            ctx = orderCtx;
+        }
+
+        resultContext = ctx;
+        return string.Join(", ", orderItems);
     }
 
     /// <summary>

@@ -208,6 +208,10 @@ public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause
     public void Deconstruct(out ISqlQuery<TSource> QueryOut) => QueryOut = Query;
 }
 
+public interface ISqlOrderedQuery : ISqlQuery;
+
+public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource>;
+
 /// <summary>
 /// Base record representing a SQL ORDER BY clause for result sorting.
 /// Defines the ordering criteria and direction for query results.
@@ -215,7 +219,17 @@ public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause
 /// <param name="Query">The source query to sort</param>
 /// <param name="KeySelector">Function that extracts the sorting key from input tuples</param>
 /// <param name="Descending">Whether to sort in descending order</param>
-public abstract record OrderByClause(ISqlQuery Query, Func<ITuple, SqlExpr> KeySelector, bool Descending) : ISqlQuery;
+public abstract record OrderByClause(ISqlQuery Query, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) : ISqlOrderedQuery;
+
+/// <summary>
+/// Concrete implementation of ORDER BY clause for multiple sorting criteria.
+/// </summary>
+/// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+/// <param name="TypedQuery">The strongly-typed source query</param>
+/// <param name="KeySelectors">Array of key selectors and their sort directions</param>
+public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) 
+    : OrderByClause(TypedQuery, KeySelectors), ISqlOrderedQuery<TSource>
+    where TSource : ITuple;
 
 /// <summary>
 /// Strongly-typed ORDER BY clause for sorting query results.
@@ -227,6 +241,6 @@ public abstract record OrderByClause(ISqlQuery Query, Func<ITuple, SqlExpr> KeyS
 /// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys from source tuples</param>
 /// <param name="Descending">Whether to sort in descending order</param>
 public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) 
-    : OrderByClause(TypedQuery, x => TypedKeySelector((TSource) x), Descending), ISqlQuery<TSource>
+    : OrderByClause<TSource>(TypedQuery, ImmutableArray.Create<(Func<ITuple, SqlExpr>, bool)>((x => TypedKeySelector((TSource) x), Descending)))
     where TSource : ITuple
     where TKey : SqlExpr;    

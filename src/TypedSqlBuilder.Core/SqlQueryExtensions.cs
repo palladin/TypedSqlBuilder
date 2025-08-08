@@ -136,6 +136,10 @@ public static class SqlQueryExtensions
     public static ISqlQuery<TSource> Where<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> predicate)
         where TSource : ITuple
     {
+        if (query is WhereClause<TSource>(var innerQuery, var innerPredicate))
+        {
+            return new WhereClause<TSource>(innerQuery, tuple => innerPredicate(tuple) && predicate(tuple));
+        }
         return new WhereClause<TSource>(query, predicate);
     }
 
@@ -152,7 +156,7 @@ public static class SqlQueryExtensions
     /// var sortedUsers = userQuery.OrderBy(user => user.Name);
     /// </code>
     /// </example>
-    public static ISqlQuery<TSource> OrderBy<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+    public static ISqlOrderedQuery<TSource> OrderBy<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
         where TSource : ITuple
         where TKey : SqlExpr
     {
@@ -172,11 +176,61 @@ public static class SqlQueryExtensions
     /// var usersByAgeDesc = userQuery.OrderByDescending(user => user.Age);
     /// </code>
     /// </example>
-    public static ISqlQuery<TSource> OrderByDescending<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+    public static ISqlOrderedQuery<TSource> OrderByDescending<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
         where TSource : ITuple
         where TKey : SqlExpr
     {
         return new OrderByClause<TSource, TKey>(query, keySelector, true);
+    }
+
+    /// <summary>
+    /// Adds a secondary ascending sort to an existing ORDER BY clause.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
+    /// <param name="query">The source query with existing ORDER BY</param>
+    /// <param name="keySelector">Function that extracts the secondary sorting key from source tuples</param>
+    /// <returns>A new query with the additional ascending sort order</returns>
+    /// <example>
+    /// <code>
+    /// var sortedUsers = userQuery.OrderBy(user => user.Name).ThenBy(user => user.Age);
+    /// </code>
+    /// </example>
+    public static ISqlOrderedQuery<TSource> ThenBy<TSource, TKey>(this ISqlOrderedQuery<TSource> query, Func<TSource, TKey> keySelector)
+        where TSource : ITuple
+        where TKey : SqlExpr
+    {
+        if (query is OrderByClause<TSource> orderByQuery)
+        {
+            var newKeySelectors = orderByQuery.KeySelectors.Add((x => keySelector((TSource)x), false));
+            return new OrderByClause<TSource>(orderByQuery.TypedQuery, newKeySelectors);
+        }
+        throw new InvalidOperationException("ThenBy can only be used after OrderBy or OrderByDescending");
+    }
+
+    /// <summary>
+    /// Adds a secondary descending sort to an existing ORDER BY clause.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
+    /// <param name="query">The source query with existing ORDER BY</param>
+    /// <param name="keySelector">Function that extracts the secondary sorting key from source tuples</param>
+    /// <returns>A new query with the additional descending sort order</returns>
+    /// <example>
+    /// <code>
+    /// var sortedUsers = userQuery.OrderBy(user => user.Name).ThenByDescending(user => user.Age);
+    /// </code>
+    /// </example>
+    public static ISqlOrderedQuery<TSource> ThenByDescending<TSource, TKey>(this ISqlOrderedQuery<TSource> query, Func<TSource, TKey> keySelector)
+        where TSource : ITuple
+        where TKey : SqlExpr
+    {
+        if (query is OrderByClause<TSource> orderByQuery)
+        {
+            var newKeySelectors = orderByQuery.KeySelectors.Add((x => keySelector((TSource)x), true));
+            return new OrderByClause<TSource>(orderByQuery.TypedQuery, newKeySelectors);
+        }
+        throw new InvalidOperationException("ThenByDescending can only be used after OrderBy or OrderByDescending");
     }
 
     /// <summary>

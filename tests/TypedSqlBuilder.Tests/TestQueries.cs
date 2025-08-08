@@ -111,4 +111,62 @@ public static class TestQueries
         => TypedSql.From<Customer>()
             .Where(c => c.Age >= minAge && c.Age <= maxAge)
             .Select(c => (c.Id, c.Name));
+
+    // WHERE clause fusion tests - multiple WHERE calls should be combined with AND
+    public static ISqlQuery FromWhereFusionTwo() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age > 18)
+            .Where(c => c.Name != "Admin");
+
+    public static ISqlQuery FromWhereFusionThree() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age > 18)
+            .Where(c => c.Name != "Admin")
+            .Where(c => c.Age < 65);
+
+    public static ISqlQuery FromWhereFusionWithSelect() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age >= 21)
+            .Where(c => c.Name != "")
+            .Select(c => (c.Id, c.Name));
+
+    public static ISqlQuery FromWhereFusionWithOrderBy() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age > 18)
+            .Where(c => c.Name != "Admin")
+            .OrderBy(c => c.Name);
+
+    // Multiple ORDER BY tests - ThenBy functionality
+    public static ISqlQuery FromOrderByThenBy() 
+        => TypedSql.From<Customer>()
+            .OrderBy(c => c.Name)
+            .ThenBy(c => c.Age);
+
+    public static ISqlQuery FromOrderByThenByDescending() 
+        => TypedSql.From<Customer>()
+            .OrderBy(c => c.Name)
+            .ThenByDescending(c => c.Age);
+
+    public static ISqlQuery FromOrderByDescendingThenBy() 
+        => TypedSql.From<Customer>()
+            .OrderByDescending(c => c.Age)
+            .ThenBy(c => c.Name);
+
+    public static ISqlQuery FromOrderByMultiple() 
+        => TypedSql.From<Customer>()
+            .OrderBy(c => c.Name)
+            .ThenByDescending(c => c.Age)
+            .ThenBy(c => c.Id);
+
+    public static ISqlQuery FromWhereOrderByThenBy() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age > 18)
+            .OrderBy(c => c.Name)
+            .ThenByDescending(c => c.Age);
+
+    public static ISqlQuery FromOrderByThenBySelect() 
+        => TypedSql.From<Customer>()
+            .OrderBy(c => c.Name)
+            .ThenBy(c => c.Age)
+            .Select(c => (c.Id, c.Name));
 }

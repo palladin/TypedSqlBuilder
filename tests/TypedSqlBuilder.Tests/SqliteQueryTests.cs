@@ -335,6 +335,151 @@ public class SqliteQueryTests
     }
 
     [Fact]
+    public void FromWhereFusionTwo_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereFusionTwo();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("Admin", parameters[":p1"]);
+    }
+
+    [Fact]
+    public void FromWhereFusionThree_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereFusionThree();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE ((customers.Age > :p0) AND (customers.Name != :p1)) AND (customers.Age < :p2)", sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("Admin", parameters[":p1"]);
+        Assert.Equal(65, parameters[":p2"]);
+    }
+
+    [Fact]
+    public void FromWhereFusionWithSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereFusionWithSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal(21, parameters[":p0"]);
+        Assert.Equal("", parameters[":p1"]);
+    }
+
+    [Fact]
+    public void FromWhereFusionWithOrderBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereFusionWithOrderBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1) ORDER BY customers.Name ASC", sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("Admin", parameters[":p1"]);
+    }
+
+    [Fact]
+    public void FromOrderByThenBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByThenBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age ASC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromOrderByThenByDescending_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByThenByDescending();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age DESC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromOrderByDescendingThenBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByDescendingThenBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers ORDER BY customers.Age DESC, customers.Name ASC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromOrderByMultiple_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByMultiple();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age DESC, customers.Id ASC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereOrderByThenBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereOrderByThenBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age > :p0 ORDER BY customers.Name ASC, customers.Age DESC", sql);
+        Assert.Equal(18, parameters[":p0"]);
+    }
+
+    [Fact]
+    public void FromOrderByThenBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByThenBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT customers.Id, customers.Name FROM customers ORDER BY customers.Name ASC, customers.Age ASC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void DatabaseComparison_SameQuery_DifferentSyntax()
     {
         // Arrange
