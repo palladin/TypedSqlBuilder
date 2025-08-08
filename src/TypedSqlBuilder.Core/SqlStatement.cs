@@ -21,82 +21,52 @@ public interface ISqlStatement<TTable> : ISqlStatement
 /// <summary>
 /// Base interface for SQL DELETE statements (non-generic).
 /// </summary>
-public interface ISqlDeleteStatement : ISqlStatement
-{
-    ISqlTable Table { get; }
-}
+public interface ISqlDeleteStatement : ISqlStatement;
 
 /// <summary>
 /// Interface for SQL DELETE statements.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being deleted from</typeparam>
 public interface ISqlDeleteStatement<TSqlTable> : ISqlDeleteStatement, ISqlStatement<TSqlTable>
-    where TSqlTable : ISqlTable
-{
-    new TSqlTable Table { get; }
-}
+    where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Base interface for SQL DELETE statements with WHERE clause (non-generic).
 /// </summary>
-public interface ISqlDeleteWhereStatement : ISqlStatement
-{
-    ISqlTable Table { get; }
-    Func<ISqlTable, SqlExprBool> Predicate { get; }
-}
+public interface ISqlDeleteWhereStatement : ISqlStatement;
 
 /// <summary>
 /// Interface for SQL DELETE statements with WHERE clause.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being deleted from</typeparam>
 public interface ISqlDeleteWhereStatement<TSqlTable> : ISqlDeleteWhereStatement, ISqlStatement<TSqlTable>
-    where TSqlTable : ISqlTable
-{
-    new TSqlTable Table { get; }
-    new Func<TSqlTable, SqlExprBool> Predicate { get; }
-}
+    where TSqlTable : ISqlTable;
 
 // ========== UPDATE INTERFACES AND IMPLEMENTATIONS ==========
 
 /// <summary>
 /// Base interface for SQL UPDATE statements (non-generic).
 /// </summary>
-public interface ISqlUpdateStatement : ISqlStatement
-{
-    ISqlTable Table { get; }
-    ImmutableArray<SetClause> SetClauses { get; }
-}
+public interface ISqlUpdateStatement : ISqlStatement;
 
 /// <summary>
 /// Interface for SQL UPDATE statements.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being updated</typeparam>
 public interface ISqlUpdateStatement<TSqlTable> : ISqlUpdateStatement, ISqlStatement<TSqlTable>
-    where TSqlTable : ISqlTable
-{
-    new TSqlTable Table { get; }
-}
+    where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Base interface for SQL UPDATE statements with WHERE clause (non-generic).
 /// </summary>
-public interface ISqlUpdateWhereStatement : ISqlStatement
-{
-    ISqlTable Table { get; }
-    ImmutableArray<SetClause> SetClauses { get; }
-    Func<ISqlTable, SqlExprBool> Predicate { get; }
-}
+public interface ISqlUpdateWhereStatement : ISqlStatement;
 
 /// <summary>
 /// Interface for SQL UPDATE statements with WHERE clause.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being updated</typeparam>
 public interface ISqlUpdateWhereStatement<TSqlTable> : ISqlUpdateWhereStatement, ISqlStatement<TSqlTable>
-    where TSqlTable : ISqlTable
-{
-    new TSqlTable Table { get; }
-    new Func<TSqlTable, SqlExprBool> Predicate { get; }
-}
+    where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Represents a SET clause in an UPDATE statement.
@@ -244,21 +214,14 @@ public abstract record InsertStatement(ISqlTable Table, ImmutableArray<ValueClau
 /// <summary>
 /// Base interface for SQL INSERT statements (non-generic).
 /// </summary>
-public interface ISqlInsertStatement : ISqlStatement
-{
-    ISqlTable Table { get; }
-    ImmutableArray<ValueClause> ValueClauses { get; }
-}
+public interface ISqlInsertStatement : ISqlStatement;
 
 /// <summary>
 /// Interface for SQL INSERT statements.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being inserted into</typeparam>
 public interface ISqlInsertStatement<TSqlTable> : ISqlInsertStatement, ISqlStatement<TSqlTable>
-    where TSqlTable : ISqlTable
-{
-    new TSqlTable Table { get; }
-}
+    where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a SQL DELETE statement.
@@ -273,8 +236,6 @@ public record DeleteStatement<TSqlTable> : DeleteStatement, ISqlDeleteStatement<
     {
         Table = table;
     }
-
-    ISqlTable ISqlDeleteStatement.Table => Table;
 }
 
 /// <summary>
@@ -292,9 +253,6 @@ public record DeleteWhereStatement<TSqlTable> : DeleteWhereStatement, ISqlDelete
         Table = table;
         Predicate = predicate;
     }
-
-    ISqlTable ISqlDeleteWhereStatement.Table => Table;
-    Func<ISqlTable, SqlExprBool> ISqlDeleteWhereStatement.Predicate => table => Predicate((TSqlTable)table);
 }
 
 /// <summary>
@@ -315,8 +273,6 @@ public record UpdateStatement<TSqlTable> : UpdateStatement, ISqlUpdateStatement<
     {
         Table = table;
     }
-    
-    ISqlTable ISqlUpdateStatement.Table => Table;
 }
 
 /// <summary>
@@ -334,9 +290,6 @@ public record UpdateWhereStatement<TSqlTable> : UpdateWhereStatement, ISqlUpdate
         Table = table;
         Predicate = predicate;
     }
-
-    ISqlTable ISqlUpdateWhereStatement.Table => Table;
-    Func<ISqlTable, SqlExprBool> ISqlUpdateWhereStatement.Predicate => table => Predicate((TSqlTable)table);
 }
 
 /// <summary>
@@ -357,6 +310,4 @@ public record InsertStatement<TSqlTable> : InsertStatement, ISqlInsertStatement<
     {
         Table = table;
     }
-    
-    ISqlTable ISqlInsertStatement.Table => Table;
 }

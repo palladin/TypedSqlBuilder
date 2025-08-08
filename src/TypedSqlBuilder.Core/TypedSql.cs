@@ -34,7 +34,11 @@ public static class TypedSql
     public static ISqlDeleteWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlDeleteStatement<TSqlTable> deleteStatement, Func<TSqlTable, SqlExprBool> predicate)
         where TSqlTable : ISqlTable, new()
     {
-        return new DeleteWhereStatement<TSqlTable>(deleteStatement.Table, predicate);
+        if (deleteStatement is DeleteStatement<TSqlTable>(var table))
+        {
+            return new DeleteWhereStatement<TSqlTable>((TSqlTable)table, predicate);
+        }
+        throw new NotSupportedException($"Delete statement type {deleteStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateStatement<TSqlTable> Update<TSqlTable>()
@@ -46,59 +50,87 @@ public static class TypedSql
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetIntClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var setClause = new SetIntClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetStringClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var setClause = new SetStringClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetBoolClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var setClause = new SetBoolClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     // Expression-based SET methods (two lambda approach)
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, Func<TSqlTable, SqlExprInt> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
-        var value = valueSelector(new TSqlTable());
-        var setClause = new SetIntClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var value = valueSelector(new TSqlTable());
+            var setClause = new SetIntClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, Func<TSqlTable, SqlExprString> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
-        var value = valueSelector(new TSqlTable());
-        var setClause = new SetStringClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var value = valueSelector(new TSqlTable());
+            var setClause = new SetStringClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, Func<TSqlTable, SqlExprBool> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
-        var value = valueSelector(new TSqlTable());
-        var setClause = new SetBoolClause(table => columnSelector((TSqlTable)table), value);
-        var newSetClauses = updateStatement.SetClauses.Append(setClause).ToImmutableArray();
-        return new UpdateStatement<TSqlTable>(updateStatement.Table, newSetClauses);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            var value = valueSelector(new TSqlTable());
+            var setClause = new SetBoolClause(t => columnSelector((TSqlTable)t), value);
+            var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+            return new UpdateStatement<TSqlTable>((TSqlTable)table, newSetClauses);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlUpdateWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> predicate)
         where TSqlTable : ISqlTable, new()
     {
-        return new UpdateWhereStatement<TSqlTable>(updateStatement.Table, updateStatement.SetClauses, predicate);
+        if (updateStatement is UpdateStatement<TSqlTable>(var table, var setClauses))
+        {
+            return new UpdateWhereStatement<TSqlTable>((TSqlTable)table, setClauses, predicate);
+        }
+        throw new NotSupportedException($"Update statement type {updateStatement.GetType().Name} is not supported");
     }
 
     public static ISqlInsertStatement<TSqlTable> Insert<TSqlTable>()
@@ -110,24 +142,36 @@ public static class TypedSql
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertIntClause(table => columnSelector((TSqlTable)table), value);
-        var newValueClauses = insertStatement.ValueClauses.Append(valueClause).ToImmutableArray();
-        return new InsertStatement<TSqlTable>(insertStatement.Table, newValueClauses);
+        if (insertStatement is InsertStatement<TSqlTable>(var table, var valueClauses))
+        {
+            var valueClause = new InsertIntClause(t => columnSelector((TSqlTable)t), value);
+            var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();
+            return new InsertStatement<TSqlTable>((TSqlTable)table, newValueClauses);
+        }
+        throw new NotSupportedException($"Insert statement type {insertStatement.GetType().Name} is not supported");
     }
 
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertStringClause(table => columnSelector((TSqlTable)table), value);
-        var newValueClauses = insertStatement.ValueClauses.Append(valueClause).ToImmutableArray();
-        return new InsertStatement<TSqlTable>(insertStatement.Table, newValueClauses);
+        if (insertStatement is InsertStatement<TSqlTable>(var table, var valueClauses))
+        {
+            var valueClause = new InsertStringClause(t => columnSelector((TSqlTable)t), value);
+            var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();
+            return new InsertStatement<TSqlTable>((TSqlTable)table, newValueClauses);
+        }
+        throw new NotSupportedException($"Insert statement type {insertStatement.GetType().Name} is not supported");
     }
 
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertBoolClause(table => columnSelector((TSqlTable)table), value);
-        var newValueClauses = insertStatement.ValueClauses.Append(valueClause).ToImmutableArray();
-        return new InsertStatement<TSqlTable>(insertStatement.Table, newValueClauses);
+        if (insertStatement is InsertStatement<TSqlTable>(var table, var valueClauses))
+        {
+            var valueClause = new InsertBoolClause(t => columnSelector((TSqlTable)t), value);
+            var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();
+            return new InsertStatement<TSqlTable>((TSqlTable)table, newValueClauses);
+        }
+        throw new NotSupportedException($"Insert statement type {insertStatement.GetType().Name} is not supported");
     }
 }
