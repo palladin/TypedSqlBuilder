@@ -245,7 +245,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlQuery query)
     {
-        var (sql, context) = SqlQueryCompiler.SqlServer.Compile(query, new Context());
+        var (sql, context) = SqlCompiler.SqlServer.Compile(query, new Context());
         return (sql, context.Parameters);
     }
 
@@ -261,7 +261,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlQuery query)
     {
-        var (sql, context) = SqlQueryCompiler.Sqlite.Compile(query, new Context());
+        var (sql, context) = SqlCompiler.Sqlite.Compile(query, new Context());
         return (sql, context.Parameters);
     }
 
@@ -277,7 +277,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlStatement statement)
     {
-        var (sql, context) = SqlQueryCompiler.SqlServer.Compile(statement, new Context());
+        var (sql, context) = SqlCompiler.SqlServer.Compile(statement, new Context());
         return (sql, context.Parameters);
     }
 
@@ -293,7 +293,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlStatement statement)
     {
-        var (sql, context) = SqlQueryCompiler.Sqlite.Compile(statement, new Context());
+        var (sql, context) = SqlCompiler.Sqlite.Compile(statement, new Context());
         return (sql, context.Parameters);
     }
 }
