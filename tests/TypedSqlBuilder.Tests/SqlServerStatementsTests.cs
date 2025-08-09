@@ -152,4 +152,49 @@ public class SqlServerStatementsTests
         Assert.Equal(25, parameters["@p1"]);
         Assert.Equal("John Doe", parameters["@p2"]);
     }
+
+    [Fact]
+    public void UpdateSetNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNull();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("UPDATE customers SET customers.Name = NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void UpdateSetNullMixed_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNullMixed();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("UPDATE customers SET customers.Name = @p0, customers.Age = NULL", sql);
+        Assert.Single(parameters);
+        Assert.Equal("John", parameters["@p0"]);
+    }
+
+    [Fact]
+    public void InsertWithNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.InsertWithNull();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (@p0, NULL, @p1)", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters["@p0"]);
+        Assert.Equal(25, parameters["@p1"]);
+    }
 }

@@ -169,4 +169,20 @@ public static class TestQueries
             .OrderBy(c => c.Name)
             .ThenBy(c => c.Age)
             .Select(c => (c.Id, c.Name));
+
+    // NULL operations
+    public static ISqlQuery FromWhereIsNull() 
+        => TypedSql.From<Customer>().Where(c => c.Name.IsNull());
+
+    public static ISqlQuery FromWhereIsNotNull() 
+        => TypedSql.From<Customer>().Where(c => c.Name.IsNotNull());
+
+    public static ISqlQuery FromWhereIsNullInt() 
+        => TypedSql.From<Customer>().Where(c => c.Age.IsNull());
+
+    public static ISqlQuery FromWhereIsNotNullInt() 
+        => TypedSql.From<Customer>().Where(c => c.Age.IsNotNull());
+
+    public static ISqlQuery FromWhereIsNullCombined() 
+        => TypedSql.From<Customer>().Where(c => c.Name.IsNull() && c.Age.IsNotNull());
 }

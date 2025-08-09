@@ -478,4 +478,46 @@ public class SqlServerQueryTests
         Assert.Equal("SELECT customers.Id, customers.Name FROM customers ORDER BY customers.Name ASC, customers.Age ASC", sql);
         Assert.Empty(parameters);
     }
+
+    [Fact]
+    public void FromWhereIsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNull();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNotNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNotNull();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NOT NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNullCombined_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNullCombined();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Name IS NULL) AND (customers.Age IS NOT NULL)", sql);
+        Assert.Empty(parameters);
+    }
 }

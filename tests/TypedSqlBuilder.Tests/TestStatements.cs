@@ -84,4 +84,35 @@ public static class TestStatements
     /// </summary>
     public static ISqlStatement DeleteAll() 
         => TypedSql.Delete<Customer>();
+    // Update with SET NULL
+    public static ISqlStatement UpdateSetNull() 
+        => TypedSql.Update<Customer>()
+            .Set(c => c.Name, SqlNull.Value);
+
+    public static ISqlStatement UpdateSetNullInt() 
+        => TypedSql.Update<Customer>()
+            .Set(c => c.Age, SqlNull.Value);
+
+    public static ISqlStatement UpdateSetNullMixed() 
+        => TypedSql.Update<Customer>()
+            .Set(c => c.Name, "John")
+            .Set(c => c.Age, SqlNull.Value);
+
+    public static ISqlStatement UpdateSetNullWhere() 
+        => TypedSql.Update<Customer>()
+            .Set(c => c.Name, SqlNull.Value)
+            .Where(c => c.Id == 1);
+
+    // Insert with NULL values
+    public static ISqlStatement InsertWithNull() 
+        => TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 1)
+            .Value(c => c.Name, SqlNull.Value)
+            .Value(c => c.Age, 25);
+
+    public static ISqlStatement InsertWithNullInt() 
+        => TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 1)
+            .Value(c => c.Name, "John")
+            .Value(c => c.Age, SqlNull.Value);
 }

@@ -203,11 +203,35 @@ public abstract class SqlCompiler
             }
 
             // Boolean equality/inequality
+            case SqlBoolEquals(var leftExpr, SqlBoolNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
+            case SqlBoolEquals(SqlBoolNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
             case SqlBoolEquals(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlBoolNotEquals(var leftExpr, SqlBoolNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
+            }
+
+            case SqlBoolNotEquals(SqlBoolNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
             }
 
             case SqlBoolNotEquals(var left, var right):
@@ -218,11 +242,35 @@ public abstract class SqlCompiler
             }
 
             // Integer comparisons (return bool)
+            case SqlIntEquals(var leftExpr, SqlIntNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
+            case SqlIntEquals(SqlIntNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
             case SqlIntEquals(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlIntNotEquals(var leftExpr, SqlIntNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
+            }
+
+            case SqlIntNotEquals(SqlIntNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
             }
 
             case SqlIntNotEquals(var left, var right):
@@ -261,11 +309,35 @@ public abstract class SqlCompiler
             }
 
             // String comparisons (return bool)
+            case SqlStringEquals(var leftExpr, SqlStringNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
+            case SqlStringEquals(SqlStringNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NULL", exprCtx);
+            }
+
             case SqlStringEquals(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} = {rightSql}", rightCtx);
+            }
+
+            case SqlStringNotEquals(var leftExpr, SqlStringNull _):
+            {
+                var (exprSql, exprCtx) = Compile(leftExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
+            }
+
+            case SqlStringNotEquals(SqlStringNull _, var rightExpr):
+            {
+                var (exprSql, exprCtx) = Compile(rightExpr, context);
+                return ($"{exprSql} IS NOT NULL", exprCtx);
             }
 
             case SqlStringNotEquals(var left, var right):
@@ -327,6 +399,23 @@ public abstract class SqlCompiler
                 var (falseSql, falseCtx) = Compile(falseValue, trueCtx);
                 return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
             }
+
+            // NULL operations
+            case SqlIsNull(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"{compiled} IS NULL", ctx);
+            }
+
+            case SqlIsNotNull(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context);
+                return ($"{compiled} IS NOT NULL", ctx);
+            }
+
+            // NULL value
+            case SqlBoolNull:
+                return ("NULL", context);
 
             default:
                 throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported");
@@ -435,6 +524,10 @@ public abstract class SqlCompiler
                 return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
             }
 
+            // NULL value
+            case SqlIntNull:
+                return ("NULL", context);
+
             default:
                 throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported");
         }
@@ -484,6 +577,10 @@ public abstract class SqlCompiler
                 var (falseSql, falseCtx) = Compile(falseValue, trueCtx);
                 return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
             }
+
+            // NULL value
+            case SqlStringNull:
+                return ("NULL", context);
 
             default:
                 throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported");

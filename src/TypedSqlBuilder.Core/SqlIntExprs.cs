@@ -308,3 +308,16 @@ public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt 
 	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprInt trueValueOut, out SqlExprInt falseValueOut) => 
 		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
 }
+
+/// <summary>
+/// Represents a SQL NULL value for integer expressions.
+/// This class is used when setting integer columns to NULL in SQL statements.
+/// </summary>
+public class SqlIntNull : SqlExprInt
+{
+    public static SqlIntNull Value => new();
+    
+    public void Deconstruct()
+    {
+    }
+}

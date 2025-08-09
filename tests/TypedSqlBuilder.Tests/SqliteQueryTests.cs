@@ -480,6 +480,76 @@ public class SqliteQueryTests
     }
 
     [Fact]
+    public void FromWhereIsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNull();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNotNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNotNull();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NOT NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNullInt_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNullInt();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age IS NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNotNullInt_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNotNullInt();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age IS NOT NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromWhereIsNullCombined_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereIsNullCombined();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Name IS NULL) AND (customers.Age IS NOT NULL)", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void DatabaseComparison_SameQuery_DifferentSyntax()
     {
         // Arrange

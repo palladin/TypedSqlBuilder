@@ -154,3 +154,16 @@ public class SqlStringCase(SqlExprBool condition, SqlExprString trueValue, SqlEx
 	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprString trueValueOut, out SqlExprString falseValueOut) => 
 		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
 }
+
+/// <summary>
+/// Represents a SQL NULL value for string expressions.
+/// This class is used when setting string columns to NULL in SQL statements.
+/// </summary>
+public class SqlStringNull : SqlExprString
+{
+    public static SqlStringNull Value => new();
+    
+    public void Deconstruct()
+    {
+    }
+}
