@@ -122,32 +122,10 @@ public class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBo
 }
 
 /// <summary>
-/// Represents a SQL IS NULL operation for testing if an expression is null.
-/// This class can be applied to any SQL expression type (string, int, bool, etc.).
-/// </summary>
-/// <param name="expression">The SQL expression to test for null</param>
-public class SqlIsNull(SqlExpr expression) : SqlExprBool
-{
-	public void Deconstruct(out SqlExpr expressionOut) => expressionOut = expression;
-}
-
-/// <summary>
-/// Represents a SQL IS NOT NULL operation for testing if an expression is not null.
-/// This class can be applied to any SQL expression type (string, int, bool, etc.).
-/// </summary>
-/// <param name="expression">The SQL expression to test for not null</param>
-public class SqlIsNotNull(SqlExpr expression) : SqlExprBool
-{
-	public void Deconstruct(out SqlExpr expressionOut) => expressionOut = expression;
-}
-
-/// <summary>
 /// Represents a SQL NULL value for boolean expressions.
 /// This class is used when setting boolean columns to NULL in SQL statements.
 /// </summary>
 public class SqlBoolNull : SqlExprBool
 {
 	public static SqlBoolNull Value => new();
-	
-	public void Deconstruct() { }
 }

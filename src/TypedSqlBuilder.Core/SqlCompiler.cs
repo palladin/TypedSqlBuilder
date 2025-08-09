@@ -400,19 +400,6 @@ public abstract class SqlCompiler
                 return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
             }
 
-            // NULL operations
-            case SqlIsNull(var operand):
-            {
-                var (compiled, ctx) = Compile(operand, context);
-                return ($"{compiled} IS NULL", ctx);
-            }
-
-            case SqlIsNotNull(var operand):
-            {
-                var (compiled, ctx) = Compile(operand, context);
-                return ($"{compiled} IS NOT NULL", ctx);
-            }
-
             // NULL value
             case SqlBoolNull:
                 return ("NULL", context);

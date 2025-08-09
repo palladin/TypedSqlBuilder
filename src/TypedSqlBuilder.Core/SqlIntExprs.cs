@@ -316,8 +316,4 @@ public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt 
 public class SqlIntNull : SqlExprInt
 {
     public static SqlIntNull Value => new();
-    
-    public void Deconstruct()
-    {
-    }
 }

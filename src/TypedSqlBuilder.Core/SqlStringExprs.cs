@@ -162,8 +162,4 @@ public class SqlStringCase(SqlExprBool condition, SqlExprString trueValue, SqlEx
 public class SqlStringNull : SqlExprString
 {
     public static SqlStringNull Value => new();
-    
-    public void Deconstruct()
-    {
-    }
 }
