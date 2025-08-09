@@ -8,9 +8,9 @@ A type-safe SQL expression builder DSL for C# that provides fluent syntax for co
 using TypedSqlBuilder.Core;
 
 // Define table schema 
-public class Customer
+public class Customer() 
     : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers")
-{ 
+{
     public SqlIntColumn Id => Column1("Id");
     public SqlIntColumn Age => Column2("Age");
     public SqlStringColumn Name => Column3("Name");

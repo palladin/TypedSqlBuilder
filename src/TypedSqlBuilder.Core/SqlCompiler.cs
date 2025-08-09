@@ -91,7 +91,7 @@ public abstract class SqlCompiler
                 (new WhereClause(innerQuery, tuple => innerPred(tuple) && outerPred(tuple)), true),
             
             // ORDER BY fusion: OrderBy(OrderBy(q, keys1), keys2) → OrderBy(q, keys1 + keys2)  
-            OrderByClause(var q, var outerKeys) when q is OrderByClause(var innerQuery, var innerKeys) =>
+            OrderByClause(OrderByClause(var innerQuery, var innerKeys), var outerKeys) =>
                 (new OrderByClause(innerQuery, innerKeys.AddRange(outerKeys)), true),
             
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
@@ -215,28 +215,6 @@ public abstract class SqlCompiler
                 var (projection, projectionCtx) = CompileTupleProjection(selected, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
             }
-
-            case WhereClause(FromClause(var table), var predicate):
-            {
-                var (whereClause, whereCtx) = Compile(predicate(table), context);
-                return ($"SELECT * FROM {table.TableName} WHERE {whereClause}", whereCtx);
-            }
-
-            case OrderByClause(FromClause(var table), var keySelectors):
-            {
-                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, context);
-                return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause}", orderCtx);
-            }
-
-            case OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors):
-            {
-                var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
-                return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", orderCtx);
-            }
-
-            case FromClause(var table):
-                return ($"SELECT * FROM {table.TableName}", context);
 
             default:
                 throw new NotSupportedException($"Query type {query.GetType().Name} is not supported");
