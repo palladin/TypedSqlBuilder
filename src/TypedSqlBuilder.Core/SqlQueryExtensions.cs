@@ -136,10 +136,6 @@ public static class SqlQueryExtensions
     public static ISqlQuery<TSource> Where<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> predicate)
         where TSource : ITuple
     {
-        if (query is WhereClause<TSource>(var innerQuery, var innerPredicate))
-        {
-            return new WhereClause<TSource>(innerQuery, tuple => innerPredicate(tuple) && predicate(tuple));
-        }
         return new WhereClause<TSource>(query, predicate);
     }
 
@@ -200,12 +196,7 @@ public static class SqlQueryExtensions
         where TSource : ITuple
         where TKey : SqlExpr
     {
-        if (query is OrderByClause<TSource> orderByQuery)
-        {
-            var newKeySelectors = orderByQuery.KeySelectors.Add((x => keySelector((TSource)x), false));
-            return new OrderByClause<TSource>(orderByQuery.TypedQuery, newKeySelectors);
-        }
-        throw new InvalidOperationException("ThenBy can only be used after OrderBy or OrderByDescending");
+        return new OrderByClause<TSource, TKey>(query, keySelector, false);
     }
 
     /// <summary>
@@ -225,12 +216,7 @@ public static class SqlQueryExtensions
         where TSource : ITuple
         where TKey : SqlExpr
     {
-        if (query is OrderByClause<TSource> orderByQuery)
-        {
-            var newKeySelectors = orderByQuery.KeySelectors.Add((x => keySelector((TSource)x), true));
-            return new OrderByClause<TSource>(orderByQuery.TypedQuery, newKeySelectors);
-        }
-        throw new InvalidOperationException("ThenByDescending can only be used after OrderBy or OrderByDescending");
+        return new OrderByClause<TSource, TKey>(query, keySelector, true);
     }
 
     /// <summary>

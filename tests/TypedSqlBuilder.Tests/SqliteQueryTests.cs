@@ -359,7 +359,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE ((customers.Age > :p0) AND (customers.Name != :p1)) AND (customers.Age < :p2)", sql);
+        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND ((customers.Name != :p1) AND (customers.Age < :p2))", sql);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Admin", parameters[":p1"]);
         Assert.Equal(65, parameters[":p2"]);

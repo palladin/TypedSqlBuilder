@@ -38,28 +38,20 @@ public abstract class SqlTable<TCol1, TCol2> : ISqlTable
 {
     private readonly object[] columns;
 
-    protected SqlTable(string tableName)
+    protected SqlTable(string tableName, TCol1 col1, TCol2 col2)
     {
         TableName = tableName;
-        columns = new object[2];
+        Column1 = TCol1.Create(TableName, col1.ColumnName);
+        Column2 = TCol2.Create(TableName, col2.ColumnName);
+        columns = new object[] { Column1, Column2 };
     }
 
     public object? this[int index] => columns[index];
 
-    public TCol1 Column1(string columnName)
-    {
-        var column1 = TCol1.Create(TableName, columnName);
-        columns[0] = column1;
-        return column1;
-    }
-    
-    public TCol2 Column2(string columnName)
-    {
-        var column2 = TCol2.Create(TableName, columnName);
-        columns[1] = column2;
-        return column2;
-    }
+    public TCol1 Column1 { get; }
 
+    public TCol2 Column2 { get; }
+     
     public string TableName { get; }
 
     public int Length => columns.Length;
@@ -79,34 +71,22 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 {
     private readonly object[] columns;
 
-    protected SqlTable(string tableName)
+    protected SqlTable(string tableName, TCol1 col1, TCol2 col2, TCol3 col3)
     {
         TableName = tableName;
-        columns = new object[3];
+        Column1 = TCol1.Create(TableName, col1.ColumnName);
+        Column2 = TCol2.Create(TableName, col2.ColumnName);
+        Column3 = TCol3.Create(TableName, col3.ColumnName);
+        columns = new object[] { Column1, Column2, Column3 };
     }
 
     public object? this[int index] => columns[index];
 
-    public TCol1 Column1(string columnName)
-    {
-        var column1 = TCol1.Create(TableName, columnName);
-        columns[0] = column1;
-        return column1;
-    }
-    
-    public TCol2 Column2(string columnName)
-    {
-        var column2 = TCol2.Create(TableName, columnName);
-        columns[1] = column2;
-        return column2;
-    }
-    
-    public TCol3 Column3(string columnName)
-    {
-        var column3 = TCol3.Create(TableName, columnName);
-        columns[2] = column3;
-        return column3;
-    }
+    public TCol1 Column1 { get; }
+
+    public TCol2 Column2 { get; }
+
+    public TCol3 Column3 { get; }
 
     public string TableName { get; }
 
@@ -120,7 +100,7 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 /// Establishes the source table for a query.
 /// </summary>
 /// <param name="Table">The table being queried</param>
-public abstract record FromClause(ISqlTable Table) : ISqlQuery;
+public record FromClause(ISqlTable Table) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed FROM clause that preserves column type information.
@@ -137,7 +117,7 @@ public record FromClause<TColumns>(ISqlTable Table) : FromClause(Table), ISqlQue
 /// </summary>
 /// <param name="Query">The source query</param>
 /// <param name="Selector">Function that transforms input tuples to output tuples</param>
-public abstract record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector) : ISqlQuery;
+public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed SELECT clause for tuple projections.
@@ -159,7 +139,7 @@ public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func
 /// </summary>
 /// <param name="Query">The source query to filter</param>
 /// <param name="Predicate">Function that evaluates filtering conditions on input tuples</param>
-public abstract record WhereClause(ISqlQuery Query, Func<ITuple, SqlExprBool> Predicate) : ISqlQuery;
+public record WhereClause(ISqlQuery Query, Func<ITuple, SqlExprBool> Predicate) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed WHERE clause for filtering query results.
@@ -219,7 +199,7 @@ public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource
 /// <param name="Query">The source query to sort</param>
 /// <param name="KeySelector">Function that extracts the sorting key from input tuples</param>
 /// <param name="Descending">Whether to sort in descending order</param>
-public abstract record OrderByClause(ISqlQuery Query, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) : ISqlOrderedQuery;
+public record OrderByClause(ISqlQuery Query, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) : ISqlOrderedQuery;
 
 /// <summary>
 /// Concrete implementation of ORDER BY clause for multiple sorting criteria.

@@ -51,6 +51,107 @@ public abstract class SqlCompiler
     {
         return context.GenerateParameter(value, ParameterPrefix);
     }
+
+    /// <summary>
+    /// Normalizes a SQL query by applying fusion rules until a fixpoint is reached.
+    /// Moves all fusion logic from extension methods to centralized normalization.
+    /// Handles WHERE clause fusion, ORDER BY fusion, and SELECT composition.
+    /// </summary>
+    /// <param name="query">The SQL query to normalize</param>
+    /// <returns>The normalized query with all possible fusions applied</returns>
+    public virtual ISqlQuery Normalize(ISqlQuery query)
+    {
+        // Phase 1: Apply fusion rules until fixpoint
+        var current = query;
+        bool changed;
+        
+        do
+        {
+            (current, changed) = ApplyNormalizationRules(current);
+        } 
+        while (changed);
+
+        // Phase 2: Apply canonical form normalization
+        current = ApplyCanonicalForm(current);
+        
+        return current;
+    }
+
+    /// <summary>
+    /// Applies normalization rules to a query, handling both fusion patterns and recursive subquery normalization.
+    /// </summary>
+    /// <param name="query">The query to apply normalization rules to</param>
+    /// <returns>A tuple containing the normalized query and whether any changes were made</returns>
+    private (ISqlQuery Query, bool Changed) ApplyNormalizationRules(ISqlQuery query)
+    {
+        return query switch
+        {
+            // WHERE clause fusion: WHERE(WHERE(q, p1), p2) → WHERE(q, p1 AND p2)
+            WhereClause(WhereClause(var innerQuery, var innerPred), var outerPred) =>
+                (new WhereClause(innerQuery, tuple => innerPred(tuple) && outerPred(tuple)), true),
+            
+            // ORDER BY fusion: OrderBy(OrderBy(q, keys1), keys2) → OrderBy(q, keys1 + keys2)  
+            OrderByClause(var q, var outerKeys) when q is OrderByClause(var innerQuery, var innerKeys) =>
+                (new OrderByClause(innerQuery, innerKeys.AddRange(outerKeys)), true),
+            
+            // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
+            SelectClause(SelectClause(var innerQuery, var innerSelector), var outerSelector) =>
+                (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple))), true),
+            
+            // Recursive normalization of subqueries - WHERE
+            WhereClause(var subQuery, var predicate) =>
+                ApplyToSubQuery(subQuery, q => new WhereClause(q, predicate)),
+            
+            // Recursive normalization of subqueries - SELECT  
+            SelectClause(var subQuery, var selector) =>
+                ApplyToSubQuery(subQuery, q => new SelectClause(q, selector)),
+            
+            // Recursive normalization of subqueries - ORDER BY
+            OrderByClause(var subQuery, var keySelectors) =>
+                ApplyToSubQuery(subQuery, q => new OrderByClause(q, keySelectors)),
+            
+            // No changes needed
+            _ => (query, false)
+        };
+    }
+
+    /// <summary>
+    /// Helper method to normalize subqueries and reconstruct parent queries.
+    /// </summary>
+    /// <param name="subQuery">The subquery to normalize</param>
+    /// <param name="constructor">Function to reconstruct the parent query with the normalized subquery</param>
+    /// <returns>A tuple containing the reconstructed query and whether any changes were made</returns>
+    private (ISqlQuery Query, bool Changed) ApplyToSubQuery(ISqlQuery subQuery, Func<ISqlQuery, ISqlQuery> constructor)
+    {
+        var (normalizedSub, changed) = ApplyNormalizationRules(subQuery);
+        return (constructor(normalizedSub), changed);
+    }
+
+    /// <summary>
+    /// Applies canonical form normalization to ensure queries match compiler patterns.
+    /// Wraps non-SELECT queries with SELECT clauses and ensures proper structure.
+    /// </summary>
+    /// <param name="query">The query to normalize to canonical form</param>
+    /// <returns>The query in canonical form</returns>
+    private ISqlQuery ApplyCanonicalForm(ISqlQuery query)
+    {
+        return query switch
+        {
+            // Wrap non-SELECT queries with SELECT * to match compiler patterns
+            WhereClause(_, var predicate) =>
+                new SelectClause(query, tuple => tuple),
+                
+            OrderByClause(_, var keySelectors) =>
+                new SelectClause(query, tuple => tuple),
+                
+            FromClause(var table) =>
+                new SelectClause(query, tuple => tuple),
+            
+            // Already in canonical form
+            _ => query
+        };
+    }
+
     /// <summary>
     /// Compiles SQL queries and clauses to SQL string representation.
     /// </summary>
@@ -58,25 +159,46 @@ public abstract class SqlCompiler
     /// <returns>The SQL string representation</returns>
     public virtual (string, Context) Compile(ISqlQuery query, Context context)
     {
-        switch (query)
+        // First normalize the query to apply all fusion rules
+        var normalizedQuery = Normalize(query);
+        
+        switch (normalizedQuery)
         {
             case SelectClause(FromClause(var table), var selector):
             {
-                var (projection, projectionCtx) = CompileTupleProjection(selector(table), context);
+                var selected = selector(table);
+                // If selector returns the same table object (identity selector), use SELECT *
+                if (ReferenceEquals(selected, table))
+                {
+                    return ($"SELECT * FROM {table.TableName}", context);
+                }
+                var (projection, projectionCtx) = CompileTupleProjection(selected, context);
                 return ($"SELECT {projection} FROM {table.TableName}", projectionCtx);
             }
 
             case SelectClause(WhereClause(FromClause(var table), var predicate), var selector):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
-                var (projection, projectionCtx) = CompileTupleProjection(selector(table), whereCtx);
+                var selected = selector(table);
+                // If selector returns the same table object (identity selector), use SELECT *
+                if (ReferenceEquals(selected, table))
+                {
+                    return ($"SELECT * FROM {table.TableName} WHERE {whereClause}", whereCtx);
+                }
+                var (projection, projectionCtx) = CompileTupleProjection(selected, whereCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause}", projectionCtx);
             }
 
             case SelectClause(OrderByClause(FromClause(var table), var keySelectors), var selector):
             {
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, context);
-                var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
+                var selected = selector(table);
+                // If selector returns the same table object (identity selector), use SELECT *
+                if (ReferenceEquals(selected, table))
+                {
+                    return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause}", orderCtx);
+                }
+                var (projection, projectionCtx) = CompileTupleProjection(selected, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause}", projectionCtx);
             }
 
@@ -84,7 +206,13 @@ public abstract class SqlCompiler
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
-                var (projection, projectionCtx) = CompileTupleProjection(selector(table), orderCtx);
+                var selected = selector(table);
+                // If selector returns the same table object (identity selector), use SELECT *
+                if (ReferenceEquals(selected, table))
+                {
+                    return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", orderCtx);
+                }
+                var (projection, projectionCtx) = CompileTupleProjection(selected, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
             }
 
