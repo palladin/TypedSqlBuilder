@@ -722,6 +722,9 @@ public abstract class SqlCompiler
             var item = tuple[i];
             switch (item)
             {
+                case null:
+                    // ignore null values
+                    break;
                 case SqlExpr expr:
                 {
                     var (compiled, newCtx) = Compile(expr, ctx);
@@ -735,7 +738,7 @@ public abstract class SqlCompiler
                     items.Add(compiled);
                     ctx = newCtx;
                     break;
-                }
+                }                
                 default:
                     throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported in projections");
             }
