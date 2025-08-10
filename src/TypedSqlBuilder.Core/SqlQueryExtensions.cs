@@ -92,13 +92,13 @@ public static class SqlQueryExtensions
     /// Computes the total sum of all integer values in the query result.
     /// </summary>
     /// <param name="query">A query that produces SQL integer expressions</param>
-    /// <returns>A SQL integer expression representing the sum of all values</returns>
+    /// <returns>A SQL scalar query representing the sum of all values</returns>
     /// <example>
     /// <code>
     /// var totalAge = userQuery.Select(user => user.Age).Sum();
     /// </code>
     /// </example>
-    public static SqlExprInt Sum(this ISqlQuery<SqlExprInt> query)
+    public static SumSqlIntClause Sum(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new SumSqlIntClause(query);
     }
@@ -108,13 +108,13 @@ public static class SqlQueryExtensions
     /// </summary>
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The query whose rows will be counted</param>
-    /// <returns>A SQL integer expression representing the count of rows</returns>
+    /// <returns>A SQL scalar query representing the count of rows</returns>
     /// <example>
     /// <code>
     /// var userCount = userQuery.Count();
     /// </code>
     /// </example>
-    public static SqlExprInt Count<TSource>(this ISqlQuery<TSource> query)
+    public static CountClause Count<TSource>(this ISqlQuery<TSource> query)
         where TSource : ITuple
     {
         return new CountClause<TSource>(query);
@@ -280,6 +280,38 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlStatement statement)
     {
         var (sql, context) = SqlCompiler.Sqlite.Compile(statement, new Context());
+        return (sql, context.Parameters);
+    }
+
+    /// <summary>
+    /// Compiles the SQL scalar query to SQL Server syntax with parameters.
+    /// </summary>
+    /// <param name="scalarQuery">The SQL scalar query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = countQuery.ToSqlServerRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlScalarQuery scalarQuery)
+    {
+        var (sql, context) = SqlCompiler.SqlServer.Compile(scalarQuery, new Context());
+        return (sql, context.Parameters);
+    }
+
+    /// <summary>
+    /// Compiles the SQL scalar query to SQLite syntax with parameters.
+    /// </summary>
+    /// <param name="scalarQuery">The SQL scalar query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = countQuery.ToSqliteRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlScalarQuery scalarQuery)
+    {
+        var (sql, context) = SqlCompiler.Sqlite.Compile(scalarQuery, new Context());
         return (sql, context.Parameters);
     }
 }

@@ -14,7 +14,21 @@ public interface ISqlQuery;
 /// Enables strongly-typed query composition and transformation.
 /// </summary>
 /// <typeparam name="TSource">The type of data produced by this query</typeparam>
-public interface ISqlQuery<TSource> : ISqlQuery;
+public interface ISqlQuery<TSource> : ISqlQuery
+    where TSource : ITuple;
+
+/// <summary>
+/// Base interface for SQL queries that return a single scalar value rather than a set of tuples.
+/// Used for aggregate functions like COUNT, SUM, AVG, MAX, MIN that produce single values.
+/// </summary>
+public interface ISqlScalarQuery;
+
+/// <summary>
+/// Generic interface for SQL queries that return a single scalar value of a specific type.
+/// Extends the base ISqlScalarQuery interface with type information.
+/// </summary>
+/// <typeparam name="T">The type of scalar SQL expression returned</typeparam>
+public interface ISqlScalarQuery<T> : ISqlScalarQuery where T : SqlExpr;
 
 /// <summary>
 /// Interface for SQL table representations that support tuple-like indexing.
@@ -175,22 +189,31 @@ public record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, 
 /// <summary>
 /// Represents a SQL SUM aggregate function applied to integer queries.
 /// Inherits from SqlExprInt to be used as an integer expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
 /// <param name="Query">The query containing integer values to sum</param>
-public class SumSqlIntClause(ISqlQuery<SqlExprInt> Query) : SqlExprInt
+public class SumSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the SUM clause to extract the underlying query.
     /// </summary>
     /// <param name="QueryOut">The query being summed</param>
-    public void Deconstruct(out ISqlQuery<SqlExprInt> QueryOut) => QueryOut = Query;
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprInt>> QueryOut) => QueryOut = Query;
 }
 
 /// <summary>
 /// Base class for SQL COUNT aggregate functions.
-/// Provides the foundation for counting operations that return integer values.
+/// Provides the foundation for counting operations that return integer scalar values.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
-public abstract class CountClause : SqlExprInt;
+public abstract class CountClause(ISqlQuery Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+{
+    /// <summary>
+    /// Deconstructs the COUNT clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being counted</param>
+    public void Deconstruct(out ISqlQuery QueryOut) => QueryOut = Query;
+}
 
 /// <summary>
 /// Strongly-typed COUNT aggregate function for SQL queries.
@@ -198,11 +221,11 @@ public abstract class CountClause : SqlExprInt;
 /// </summary>
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="Query">The query whose rows will be counted</param>
-public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause
+public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause(Query)
     where TSource : ITuple
 {
     /// <summary>
-    /// Deconstructs the COUNT clause to extract the underlying query.
+    /// Deconstructs the COUNT clause to extract the underlying typed query.
     /// </summary>
     /// <param name="QueryOut">The query being counted</param>
     public void Deconstruct(out ISqlQuery<TSource> QueryOut) => QueryOut = Query;
@@ -210,7 +233,8 @@ public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause
 
 public interface ISqlOrderedQuery : ISqlQuery;
 
-public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource>;
+public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource>
+    where TSource : ITuple;
 
 /// <summary>
 /// Base record representing a SQL ORDER BY clause for result sorting.

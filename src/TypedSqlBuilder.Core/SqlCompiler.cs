@@ -251,6 +251,34 @@ public abstract class SqlCompiler
     }
 
     /// <summary>
+    /// Compiles SQL scalar queries to standalone SQL SELECT statements (without parentheses).
+    /// Used for compiling aggregate functions as standalone queries.
+    /// </summary>
+    /// <param name="scalarQuery">The scalar query to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    public virtual (string, Context) Compile(ISqlScalarQuery scalarQuery, Context context)
+    {
+        switch (scalarQuery)
+        {
+            case SumSqlIntClause(var query):
+            {
+                var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)));
+                return Compile(sumQuery, context);
+            }
+
+            case CountClause(var query):
+            {
+                var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()));
+                return Compile(countQuery, context);
+            }
+
+            default:
+                throw new NotSupportedException($"Scalar query type {scalarQuery.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
     /// Compiles boolean expressions to SQL string representation.
     /// </summary>
     /// <param name="expr">The boolean expression to compile</param>
@@ -582,11 +610,19 @@ public abstract class SqlCompiler
             }
 
             // Aggregate functions that are also queries (need special handling)
-            case SumSqlIntClause sumClause:
-                throw new NotImplementedException();
+            case SumSqlIntClause(var query):
+            {
+                var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)));
+                var (sql, ctx) = Compile(sumQuery, context);
+                return ($"({sql})", ctx);
+            }
 
-            case CountClause countClause:
-                throw new NotImplementedException();
+            case CountClause(var query):
+            {
+                var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()));
+                var (sql, ctx) = Compile(countQuery, context);
+                return ($"({sql})", ctx);
+            }
 
             // CASE expressions
             case SqlIntCase(var condition, var trueValue, var falseValue):
@@ -671,6 +707,13 @@ public abstract class SqlCompiler
     {
         switch (expr)
         {
+            case ISqlScalarQuery scalarQuery:
+            {
+                // When scalar queries are used as expressions, wrap them in parentheses
+                var (sql, ctx) = Compile(scalarQuery, context);
+                return ($"({sql})", ctx);
+            }
+
             case SqlExprBool boolExpr:
                 return Compile(boolExpr, context);
 

@@ -185,4 +185,18 @@ public static class TestQueries
 
     public static ISqlQuery FromWhereIsNullCombined() 
         => TypedSql.From<Customer>().Where(c => c.Name.IsNull() && c.Age.IsNotNull());
+
+    // Aggregate functions
+    public static ISqlScalarQuery<SqlExprInt> SumAges() 
+        => TypedSql.From<Customer>().Select(c => c.Age).Sum();
+
+    public static ISqlScalarQuery<SqlExprInt> CountCustomers() 
+        => TypedSql.From<Customer>().Count();
+
+    public static ISqlScalarQuery<SqlExprInt> CountActiveCustomers() 
+        => TypedSql.From<Customer>().Where(c => c.Age >= 18).Count();
+
+    // Test case for scalar queries used as expressions (should have parentheses)
+    public static ISqlQuery FromWhereAgeGreaterThanAverageAge() 
+        => TypedSql.From<Customer>().Where(c => c.Age > TypedSql.From<Customer>().Select(x => x.Age).Sum());
 }

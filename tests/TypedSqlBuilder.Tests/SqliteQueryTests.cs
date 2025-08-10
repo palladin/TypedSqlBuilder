@@ -550,6 +550,63 @@ public class SqliteQueryTests
     }
 
     [Fact]
+    public void SumAges_GeneratesCorrectSql()
+    {
+        // Arrange
+        var sumExpr = TestQueries.SumAges();
+        
+        // Act
+        var (sql, parameters) = sumExpr.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT SUM(customers.Age) FROM customers", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void CountCustomers_GeneratesCorrectSql()
+    {
+        // Arrange
+        var countExpr = TestQueries.CountCustomers();
+        
+        // Act
+        var (sql, parameters) = countExpr.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT COUNT(*) FROM customers", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void CountActiveCustomers_GeneratesCorrectSql()
+    {
+        // Arrange
+        var countExpr = TestQueries.CountActiveCustomers();
+        
+        // Act
+        var (sql, parameters) = countExpr.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT COUNT(*) FROM customers WHERE customers.Age >= :p0", sql);
+        Assert.Single(parameters);
+        Assert.Equal(18, parameters[":p0"]);
+    }
+
+    [Fact]
+    public void FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAgeGreaterThanAverageAge();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - Scalar query used as expression should have parentheses
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age > (SELECT SUM(customers.Age) FROM customers)", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void DatabaseComparison_SameQuery_DifferentSyntax()
     {
         // Arrange
