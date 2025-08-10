@@ -167,12 +167,7 @@ public abstract class SqlCompiler
             case SelectClause(FromClause(var table), var selector):
             {
                 var selected = selector(table);
-                // If selector returns the same table object (identity selector), use SELECT *
-                if (ReferenceEquals(selected, table))
-                {
-                    return ($"SELECT * FROM {table.TableName}", context);
-                }
-                var (projection, projectionCtx) = CompileTupleProjection(selected, context);
+                var (projection, projectionCtx) = CompileProjection(selected, table, context);
                 return ($"SELECT {projection} FROM {table.TableName}", projectionCtx);
             }
 
@@ -180,12 +175,7 @@ public abstract class SqlCompiler
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
                 var selected = selector(table);
-                // If selector returns the same table object (identity selector), use SELECT *
-                if (ReferenceEquals(selected, table))
-                {
-                    return ($"SELECT * FROM {table.TableName} WHERE {whereClause}", whereCtx);
-                }
-                var (projection, projectionCtx) = CompileTupleProjection(selected, whereCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, whereCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause}", projectionCtx);
             }
 
@@ -193,12 +183,7 @@ public abstract class SqlCompiler
             {
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, context);
                 var selected = selector(table);
-                // If selector returns the same table object (identity selector), use SELECT *
-                if (ReferenceEquals(selected, table))
-                {
-                    return ($"SELECT * FROM {table.TableName} ORDER BY {orderByClause}", orderCtx);
-                }
-                var (projection, projectionCtx) = CompileTupleProjection(selected, orderCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} ORDER BY {orderByClause}", projectionCtx);
             }
 
@@ -207,12 +192,7 @@ public abstract class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
                 var selected = selector(table);
-                // If selector returns the same table object (identity selector), use SELECT *
-                if (ReferenceEquals(selected, table))
-                {
-                    return ($"SELECT * FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", orderCtx);
-                }
-                var (projection, projectionCtx) = CompileTupleProjection(selected, orderCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
             }
 
@@ -705,6 +685,24 @@ public abstract class SqlCompiler
         }
     }
 
+
+    /// <summary>
+    /// Compiles a projection based on the selected value, handling both identity selectors (SELECT *) and tuple projections.
+    /// </summary>
+    /// <param name="selected">The selected value from the selector - either the table itself or a tuple projection</param>
+    /// <param name="table">The table being selected from</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The projection SQL string and updated context</returns>
+    protected virtual (string, Context) CompileProjection(ITuple selected, ISqlTable table, Context context)
+    {
+        // If selector returns the same table object (identity selector), use SELECT *
+        if (ReferenceEquals(selected, table))
+        {
+            return ("*", context);
+        }
+        
+        return CompileTupleProjection(selected, context);
+    }
 
     /// <summary>
     /// Compiles a tuple projection into a SELECT list.
