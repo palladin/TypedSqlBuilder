@@ -199,4 +199,18 @@ public static class TestQueries
     // Test case for scalar queries used as expressions (should have parentheses)
     public static ISqlQuery FromWhereAgeGreaterThanAverageAge() 
         => TypedSql.From<Customer>().Where(c => c.Age > TypedSql.From<Customer>().Select(x => x.Age).Sum());
+
+    // Test case for IN clause with integer values
+    public static ISqlQuery FromWhereAgeIn() 
+        => TypedSql.From<Customer>().Where(c => c.Age.In(18, 21, 25, 30));
+
+    // Test cases for IN clause with subqueries
+    public static ISqlQuery FromWhereAgeInSubquery() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age.In(
+                TypedSql.From<Customer>()
+                    .Where(x => x.Name == "VIP")
+                    .Select(x => x.Age)
+            ));
+
 }

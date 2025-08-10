@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace TypedSqlBuilder.Core;
 
 /// <summary>

@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+using System.Linq;
+
 namespace TypedSqlBuilder.Core;
 
 /// <summary>
@@ -168,5 +171,77 @@ public static class SqlFunc
     public static SqlExprBool Case(SqlExprBool condition, bool trueValue, bool falseValue)
     {
         return new SqlBoolCase(condition, trueValue, falseValue);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for integer values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The integer expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprInt expr, params ImmutableArray<SqlExprInt> values)
+    {
+        return new SqlInValues<SqlExprInt>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for string values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The string expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprString expr, params ImmutableArray<SqlExprString> values)
+    {
+        return new SqlInValues<SqlExprString>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for boolean values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The boolean expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprBool expr, params ImmutableArray<SqlExprBool> values)
+    {
+        return new SqlInValues<SqlExprBool>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with an integer subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The integer expression to test</param>
+    /// <param name="subQuery">The subquery that returns integer values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprInt expr, ISqlQuery<ValueTuple<SqlExprInt>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprInt>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a string subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The string expression to test</param>
+    /// <param name="subQuery">The subquery that returns string values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprString expr, ISqlQuery<ValueTuple<SqlExprString>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprString>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a boolean subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The boolean expression to test</param>
+    /// <param name="subQuery">The subquery that returns boolean values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprBool expr, ISqlQuery<ValueTuple<SqlExprBool>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprBool>(expr, subQuery);
     }
 }

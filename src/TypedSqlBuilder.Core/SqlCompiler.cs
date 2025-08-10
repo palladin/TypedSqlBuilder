@@ -518,6 +518,35 @@ public abstract class SqlCompiler
             case SqlBoolNull:
                 return ("NULL", context);
 
+            // IN clause
+            case SqlInValues(var expression, var values):
+            {
+                if (values.IsEmpty)
+                    return ("FALSE", context); // Empty IN clause is always false
+                    
+                var (exprSql, ctx) = Compile(expression, context);
+                var valuesSql = new List<string>();
+                var currentCtx = ctx;
+                
+                foreach (var value in values)
+                {
+                    var (valueSql, nextCtx) = Compile(value, currentCtx);
+                    valuesSql.Add(valueSql);
+                    currentCtx = nextCtx;
+                }
+                
+                return ($"{exprSql} IN ({string.Join(", ", valuesSql)})", currentCtx);
+            }
+
+            // IN clause with subquery
+            case SqlInSubQuery(var expression, var subQuery):
+            {
+                var (exprSql, ctx) = Compile(expression, context);
+                var (subQuerySql, finalCtx) = Compile((ISqlQuery)subQuery, ctx);
+                
+                return ($"{exprSql} IN ({subQuerySql})", finalCtx);
+            }
+
             default:
                 throw new NotSupportedException($"Boolean expression type {expr.GetType().Name} is not supported");
         }

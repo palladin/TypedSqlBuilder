@@ -607,6 +607,24 @@ public class SqliteQueryTests
     }
 
     [Fact]
+    public void FromWhereAgeIn_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAgeIn();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers WHERE customers.Age IN (:p0, :p1, :p2, :p3)", sql);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal(21, parameters[":p1"]);
+        Assert.Equal(25, parameters[":p2"]);
+        Assert.Equal(30, parameters[":p3"]);
+    }
+
+    [Fact]
     public void DatabaseComparison_SameQuery_DifferentSyntax()
     {
         // Arrange
