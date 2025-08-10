@@ -215,35 +215,52 @@ public abstract class SqlCompiler
             case DeleteStatement(var table):
                 return ($"DELETE FROM {table.TableName}", context);
 
-            case DeleteWhereStatement(var table, var predicate):
+            case DeleteWhereStatement(DeleteStatement(var table), var predicate):
             {
                 var (whereClause, whereCtx) = Compile(predicate(table), context);
                 return ($"DELETE FROM {table.TableName} WHERE {whereClause}", whereCtx);
             }
 
             // ========== UPDATE STATEMENTS ==========
-            case UpdateStatement(var table, var setClauses):
-            {
-                var (setClause, setCtx) = CompileSetClauses(setClauses, table, context);
-                return ($"UPDATE {table.TableName} SET {setClause}", setCtx);
-            }
-
-            case UpdateWhereStatement(var table, var setClauses, var predicate):
-            {
-                var (setClause, setCtx) = CompileSetClauses(setClauses, table, context);
-                var (whereClause, whereCtx) = Compile(predicate(table), setCtx);
-                return ($"UPDATE {table.TableName} SET {setClause} WHERE {whereClause}", whereCtx);
-            }
+            // Note: Bare UpdateStatement without SET clauses should not be compiled
+            // UPDATE statements must have at least one SET clause via SetStatement fusion
+            case UpdateStatement(var table):
+                throw new InvalidOperationException($"UPDATE statement for table {table.TableName} must have at least one SET clause. Use .Set(...) to add SET clauses.");
 
             // ========== INSERT STATEMENTS ==========
-            case InsertStatement(var table, var valueClauses) when valueClauses.Length == 0:
-                return ($"INSERT INTO {table.TableName} DEFAULT VALUES", context);
+            // Note: Bare InsertStatement without VALUE clauses should not be compiled
+            // INSERT statements must have at least one VALUE clause via ValueStatement fusion
+            case InsertStatement(var table):
+                throw new InvalidOperationException($"INSERT statement for table {table.TableName} must have at least one VALUE clause. Use .Value(...) to add VALUE clauses.");
 
-            case InsertStatement(var table, var valueClauses) when valueClauses.Length > 0:
+            // ========== STATEMENT FUSION PATTERNS ==========
+            // SET fusion: SET(SET(...), setClause) → SET(..., setClause) (recursive)
+            // Also handles SET(UPDATE(table), setClause) → UPDATE(table, [setClause])
+            case SetStatement(var innerStatement, var setClause):
             {
-                var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(valueClauses, table, context);
-                return ($"INSERT INTO {table.TableName} ({columnsClause}) VALUES ({valuesClause})", valuesCtx);
-            }
+                var (table, setClauses) = ExtractUpdateTableAndClauses(innerStatement);
+                var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
+                var (setClauseSql, setCtx) = CompileSetClauses(newSetClauses, table, context);
+                return ($"UPDATE {table.TableName} SET {setClauseSql}", setCtx);
+            }    
+
+            // WHERE fusion for UPDATE: WHERE(UPDATE(...), predicate) or WHERE(SET(...), predicate)
+            case UpdateWhereFromStatement(var updateStatement, var predicate):
+            {
+                var (table, setClauses) = ExtractUpdateTableAndClauses(updateStatement);
+                var (setClauseSql, setCtx) = CompileSetClauses(setClauses, table, context);
+                var (whereClause, whereCtx) = Compile(predicate(table), setCtx);
+                return ($"UPDATE {table.TableName} SET {setClauseSql} WHERE {whereClause}", whereCtx);
+            }        
+
+            // ========== STATEMENT FUSION PATTERNS ==========
+            case ValueStatement(var innerStatement, var valueClause):
+            {
+                var (table, valueClauses) = ExtractInsertTableAndClauses(innerStatement);
+                var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();                
+                var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(newValueClauses, table, context);
+                return ($"INSERT INTO {table.TableName} ({columnsClause}) VALUES ({valuesClause})", valuesCtx);            
+            }            
 
             default:
                 throw new NotSupportedException($"Statement type {statement.GetType().Name} is not supported");
@@ -785,5 +802,39 @@ public abstract class SqlCompiler
         }
 
         return (string.Join(", ", columns), string.Join(", ", valuesSql), ctx);
+    }
+
+    /// <summary>
+    /// Helper method to extract table and set clauses from an UPDATE statement chain.
+    /// </summary>
+    private (ISqlTable table, ImmutableArray<SetClause> setClauses) ExtractUpdateTableAndClauses(ISqlStatement statement)
+    {
+        switch (statement)
+        {
+            case UpdateStatement(var table):
+                return (table, ImmutableArray<SetClause>.Empty);
+            case SetStatement(var innerStatement, var setClause):
+                var (innerTable, innerSetClauses) = ExtractUpdateTableAndClauses(innerStatement);
+                return (innerTable, innerSetClauses.Append(setClause).ToImmutableArray());
+            default:
+                throw new NotSupportedException($"Cannot extract UPDATE table and clauses from statement type {statement.GetType().Name}");
+        }
+    }
+
+    /// <summary>
+    /// Helper method to extract table and value clauses from an INSERT statement chain.
+    /// </summary>
+    private (ISqlTable table, ImmutableArray<ValueClause> valueClauses) ExtractInsertTableAndClauses(ISqlStatement statement)
+    {
+        switch (statement)
+        {
+            case InsertStatement(var table):
+                return (table, ImmutableArray<ValueClause>.Empty);
+            case ValueStatement(var innerStatement, var valueClause):
+                var (innerTable, innerValueClauses) = ExtractInsertTableAndClauses(innerStatement);
+                return (innerTable, innerValueClauses.Add(valueClause));
+            default:
+                throw new NotSupportedException($"Cannot extract INSERT table and clauses from statement type {statement.GetType().Name}");
+        }
     }
 }
