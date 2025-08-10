@@ -316,173 +316,67 @@ public abstract class SqlCompiler
                 return ($"({leftSql}) OR ({rightSql})", rightCtx);
             }
 
-            // Boolean equality/inequality
-            case SqlBoolEquals(var leftExpr, SqlBoolNull _):
+            // Generic equality/inequality comparisons - handles ALL types (Bool, Int, String)
+            case SqlEquals(var leftExpr, ISqlNullValue _):
             {
                 var (exprSql, exprCtx) = Compile(leftExpr, context);
                 return ($"{exprSql} IS NULL", exprCtx);
             }
 
-            case SqlBoolEquals(SqlBoolNull _, var rightExpr):
+            case SqlEquals(ISqlNullValue _, var rightExpr):
             {
                 var (exprSql, exprCtx) = Compile(rightExpr, context);
                 return ($"{exprSql} IS NULL", exprCtx);
             }
 
-            case SqlBoolEquals(var left, var right):
+            case SqlEquals(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} = {rightSql}", rightCtx);
             }
 
-            case SqlBoolNotEquals(var leftExpr, SqlBoolNull _):
+            case SqlNotEquals(var leftExpr, ISqlNullValue _):
             {
                 var (exprSql, exprCtx) = Compile(leftExpr, context);
                 return ($"{exprSql} IS NOT NULL", exprCtx);
             }
 
-            case SqlBoolNotEquals(SqlBoolNull _, var rightExpr):
+            case SqlNotEquals(ISqlNullValue _, var rightExpr):
             {
                 var (exprSql, exprCtx) = Compile(rightExpr, context);
                 return ($"{exprSql} IS NOT NULL", exprCtx);
             }
 
-            case SqlBoolNotEquals(var left, var right):
+            case SqlNotEquals(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} != {rightSql}", rightCtx);
             }
 
-            // Integer comparisons (return bool)
-            case SqlIntEquals(var leftExpr, SqlIntNull _):
-            {
-                var (exprSql, exprCtx) = Compile(leftExpr, context);
-                return ($"{exprSql} IS NULL", exprCtx);
-            }
-
-            case SqlIntEquals(SqlIntNull _, var rightExpr):
-            {
-                var (exprSql, exprCtx) = Compile(rightExpr, context);
-                return ($"{exprSql} IS NULL", exprCtx);
-            }
-
-            case SqlIntEquals(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} = {rightSql}", rightCtx);
-            }
-
-            case SqlIntNotEquals(var leftExpr, SqlIntNull _):
-            {
-                var (exprSql, exprCtx) = Compile(leftExpr, context);
-                return ($"{exprSql} IS NOT NULL", exprCtx);
-            }
-
-            case SqlIntNotEquals(SqlIntNull _, var rightExpr):
-            {
-                var (exprSql, exprCtx) = Compile(rightExpr, context);
-                return ($"{exprSql} IS NOT NULL", exprCtx);
-            }
-
-            case SqlIntNotEquals(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} != {rightSql}", rightCtx);
-            }
-
-            case SqlIntGreaterThan(var left, var right):
+            case SqlGreaterThan(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} > {rightSql}", rightCtx);
             }
 
-            case SqlIntLessThan(var left, var right):
+            case SqlLessThan(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} < {rightSql}", rightCtx);
             }
 
-            case SqlIntGreaterThanOrEqualTo(var left, var right):
+            case SqlGreaterThanOrEqualTo(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);
                 return ($"{leftSql} >= {rightSql}", rightCtx);
             }
 
-            case SqlIntLessThanOrEqualTo(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} <= {rightSql}", rightCtx);
-            }
-
-            // String comparisons (return bool)
-            case SqlStringEquals(var leftExpr, SqlStringNull _):
-            {
-                var (exprSql, exprCtx) = Compile(leftExpr, context);
-                return ($"{exprSql} IS NULL", exprCtx);
-            }
-
-            case SqlStringEquals(SqlStringNull _, var rightExpr):
-            {
-                var (exprSql, exprCtx) = Compile(rightExpr, context);
-                return ($"{exprSql} IS NULL", exprCtx);
-            }
-
-            case SqlStringEquals(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} = {rightSql}", rightCtx);
-            }
-
-            case SqlStringNotEquals(var leftExpr, SqlStringNull _):
-            {
-                var (exprSql, exprCtx) = Compile(leftExpr, context);
-                return ($"{exprSql} IS NOT NULL", exprCtx);
-            }
-
-            case SqlStringNotEquals(SqlStringNull _, var rightExpr):
-            {
-                var (exprSql, exprCtx) = Compile(rightExpr, context);
-                return ($"{exprSql} IS NOT NULL", exprCtx);
-            }
-
-            case SqlStringNotEquals(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} != {rightSql}", rightCtx);
-            }
-
-            case SqlStringGreaterThan(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} > {rightSql}", rightCtx);
-            }
-
-            case SqlStringLessThan(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} < {rightSql}", rightCtx);
-            }
-
-            case SqlStringGreaterThanOrEqualTo(var left, var right):
-            {
-                var (leftSql, leftCtx) = Compile(left, context);
-                var (rightSql, rightCtx) = Compile(right, leftCtx);
-                return ($"{leftSql} >= {rightSql}", rightCtx);
-            }
-
-            case SqlStringLessThanOrEqualTo(var left, var right):
+            case SqlLessThanOrEqualTo(var left, var right):
             {
                 var (leftSql, leftCtx) = Compile(left, context);
                 var (rightSql, rightCtx) = Compile(right, leftCtx);

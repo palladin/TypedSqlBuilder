@@ -149,103 +149,6 @@ public class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 }
 
 /// <summary>
-/// Represents a greater than comparison operation in SQL expressions (left > right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the comparison</param>
-/// <param name="right">The right operand of the comparison</param>
-public class SqlIntGreaterThan(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-/// <summary>
-/// Represents a less than comparison operation in SQL expressions (left &lt; right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the comparison</param>
-/// <param name="right">The right operand of the comparison</param>
-public class SqlIntLessThan(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-/// <summary>
-/// Represents a greater than or equal to comparison operation in SQL expressions (left >= right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the comparison</param>
-/// <param name="right">The right operand of the comparison</param>
-public class SqlIntGreaterThanOrEqualTo(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-/// <summary>
-/// Represents a less than or equal to comparison operation in SQL expressions (left &lt;= right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the comparison</param>
-/// <param name="right">The right operand of the comparison</param>
-public class SqlIntLessThanOrEqualTo(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-/// <summary>
-/// Represents an equality comparison operation in SQL expressions (left = right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the equality comparison</param>
-/// <param name="right">The right operand of the equality comparison</param>
-public class SqlIntEquals(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-/// <summary>
-/// Represents a not equal comparison operation in SQL expressions (left != right or left &lt;&gt; right).
-/// This class performs a binary comparison between two integer expressions, returning a boolean result.
-/// </summary>
-/// <param name="left">The left operand of the inequality comparison</param>
-/// <param name="right">The right operand of the inequality comparison</param>
-public class SqlIntNotEquals(SqlExprInt left, SqlExprInt right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
-	{
-		leftOut = left;
-		rightOut = right;
-	}
-
-}
-
-
-/// <summary>
 /// Represents a projection of an integer column or expression in SQL queries.
 /// This class serves as a base for referencing integer values from tables or subqueries,
 /// typically used in SELECT clauses or other projection contexts.
@@ -315,7 +218,7 @@ public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt 
 /// Represents a SQL NULL value for integer expressions.
 /// This class is used when setting integer columns to NULL in SQL statements.
 /// </summary>
-public class SqlIntNull : SqlExprInt
+public class SqlIntNull : SqlExprInt, ISqlNullValue
 {
     public static SqlIntNull Value => new();
 }

@@ -17,58 +17,6 @@ public class SqlStringValue(string value) : SqlExprString
 }
 
 /// <summary>
-/// Represents a SQL equality comparison between two string expressions (=).
-/// </summary>
-public class SqlStringEquals(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL inequality comparison between two string expressions (!=).
-/// </summary>
-public class SqlStringNotEquals(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL greater-than comparison between two string expressions (>).
-/// Uses lexicographic (alphabetical) ordering.
-/// </summary>
-public class SqlStringGreaterThan(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL less-than comparison between two string expressions (<).
-/// Uses lexicographic (alphabetical) ordering.
-/// </summary>
-public class SqlStringLessThan(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL greater-than-or-equal comparison between two string expressions (>=).
-/// Uses lexicographic (alphabetical) ordering.
-/// </summary>
-public class SqlStringGreaterThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL less-than-or-equal comparison between two string expressions (<=).
-/// Uses lexicographic (alphabetical) ordering.
-/// </summary>
-public class SqlStringLessThanOrEqualTo(SqlExprString left, SqlExprString right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprString leftOut, out SqlExprString rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
 /// Represents a SQL string concatenation operation between two string expressions.
 /// Equivalent to the SQL CONCAT function or || operator in some databases.
 /// </summary>
@@ -159,7 +107,7 @@ public class SqlStringCase(SqlExprBool condition, SqlExprString trueValue, SqlEx
 /// Represents a SQL NULL value for string expressions.
 /// This class is used when setting string columns to NULL in SQL statements.
 /// </summary>
-public class SqlStringNull : SqlExprString
+public class SqlStringNull : SqlExprString, ISqlNullValue
 {
     public static SqlStringNull Value => new();
 }

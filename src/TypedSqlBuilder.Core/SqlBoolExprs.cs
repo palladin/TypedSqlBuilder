@@ -42,22 +42,6 @@ public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 }
 
 /// <summary>
-/// Represents a SQL equality comparison between two boolean expressions (=).
-/// </summary>
-public class SqlBoolEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
-/// Represents a SQL inequality comparison between two boolean expressions (!=).
-/// </summary>
-public class SqlBoolNotEquals(SqlExprBool left, SqlExprBool right) : SqlExprBool
-{
-	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
-}
-
-/// <summary>
 /// Represents a projection of a boolean column or expression in SQL queries.
 /// This class serves as a base for referencing boolean values from tables or subqueries,
 /// typically used in SELECT clauses or other projection contexts.
@@ -127,7 +111,7 @@ public class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBo
 /// Represents a SQL NULL value for boolean expressions.
 /// This class is used when setting boolean columns to NULL in SQL statements.
 /// </summary>
-public class SqlBoolNull : SqlExprBool
+public class SqlBoolNull : SqlExprBool, ISqlNullValue
 {
 	public static SqlBoolNull Value => new();
 }
