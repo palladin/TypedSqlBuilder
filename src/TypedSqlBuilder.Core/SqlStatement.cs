@@ -117,9 +117,9 @@ public abstract record DeleteStatement(ISqlTable Table) : ISqlStatement;
 /// <summary>
 /// Base record representing a SQL DELETE statement with WHERE clause.
 /// </summary>
-/// <param name="Table">The table being deleted from</param>
+/// <param name="Statement">The DELETE statement being extended</param>
 /// <param name="Predicate">Function that evaluates filtering conditions</param>
-public abstract record DeleteWhereStatement(ISqlDeleteStatement Table, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
+public abstract record DeleteWhereStatement(ISqlDeleteStatement Statement, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a SET operation in an UPDATE statement.
@@ -146,7 +146,6 @@ public abstract record UpdateWhereFromStatement(ISqlUpdateStatement Statement, F
 /// Base record representing a SQL UPDATE statement.
 /// </summary>
 /// <param name="Table">The table being updated</param>
-/// <param name="SetClauses">The SET clauses for the update</param>
 public abstract record UpdateStatement(ISqlTable Table) : ISqlStatement;
 
 
@@ -154,7 +153,6 @@ public abstract record UpdateStatement(ISqlTable Table) : ISqlStatement;
 /// Base record representing a SQL INSERT statement.
 /// </summary>
 /// <param name="Table">The table being inserted into</param>
-/// <param name="ValueClauses">The VALUE clauses for the insert</param>
 public abstract record InsertStatement(ISqlTable Table) : ISqlStatement;
 
 // ========== INSERT INTERFACES AND IMPLEMENTATIONS ==========
@@ -182,7 +180,7 @@ public record DeleteStatement<TSqlTable>(TSqlTable table) : DeleteStatement(tabl
 /// Implementation of a SQL DELETE statement with WHERE clause.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being deleted from</typeparam>
-public record DeleteWhereStatement<TSqlTable>(ISqlDeleteStatement<TSqlTable> table, Func<TSqlTable, SqlExprBool> predicate) : DeleteWhereStatement(table, t => predicate((TSqlTable)t)), ISqlDeleteWhereStatement<TSqlTable>
+public record DeleteWhereStatement<TSqlTable>(ISqlDeleteStatement<TSqlTable> statement, Func<TSqlTable, SqlExprBool> predicate) : DeleteWhereStatement(statement, t => predicate((TSqlTable)t)), ISqlDeleteWhereStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
