@@ -41,47 +41,29 @@ public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
 
-/// <summary>
-/// Represents a projection of a boolean column or expression in SQL queries.
-/// This class serves as a base for referencing boolean values from tables or subqueries,
-/// typically used in SELECT clauses or other projection contexts.
-/// </summary>
-/// <param name="source">The table alias or source identifier</param>
-/// <param name="name">The column or expression name</param>
-public class SqlBoolProjection(string source, string name) : SqlExprBool
-{
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = source;
-		nameOut = name;
-	}
-}
 
 /// <summary>
 /// Represents a reference to a boolean column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
 public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
-{	
-	public SqlBoolColumn(string columnName)
-	{
-		ColumnName = columnName;
-	}		
-	private SqlBoolColumn(string tableName, string columnName)
-	{
-		TableName = tableName;
-		ColumnName = columnName;		
-	}
-	public string TableName { get; } = string.Empty;
-	public string ColumnName { get; }
-	
-	public static SqlBoolColumn Create(string source, string columnName) => new SqlBoolColumn(source, columnName);
-	
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = TableName;
-		nameOut = ColumnName;
-	}
+{    
+    private SqlBoolColumn(ISqlTable table, string columnName)
+    {
+        Table = table;
+        ColumnName = columnName;        
+    }
+    
+    public ISqlTable Table { get; }
+    public string ColumnName { get; }
+    
+    public static SqlBoolColumn Create(ISqlTable table, string columnName) => new SqlBoolColumn(table, columnName);
+    
+    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+    {
+        tableOut = Table;
+        nameOut = ColumnName;
+    }
 }
 
 /// <summary>

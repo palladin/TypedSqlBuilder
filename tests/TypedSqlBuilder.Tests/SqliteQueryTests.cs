@@ -18,7 +18,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers", sql);
+        Assert.Equal("SELECT * FROM customers a1", sql);
         Assert.Empty(parameters);
     }
 
@@ -32,7 +32,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1", sql);
         Assert.Empty(parameters);
     }
 
@@ -46,7 +46,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Age FROM customers", sql);
+        Assert.Equal("SELECT a1.Age AS Age FROM customers a1", sql);
         Assert.Empty(parameters);
     }
 
@@ -60,7 +60,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age > :p0", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters[":p0"]);
     }
@@ -75,7 +75,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Name = :p0", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name = :p0", sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters[":p0"]);
     }
@@ -90,7 +90,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > :p0) AND (a1.Name != :p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Admin", parameters[":p1"]);
@@ -106,7 +106,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -120,7 +120,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Age DESC", sql);
         Assert.Empty(parameters);
     }
 
@@ -134,7 +134,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - SQLite uses || for string concatenation instead of CONCAT
-        Assert.Equal("SELECT (customers.Id + :p1), (customers.Name || :p2) FROM customers WHERE customers.Age > :p0 ORDER BY customers.Name ASC", sql);
+        Assert.Equal("SELECT (a1.Id + :p1) AS prj0, (a1.Name || :p2) AS prj1 FROM customers a1 WHERE a1.Age > :p0 ORDER BY a1.Name ASC", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(1, parameters[":p1"]);
@@ -151,7 +151,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE customers.Age >= :p0", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE a1.Age >= :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(21, parameters[":p0"]);
     }
@@ -166,7 +166,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE ((customers.Age > :p0) AND (customers.Age < :p1)) OR (customers.Name = :p2)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE ((a1.Age > :p0) AND (a1.Age < :p1)) OR (a1.Name = :p2)", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(65, parameters[":p1"]);
@@ -183,7 +183,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - SQLite uses || for string concatenation instead of CONCAT
-        Assert.Equal("SELECT ((customers.Id * :p0) + customers.Age), (customers.Name || :p1) FROM customers", sql);
+        Assert.Equal("SELECT ((a1.Id * :p0) + a1.Age) AS prj0, (a1.Name || :p1) AS prj1 FROM customers a1", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(100, parameters[":p0"]);
         Assert.Equal(" - Customer", parameters[":p1"]);
@@ -199,7 +199,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + :p2) FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1) ORDER BY customers.Age ASC", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + :p2) AS prj2 FROM customers a1 WHERE (a1.Age > :p0) AND (a1.Name != :p1) ORDER BY a1.Age ASC", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(21, parameters[":p0"]);
         Assert.Equal("", parameters[":p1"]);
@@ -216,7 +216,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name = :p1)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > :p0) AND (a1.Name = :p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("John", parameters[":p1"]);
@@ -245,7 +245,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - SQLite uses || for string concatenation instead of CONCAT
-        var expectedSql = "SELECT customers.Id, (customers.Name || :p2), (customers.Age + :p3) FROM customers WHERE (customers.Age >= :p0) AND (customers.Name != :p1) ORDER BY customers.Name ASC";
+        var expectedSql = "SELECT a1.Id AS Id, (a1.Name || :p2) AS prj1, (a1.Age + :p3) AS prj2 FROM customers a1 WHERE (a1.Age >= :p0) AND (a1.Name != :p1) ORDER BY a1.Name ASC";
         Assert.Equal(expectedSql, sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(21, parameters[":p0"]);
@@ -264,7 +264,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT products.ProductId, products.ProductName FROM products WHERE products.ProductName != :p0", sql);
+        Assert.Equal("SELECT a1.ProductId AS ProductId, a1.ProductName AS ProductName FROM products a1 WHERE a1.ProductName != :p0", sql);
         Assert.Single(parameters);
         Assert.Equal("Discontinued", parameters[":p0"]);
     }
@@ -282,7 +282,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - The structure should be consistent regardless of parameter values
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= :p0) AND (customers.Age <= :p1)", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= :p0) AND (a1.Age <= :p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(minAge, parameters[":p0"]);
         Assert.Equal(maxAge, parameters[":p1"]);
@@ -298,7 +298,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, ((customers.Id * :p1) + customers.Age), customers.Name FROM customers WHERE customers.Age > :p0", sql);
+        Assert.Equal("SELECT a1.Id AS Id, ((a1.Id * :p1) + a1.Age) AS prj1, a1.Name AS Name FROM customers a1 WHERE a1.Age > :p0", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(100, parameters[":p1"]);
@@ -314,7 +314,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + :p0) FROM customers ORDER BY customers.Name ASC", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + :p0) AS prj2 FROM customers a1 ORDER BY a1.Name ASC", sql);
         Assert.Single(parameters);
     }
 
@@ -328,7 +328,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= :p0) AND (a1.Name != :p1)", sql);
         Assert.Equal(21, parameters[":p0"]);
         Assert.Equal("", parameters[":p1"]);
         Assert.True(true, "Clean architecture with extension methods works perfectly!");
@@ -344,7 +344,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > :p0) AND (a1.Name != :p1)", sql);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Admin", parameters[":p1"]);
     }
@@ -359,7 +359,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND ((customers.Name != :p1) AND (customers.Age < :p2))", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > :p0) AND ((a1.Name != :p1) AND (a1.Age < :p2))", sql);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Admin", parameters[":p1"]);
         Assert.Equal(65, parameters[":p2"]);
@@ -375,7 +375,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers WHERE (customers.Age >= :p0) AND (customers.Name != :p1)", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= :p0) AND (a1.Name != :p1)", sql);
         Assert.Equal(21, parameters[":p0"]);
         Assert.Equal("", parameters[":p1"]);
     }
@@ -390,7 +390,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Age > :p0) AND (customers.Name != :p1) ORDER BY customers.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > :p0) AND (a1.Name != :p1) ORDER BY a1.Name ASC", sql);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Admin", parameters[":p1"]);
     }
@@ -405,7 +405,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age ASC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -419,7 +419,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age DESC", sql);
         Assert.Empty(parameters);
     }
 
@@ -433,7 +433,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Age DESC, customers.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Age DESC, a1.Name ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -447,7 +447,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers ORDER BY customers.Name ASC, customers.Age DESC, customers.Id ASC", sql);
+        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age DESC, a1.Id ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -461,7 +461,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age > :p0 ORDER BY customers.Name ASC, customers.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > :p0 ORDER BY a1.Name ASC, a1.Age DESC", sql);
         Assert.Equal(18, parameters[":p0"]);
     }
 
@@ -475,7 +475,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT customers.Id, customers.Name FROM customers ORDER BY customers.Name ASC, customers.Age ASC", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 ORDER BY a1.Name ASC, a1.Age ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -489,7 +489,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NULL", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name IS NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -503,7 +503,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Name IS NOT NULL", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name IS NOT NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -517,7 +517,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age IS NULL", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IS NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -531,7 +531,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age IS NOT NULL", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IS NOT NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -545,7 +545,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE (customers.Name IS NULL) AND (customers.Age IS NOT NULL)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Name IS NULL) AND (a1.Age IS NOT NULL)", sql);
         Assert.Empty(parameters);
     }
 
@@ -559,7 +559,7 @@ public class SqliteQueryTests
         var (sql, parameters) = sumExpr.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT SUM(customers.Age) FROM customers", sql);
+        Assert.Equal("SELECT SUM(a1.Age) AS prj0 FROM customers a1", sql);
         Assert.Empty(parameters);
     }
 
@@ -573,7 +573,7 @@ public class SqliteQueryTests
         var (sql, parameters) = countExpr.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT COUNT(*) FROM customers", sql);
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a1", sql);
         Assert.Empty(parameters);
     }
 
@@ -587,7 +587,7 @@ public class SqliteQueryTests
         var (sql, parameters) = countExpr.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT COUNT(*) FROM customers WHERE customers.Age >= :p0", sql);
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a1 WHERE a1.Age >= :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters[":p0"]);
     }
@@ -602,7 +602,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - Scalar query used as expression should have parentheses
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age > (SELECT SUM(customers.Age) FROM customers)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > (SELECT SUM(a2.Age) AS prj0 FROM customers a2)", sql);
         Assert.Empty(parameters);
     }
 
@@ -616,7 +616,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers WHERE customers.Age IN (:p0, :p1, :p2, :p3)", sql);
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IN (:p0, :p1, :p2, :p3)", sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(21, parameters[":p1"]);
@@ -635,10 +635,25 @@ public class SqliteQueryTests
         var (sqlServerSql, sqlServerParameters) = query.ToSqlServerRaw();
         
         // Assert - Different parameter prefixes
-        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + :p0) FROM customers ORDER BY customers.Name ASC", sqliteSql);
-        Assert.Equal("SELECT customers.Id, customers.Name, (customers.Age + @p0) FROM customers ORDER BY customers.Name ASC", sqlServerSql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + :p0) AS prj2 FROM customers a1 ORDER BY a1.Name ASC", sqliteSql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + @p0) AS prj2 FROM customers a1 ORDER BY a1.Name ASC", sqlServerSql);
         
         // Same number of parameters
         Assert.Equal(sqliteParameters.Count, sqlServerParameters.Count);
+    }
+
+    [Fact]
+    public void FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAgeInSubqueryWithClosure();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - Closure semantics should capture outer scope variables
+        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IN (SELECT a2.Age AS Age FROM customers a2 WHERE a2.Name = (a1.Name || :p0))", sql);
+        Assert.Single(parameters);
+        Assert.Equal("_VIP", parameters[":p0"]);
     }
 }

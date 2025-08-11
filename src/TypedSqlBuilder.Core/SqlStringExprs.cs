@@ -26,47 +26,27 @@ public class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExprS
 }
 
 /// <summary>
-/// Represents a projection of a string column or expression in SQL queries.
-/// This class serves as a base for referencing string values from tables or subqueries,
-/// typically used in SELECT clauses or other projection contexts.
-/// </summary>
-/// <param name="source">The table alias or source identifier</param>
-/// <param name="name">The column or expression name</param>
-public class SqlStringProjection(string source, string name) : SqlExprString
-{
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = source;
-		nameOut = name;
-	}
-}
-
-/// <summary>
 /// Represents a reference to a string column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
 public class SqlStringColumn : SqlExprString, ISqlColumn<SqlStringColumn>
 {
-		
-	public SqlStringColumn(string columnName)
-	{
-		ColumnName = columnName;
-	}		
-	private SqlStringColumn(string tableName, string columnName)
-	{
-		TableName = tableName;
-		ColumnName = columnName;		
-	}
-	public string TableName { get; } = string.Empty;
-	public string ColumnName { get; }
-	
-	public static SqlStringColumn Create(string source, string columnName) => new SqlStringColumn(source, columnName);
-	
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = TableName;
-		nameOut = ColumnName;
-	}
+    private SqlStringColumn(ISqlTable table, string columnName)
+    {
+        Table = table;
+        ColumnName = columnName;        
+    }
+    
+    public ISqlTable Table { get; }
+    public string ColumnName { get; }
+    
+    public static SqlStringColumn Create(ISqlTable table, string columnName) => new SqlStringColumn(table, columnName);
+    
+    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+    {
+        tableOut = Table;
+        nameOut = ColumnName;
+    }
 }
 
 /// <summary>

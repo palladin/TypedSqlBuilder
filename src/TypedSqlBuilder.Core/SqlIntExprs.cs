@@ -149,46 +149,27 @@ public class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 }
 
 /// <summary>
-/// Represents a projection of an integer column or expression in SQL queries.
-/// This class serves as a base for referencing integer values from tables or subqueries,
-/// typically used in SELECT clauses or other projection contexts.
-/// </summary>
-/// <param name="source">The table alias or source identifier</param>
-/// <param name="name">The column or expression name</param>
-public class SqlIntProjection(string source, string name) : SqlExprInt
-{
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = source;
-		nameOut = name;
-	}
-}
-
-/// <summary>
 /// Represents a reference to an integer column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
 public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
-{	
-	public SqlIntColumn(string columnName)
-	{
-		ColumnName = columnName;
-	}		
-	private SqlIntColumn(string tableName, string columnName)
-	{
-		TableName = tableName;
-		ColumnName = columnName;		
-	}
-	public string TableName { get; } = string.Empty;
-	public string ColumnName { get; }
-	
-	public static SqlIntColumn Create(string source, string columnName) => new SqlIntColumn(source, columnName);
-	
-	public void Deconstruct(out string sourceOut, out string nameOut)
-	{
-		sourceOut = TableName;
-		nameOut = ColumnName;
-	}
+{    
+    private SqlIntColumn(ISqlTable table, string columnName)
+    {
+        Table = table;
+        ColumnName = columnName;        
+    }
+    
+    public ISqlTable Table { get; }
+    public string ColumnName { get; }
+    
+    public static SqlIntColumn Create(ISqlTable table, string columnName) => new SqlIntColumn(table, columnName);
+    
+    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+    {
+        tableOut = Table;
+        nameOut = ColumnName;
+    }
 }
 
 /// <summary>

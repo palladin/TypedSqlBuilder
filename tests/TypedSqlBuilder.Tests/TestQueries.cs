@@ -213,4 +213,13 @@ public static class TestQueries
                     .Select(x => x.Age)
             ));
 
+    // Test case for closure semantics - outer variable captured in subquery
+    public static ISqlQuery FromWhereAgeInSubqueryWithClosure() 
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age.In(
+                TypedSql.From<Customer>()
+                    .Where(x => x.Name == c.Name + "_VIP")  // Capturing 'c' from outer scope
+                    .Select(x => x.Age)
+            ));
+
 }

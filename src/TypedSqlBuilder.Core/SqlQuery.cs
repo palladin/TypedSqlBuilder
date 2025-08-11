@@ -62,14 +62,14 @@ public abstract class SqlTable<TCol1, TCol2> : ISqlTable
 
     public TCol1 Column1(string columnName)
     {
-        TCol1 col1 = TCol1.Create(TableName, columnName);
+        TCol1 col1 = TCol1.Create(this, columnName);
         columns[0] = col1;
         return col1;
     }
 
     public TCol2 Column2(string columnName) 
     {
-        TCol2 col2 = TCol2.Create(TableName, columnName);
+        TCol2 col2 = TCol2.Create(this, columnName);
         columns[1] = col2;
         return col2;
     }
@@ -103,21 +103,21 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 
     public TCol1 Column1(string columnName)
     {
-        TCol1 col1 = TCol1.Create(TableName, columnName);
+        TCol1 col1 = TCol1.Create(this, columnName);
         columns[0] = col1;
         return col1;
     }
 
     public TCol2 Column2(string columnName) 
     {
-        TCol2 col2 = TCol2.Create(TableName, columnName);
+        TCol2 col2 = TCol2.Create(this, columnName);
         columns[1] = col2;
         return col2;
     }
 
     public TCol3 Column3(string columnName) 
     {
-        TCol3 col3 = TCol3.Create(TableName, columnName);
+        TCol3 col3 = TCol3.Create(this, columnName);
         columns[2] = col3;
         return col3;
     }
@@ -265,6 +265,6 @@ public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, ImmutableArr
 /// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys from source tuples</param>
 /// <param name="Descending">Whether to sort in descending order</param>
 public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) 
-    : OrderByClause<TSource>(TypedQuery, ImmutableArray.Create<(Func<ITuple, SqlExpr>, bool)>((x => TypedKeySelector((TSource) x), Descending)))
+    : OrderByClause<TSource>(TypedQuery, [(x => TypedKeySelector((TSource) x), Descending)])
     where TSource : ITuple
     where TKey : SqlExpr;    
