@@ -136,6 +136,11 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 /// <param name="Table">The table being queried</param>
 public record FromTableClause(ISqlTable Table) : ISqlQuery;
 
+/// <summary>
+/// Base record representing a SQL FROM clause with a subquery.
+/// Establishes a subquery as the source for a query.
+/// </summary>
+/// <param name="Query">The subquery being used as the source</param>
 public record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 
 /// <summary>
@@ -147,6 +152,12 @@ public record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 public record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
     where TColumns : ITuple;
 
+/// <summary>
+/// Strongly-typed FROM clause with a subquery that preserves column type information.
+/// Links a query to a specific subquery with known column structure.
+/// </summary>
+/// <typeparam name="TSource">The tuple type representing the subquery's columns</typeparam>
+/// <param name="query">The subquery being used as the source</param>
 public record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQueryClause(query), ISqlQuery<TSource>
     where TSource : ITuple;
 

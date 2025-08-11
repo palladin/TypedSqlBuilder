@@ -60,29 +60,6 @@ public record Context
     }
 }
 
-/// <summary>
-/// Synthetic table representation for subqueries in FROM clauses.
-/// Allows the compiler to treat subqueries as tables with projected columns.
-/// </summary>
-internal class SubQueryTable : ISqlTable
-{
-    private readonly object[] _columns;
-    
-    public string TableName { get; }
-    public ISqlQuery SubQuery { get; }
-    
-    public SubQueryTable(string tableAlias, ISqlQuery subQuery)
-    {
-        TableName = tableAlias;
-        SubQuery = subQuery;
-        
-        // For now, create a placeholder array - we'll populate it based on the subquery's projection
-        _columns = new object[10]; // arbitrary size, will be populated dynamically
-    }
-    
-    public object? this[int index] => _columns[index];
-    public int Length => _columns.Length;
-}
 
 /// <summary>
 /// Abstract base class for SQL compilation that can properly handle typed queries and lambda expressions.

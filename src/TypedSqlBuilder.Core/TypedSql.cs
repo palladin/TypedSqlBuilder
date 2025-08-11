@@ -26,30 +26,62 @@ public static class TypedSql
         return new FromTableClause<TSqlTable>(new TSqlTable());
     }
 
+    /// <summary>
+    /// Creates a query from a subquery.
+    /// Allows using the result of one query as the source for another query.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type representing the subquery's columns</typeparam>
+    /// <param name="query">The subquery to use as the source</param>
+    /// <returns>A typed SQL query that can be further composed</returns>
     public static ISqlQuery<TSource> From<TSource>(ISqlQuery<TSource> query)
         where TSource : ITuple        
     {
         return new FromSubQueryClause<TSource>(query);
     }
 
+    /// <summary>
+    /// Creates a DELETE statement for the specified table.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <returns>A DELETE statement that can be further composed with WHERE clauses</returns>
     public static ISqlDeleteStatement<TSqlTable> Delete<TSqlTable>()
         where TSqlTable : ISqlTable, new()
     {
         return new DeleteStatement<TSqlTable>(new TSqlTable());
     }
 
+    /// <summary>
+    /// Adds a WHERE clause to a DELETE statement.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="deleteStatement">The DELETE statement to add the WHERE clause to</param>
+    /// <param name="predicate">A function that defines the filter condition</param>
+    /// <returns>A DELETE statement with the WHERE clause applied</returns>
     public static ISqlDeleteWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlDeleteStatement<TSqlTable> deleteStatement, Func<TSqlTable, SqlExprBool> predicate)
         where TSqlTable : ISqlTable, new()
     {
         return new DeleteWhereStatement<TSqlTable>(deleteStatement, predicate);
     }
 
+    /// <summary>
+    /// Creates an UPDATE statement for the specified table.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <returns>An UPDATE statement that can be further composed with SET and WHERE clauses</returns>
     public static ISqlUpdateStatement<TSqlTable> Update<TSqlTable>()
         where TSqlTable : ISqlTable, new()
     {
         return new UpdateStatement<TSqlTable>(new TSqlTable());
     }
 
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for an integer column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the integer column to update</param>
+    /// <param name="value">The new value to set for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
@@ -57,6 +89,14 @@ public static class TypedSql
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a string column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the string column to update</param>
+    /// <param name="value">The new value to set for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
@@ -64,6 +104,14 @@ public static class TypedSql
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a boolean column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the boolean column to update</param>
+    /// <param name="value">The new value to set for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
@@ -72,6 +120,14 @@ public static class TypedSql
     }
 
     // Expression-based SET methods (two lambda approach)
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for an integer column using an expression.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the integer column to update</param>
+    /// <param name="valueSelector">A function that generates the new value expression for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, Func<TSqlTable, SqlExprInt> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
@@ -80,6 +136,14 @@ public static class TypedSql
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a string column using an expression.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the string column to update</param>
+    /// <param name="valueSelector">A function that generates the new value expression for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, Func<TSqlTable, SqlExprString> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
@@ -88,6 +152,14 @@ public static class TypedSql
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a boolean column using an expression.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the boolean column to update</param>
+    /// <param name="valueSelector">A function that generates the new value expression for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, Func<TSqlTable, SqlExprBool> valueSelector)
         where TSqlTable : ISqlTable, new()
     {
@@ -96,18 +168,38 @@ public static class TypedSql
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
+    /// <summary>
+    /// Adds a WHERE clause to an UPDATE statement.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the WHERE clause to</param>
+    /// <param name="predicate">A function that defines the filter condition</param>
+    /// <returns>An UPDATE statement with the WHERE clause applied</returns>
     public static ISqlUpdateWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> predicate)
         where TSqlTable : ISqlTable, new()
     {
         return new UpdateWhereFromStatement<TSqlTable>(updateStatement, predicate);
     }
 
+    /// <summary>
+    /// Creates an INSERT statement for the specified table.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <returns>An INSERT statement that can be further composed with VALUE clauses</returns>
     public static ISqlInsertStatement<TSqlTable> Insert<TSqlTable>()
         where TSqlTable : ISqlTable, new()
     {
         return new InsertStatement<TSqlTable>(new TSqlTable());
     }
 
+    /// <summary>
+    /// Adds a VALUE clause to an INSERT statement for an integer column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="insertStatement">The INSERT statement to add the VALUE clause to</param>
+    /// <param name="columnSelector">A function that selects the integer column to insert into</param>
+    /// <param name="value">The value to insert for the column</param>
+    /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
@@ -115,6 +207,14 @@ public static class TypedSql
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
     }
 
+    /// <summary>
+    /// Adds a VALUE clause to an INSERT statement for a string column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="insertStatement">The INSERT statement to add the VALUE clause to</param>
+    /// <param name="columnSelector">A function that selects the string column to insert into</param>
+    /// <param name="value">The value to insert for the column</param>
+    /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
@@ -122,6 +222,14 @@ public static class TypedSql
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
     }
 
+    /// <summary>
+    /// Adds a VALUE clause to an INSERT statement for a boolean column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="insertStatement">The INSERT statement to add the VALUE clause to</param>
+    /// <param name="columnSelector">A function that selects the boolean column to insert into</param>
+    /// <param name="value">The value to insert for the column</param>
+    /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
