@@ -18,7 +18,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1", sql);
+        Assert.Equal("SELECT * FROM customers a0", sql);
         Assert.Empty(parameters);
     }
 
@@ -32,7 +32,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0", sql);
         Assert.Empty(parameters);
     }
 
@@ -46,7 +46,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Age AS Age FROM customers a1", sql);
+        Assert.Equal("SELECT a0.Age AS Age FROM customers a0", sql);
         Assert.Empty(parameters);
     }
 
@@ -60,7 +60,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > @p0", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age > @p0", sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
     }
@@ -75,7 +75,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name = @p0", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Name = @p0", sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters["@p0"]);
     }
@@ -90,7 +90,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > @p0) AND (a1.Name != @p1)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name != @p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
@@ -106,7 +106,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Name ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -120,7 +120,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Age DESC", sql);
         Assert.Empty(parameters);
     }
 
@@ -134,7 +134,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT (a1.Id + @p1) AS prj0, CONCAT(a1.Name, @p2) AS prj1 FROM customers a1 WHERE a1.Age > @p0 ORDER BY a1.Name ASC", sql);
+        Assert.Equal("SELECT (a0.Id + @p1) AS prj0, CONCAT(a0.Name, @p2) AS prj1 FROM customers a0 WHERE a0.Age > @p0 ORDER BY a0.Name ASC", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(1, parameters["@p1"]);
@@ -151,7 +151,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE a1.Age >= @p0", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE a0.Age >= @p0", sql);
         Assert.Single(parameters);
         Assert.Equal(21, parameters["@p0"]);
     }
@@ -166,7 +166,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE ((a1.Age > @p0) AND (a1.Age < @p1)) OR (a1.Name = @p2)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE ((a0.Age > @p0) AND (a0.Age < @p1)) OR (a0.Name = @p2)", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(65, parameters["@p1"]);
@@ -184,7 +184,7 @@ public class SqlServerQueryTests
         
         // Assert
         // Assert - SQL Server uses CONCAT for string concatenation
-        Assert.Equal("SELECT ((a1.Id * @p0) + a1.Age) AS prj0, CONCAT(a1.Name, @p1) AS prj1 FROM customers a1", sql);
+        Assert.Equal("SELECT ((a0.Id * @p0) + a0.Age) AS prj0, CONCAT(a0.Name, @p1) AS prj1 FROM customers a0", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(100, parameters["@p0"]);
         Assert.Equal(" - Customer", parameters["@p1"]);
@@ -200,7 +200,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + @p2) AS prj2 FROM customers a1 WHERE (a1.Age > @p0) AND (a1.Name != @p1) ORDER BY a1.Age ASC", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, (a0.Age + @p2) AS prj0 FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name != @p1) ORDER BY a0.Age ASC", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
@@ -217,7 +217,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > @p0) AND (a1.Name = @p1)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name = @p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("John", parameters["@p1"]);
@@ -246,7 +246,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        var expectedSql = "SELECT a1.Id AS Id, CONCAT(a1.Name, @p2) AS prj1, (a1.Age + @p3) AS prj2 FROM customers a1 WHERE (a1.Age >= @p0) AND (a1.Name != @p1) ORDER BY a1.Name ASC";
+        var expectedSql = "SELECT a0.Id AS Id, CONCAT(a0.Name, @p2) AS prj0, (a0.Age + @p3) AS prj1 FROM customers a0 WHERE (a0.Age >= @p0) AND (a0.Name != @p1) ORDER BY a0.Name ASC";
         Assert.Equal(expectedSql, sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(21, parameters["@p0"]);
@@ -265,7 +265,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.ProductId AS ProductId, a1.ProductName AS ProductName FROM products a1 WHERE a1.ProductName != @p0", sql);
+        Assert.Equal("SELECT a0.ProductId AS ProductId, a0.ProductName AS ProductName FROM products a0 WHERE a0.ProductName != @p0", sql);
         Assert.Single(parameters);
         Assert.Equal("Discontinued", parameters["@p0"]);
     }
@@ -283,7 +283,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert - The structure should be consistent regardless of parameter values
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= @p0) AND (a1.Age <= @p1)", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE (a0.Age >= @p0) AND (a0.Age <= @p1)", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(minAge, parameters["@p0"]);
         Assert.Equal(maxAge, parameters["@p1"]);
@@ -299,7 +299,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, ((a1.Id * @p1) + a1.Age) AS prj1, a1.Name AS Name FROM customers a1 WHERE a1.Age > @p0", sql);
+        Assert.Equal("SELECT a0.Id AS Id, ((a0.Id * @p1) + a0.Age) AS prj0, a0.Name AS Name FROM customers a0 WHERE a0.Age > @p0", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
@@ -315,7 +315,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, (a1.Age + @p0) AS prj2 FROM customers a1 ORDER BY a1.Name ASC", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, (a0.Age + @p0) AS prj0 FROM customers a0 ORDER BY a0.Name ASC", sql);
         Assert.Single(parameters);
     }
 
@@ -329,7 +329,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
 
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= @p0) AND (a1.Name != @p1)", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE (a0.Age >= @p0) AND (a0.Name != @p1)", sql);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
         Assert.True(true, "Clean architecture with extension methods works perfectly!");
@@ -345,7 +345,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > @p0) AND (a1.Name != @p1)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name != @p1)", sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
     }
@@ -360,7 +360,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > @p0) AND ((a1.Name != @p1) AND (a1.Age < @p2))", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Age > @p0) AND ((a0.Name != @p1) AND (a0.Age < @p2))", sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
         Assert.Equal(65, parameters["@p2"]);
@@ -376,7 +376,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 WHERE (a1.Age >= @p0) AND (a1.Name != @p1)", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE (a0.Age >= @p0) AND (a0.Name != @p1)", sql);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
     }
@@ -391,7 +391,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Age > @p0) AND (a1.Name != @p1) ORDER BY a1.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name != @p1) ORDER BY a0.Name ASC", sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
     }
@@ -406,7 +406,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age ASC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Name ASC, a0.Age ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -420,7 +420,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Name ASC, a0.Age DESC", sql);
         Assert.Empty(parameters);
     }
 
@@ -434,7 +434,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Age DESC, a1.Name ASC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Age DESC, a0.Name ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -448,7 +448,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 ORDER BY a1.Name ASC, a1.Age DESC, a1.Id ASC", sql);
+        Assert.Equal("SELECT * FROM customers a0 ORDER BY a0.Name ASC, a0.Age DESC, a0.Id ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -462,7 +462,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > @p0 ORDER BY a1.Name ASC, a1.Age DESC", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age > @p0 ORDER BY a0.Name ASC, a0.Age DESC", sql);
         Assert.Equal(18, parameters["@p0"]);
     }
 
@@ -476,7 +476,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM customers a1 ORDER BY a1.Name ASC, a1.Age ASC", sql);
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 ORDER BY a0.Name ASC, a0.Age ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -490,7 +490,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name IS NULL", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Name IS NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -504,7 +504,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Name IS NOT NULL", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Name IS NOT NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -518,7 +518,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE (a1.Name IS NULL) AND (a1.Age IS NOT NULL)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE (a0.Name IS NULL) AND (a0.Age IS NOT NULL)", sql);
         Assert.Empty(parameters);
     }
 
@@ -532,7 +532,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = sumExpr.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT SUM(a1.Age) AS prj0 FROM customers a1", sql);
+        Assert.Equal("SELECT SUM(a0.Age) AS prj0 FROM customers a0", sql);
         Assert.Empty(parameters);
     }
 
@@ -546,7 +546,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = countExpr.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a1", sql);
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a0", sql);
         Assert.Empty(parameters);
     }
 
@@ -560,7 +560,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = countExpr.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a1 WHERE a1.Age >= @p0", sql);
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a0 WHERE a0.Age >= @p0", sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
     }
@@ -575,7 +575,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert - Scalar query used as expression should have parentheses
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age > (SELECT SUM(a2.Age) AS prj0 FROM customers a2)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age > (SELECT SUM(a1.Age) AS prj0 FROM customers a1)", sql);
         Assert.Empty(parameters);
     }
 
@@ -589,7 +589,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IN (@p0, @p1, @p2, @p3)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age IN (@p0, @p1, @p2, @p3)", sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(21, parameters["@p1"]);
@@ -607,7 +607,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IN (SELECT a2.Age AS Age FROM customers a2 WHERE a2.Name = @p0)", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age IN (SELECT a1.Age AS Age FROM customers a1 WHERE a1.Name = @p0)", sql);
         Assert.Single(parameters);
         Assert.Equal("VIP", parameters["@p0"]);
     }
@@ -622,8 +622,23 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT * FROM customers a1 WHERE a1.Age IN (SELECT a2.Age AS Age FROM customers a2 WHERE a2.Name = CONCAT(a1.Name, @p0))", sql);
+        Assert.Equal("SELECT * FROM customers a0 WHERE a0.Age IN (SELECT a1.Age AS Age FROM customers a1 WHERE a1.Name = CONCAT(a0.Name, @p0))", sql);
         Assert.Single(parameters);
         Assert.Equal("_VIP", parameters["@p0"]);
+    }
+
+    [Fact]
+    public void FromSubquery_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromSubquery();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert - Subquery in FROM clause should be wrapped in parentheses with alias and projection columns should use generated aliases
+        Assert.Equal("SELECT a1.Id AS Id, a1.prj0 AS prj0 FROM (SELECT a0.Id AS Id, (a0.Age + @p0) AS prj0 FROM customers a0) a1", sql);
+        Assert.Single(parameters);
+        Assert.Equal(1, parameters["@p0"]);        
     }
 }

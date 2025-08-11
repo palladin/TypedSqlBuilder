@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
 
@@ -22,7 +23,13 @@ public static class TypedSql
     public static ISqlQuery<TSqlTable> From<TSqlTable>()
         where TSqlTable : ISqlTable, new()
     {
-        return new FromClause<TSqlTable>(new TSqlTable());
+        return new FromTableClause<TSqlTable>(new TSqlTable());
+    }
+
+    public static ISqlQuery<TSource> From<TSource>(ISqlQuery<TSource> query)
+        where TSource : ITuple        
+    {
+        return new FromSubQueryClause<TSource>(query);
     }
 
     public static ISqlDeleteStatement<TSqlTable> Delete<TSqlTable>()

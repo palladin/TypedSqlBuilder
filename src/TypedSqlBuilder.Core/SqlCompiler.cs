@@ -10,7 +10,7 @@ public record Context
 {
     public ImmutableDictionary<SqlExpr, SqlExprAlias> ProjectionAliases { get; init; } = ImmutableDictionary<SqlExpr, SqlExprAlias>.Empty;
 
-    public int AliasIndex { get; init; } = 0;
+    public int AliasIndex { get; init; } = -1;
 
     public ImmutableDictionary<ISqlTable, int> TableAliases { get; init; } = ImmutableDictionary<ISqlTable, int>.Empty;
 
@@ -51,13 +51,37 @@ public record Context
         }
         
         // For statements, use AliasIndex directly (not incremented)
-        var newAliasIndex = AliasIndex;
+        var newAliasIndex = AliasIndex + 1;
         var newContext = this with 
         { 
             TableAliases = TableAliases.Add(table, newAliasIndex)
         };
         return (newAliasIndex, newContext);
     }
+}
+
+/// <summary>
+/// Synthetic table representation for subqueries in FROM clauses.
+/// Allows the compiler to treat subqueries as tables with projected columns.
+/// </summary>
+internal class SubQueryTable : ISqlTable
+{
+    private readonly object[] _columns;
+    
+    public string TableName { get; }
+    public ISqlQuery SubQuery { get; }
+    
+    public SubQueryTable(string tableAlias, ISqlQuery subQuery)
+    {
+        TableName = tableAlias;
+        SubQuery = subQuery;
+        
+        // For now, create a placeholder array - we'll populate it based on the subquery's projection
+        _columns = new object[10]; // arbitrary size, will be populated dynamically
+    }
+    
+    public object? this[int index] => _columns[index];
+    public int Length => _columns.Length;
 }
 
 /// <summary>
@@ -184,7 +208,7 @@ public abstract class SqlCompiler
             OrderByClause(_, var keySelectors) =>
                 new SelectClause(query, tuple => tuple),
                 
-            FromClause(var table) =>
+            FromTableClause(var table) =>
                 new SelectClause(query, tuple => tuple),
             
             // Already in canonical form
@@ -197,47 +221,62 @@ public abstract class SqlCompiler
     /// </summary>
     /// <param name="query">The SQL query or clause to compile</param>
     /// <returns>The SQL string representation</returns>
-    public virtual (string, Context) Compile(ISqlQuery query, Context context)
+    public virtual (string, ITuple, Context) Compile(ISqlQuery query, Context context)
     {
         // First normalize the query to apply all fusion rules
         var normalizedQuery = Normalize(query);
         
         switch (normalizedQuery)
         {
-            case SelectClause(FromClause(var table), var selector):
+            case SelectClause(FromTableClause(var table), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, newContext);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex}", projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, newContext);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex}", selected, projectionCtx);
             }
 
-            case SelectClause(WhereClause(FromClause(var table), var predicate), var selector):
+            case SelectClause(FromSubQueryClause(var subQuery), var selector):
+            {
+                // Compile the subquery
+                var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
+                var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                var selected = selector(tuple);
+                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, newContext);
+                return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex}", selected, projectionCtx);
+            }
+
+            case SelectClause(WhereClause(FromTableClause(var table), var predicate), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, whereCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause}", projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, whereCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
             }
 
-            case SelectClause(OrderByClause(FromClause(var table), var keySelectors), var selector):
+            case SelectClause(OrderByClause(FromTableClause(var table), var keySelectors), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, newContext);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, orderCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} ORDER BY {orderByClause}", projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, orderCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
-            case SelectClause(OrderByClause(WhereClause(FromClause(var table), var predicate), var keySelectors), var selector):
+            case SelectClause(OrderByClause(WhereClause(FromTableClause(var table), var predicate), var keySelectors), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, orderCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, orderCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
             default:
@@ -325,13 +364,15 @@ public abstract class SqlCompiler
             case SumSqlIntClause(var query):
             {
                 var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)));
-                return Compile(sumQuery, context);
-            }
+                var (sql, _, ctx) = Compile(sumQuery, context);
+                return (sql, ctx);
+            }        
 
             case CountClause(var query):
             {
                 var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()));
-                return Compile(countQuery, context);
+                var (sql, _, ctx) = Compile(countQuery, context);
+                return (sql, ctx);
             }
 
             default:
@@ -493,7 +534,7 @@ public abstract class SqlCompiler
             case SqlInSubQuery(var expression, var subQuery):
             {
                 var (exprSql, ctx) = Compile(expression, context);
-                var (subQuerySql, finalCtx) = Compile((ISqlQuery)subQuery, ctx);
+                var (subQuerySql, _, finalCtx) = Compile((ISqlQuery)subQuery, ctx);
                 
                 return ($"{exprSql} IN ({subQuerySql})", finalCtx);
             }
@@ -586,14 +627,14 @@ public abstract class SqlCompiler
             case SumSqlIntClause(var query):
             {
                 var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)));
-                var (sql, ctx) = Compile(sumQuery, context);
+                var (sql, _, ctx) = Compile(sumQuery, context);
                 return ($"({sql})", ctx);
             }
 
             case CountClause(var query):
             {
                 var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()));
-                var (sql, ctx) = Compile(countQuery, context);
+                var (sql, _, ctx) = Compile(countQuery, context);
                 return ($"({sql})", ctx);
             }
 
@@ -717,33 +758,31 @@ public abstract class SqlCompiler
     /// <param name="table">The table being selected from</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The projection SQL string and updated context</returns>
-    protected virtual (string, Context) CompileProjection(ITuple selected, ISqlTable table, Context context)
+    protected virtual (string, Context) CompileProjection(ITuple selected, ISqlTable table, int aliasIndex, Context context)
     {
         // If selector returns the same table object (identity selector), use SELECT *
         if (ReferenceEquals(selected, table))
         {
             return ("*", context);
         }
-        
-        return CompileTupleProjection(selected, context);
-    }    
 
-    /// <summary>
-    /// Compiles a tuple projection into a SELECT list.
-    /// </summary>
-    /// <param name="tuple">The tuple to compile</param>
-    /// <param name="table">The table being selected from (for alias resolution)</param>
-    /// <param name="context">The compilation context</param>
-    /// <returns>The SQL string representation and updated context</returns>
-    protected virtual (string, Context) CompileTupleProjection(ITuple tuple, Context context)
+        return CompileTupleProjection(selected, aliasIndex, context);
+    }
+
+    protected virtual (string, Context) CompileProjection(ITuple selected, ITuple table, int aliasIndex, Context context)
     {
-        var items = new List<(string Projection, string Alias)>();
-        var ctx = context;
+        // If selector returns the same table object (identity selector), use SELECT *
+        if (ReferenceEquals(selected, table))
+        {
+            return ("*", context);
+        }
 
-        // Get new alias index
-        ctx = ctx with { AliasIndex = ctx.AliasIndex + 1 };
-        var aliasIndex = ctx.AliasIndex;
+        return CompileTupleProjection(selected, aliasIndex, context);
+    }
 
+    private ImmutableArray<SqlExpr> FlattenTuple(ITuple tuple)
+    {
+        var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
         for (int i = 0; i < tuple.Length; i++)
         {
             var item = tuple[i];
@@ -753,22 +792,60 @@ public abstract class SqlCompiler
                     // ignore null values
                     break;
                 case SqlExpr expr:
-                    {
-                        string fieldAlias = expr is ISqlColumn sqlColumn ? sqlColumn.ColumnName : $"prj{items.Count}";
-                        var sourceAlias = $"a{aliasIndex}";
-                        var (compiled, newCtx) = Compile(expr, ctx);
-                        items.Add((compiled, fieldAlias));
-                        ctx = newCtx;
-
-                        if (!ctx.ProjectionAliases.ContainsKey(expr))
-                        {
-                            ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.Add(expr, new SqlExprAlias(sourceAlias, fieldAlias)) };
-                        }
-                        break;
-                    }
+                    flattened.Add(expr);
+                    break;
+                case ITuple subTuple:
+                    // Recursively flatten nested tuples
+                    flattened.AddRange(FlattenTuple(subTuple));
+                    break;
                 default:
-                    throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported in projections");
+                    throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported");
             }
+        }
+        return flattened.ToImmutable();
+    }
+
+    private Context UpdateProjectionAliases(ITuple tuple, Context context)
+    {
+        // Update projection aliases for the tuple items        
+        var ctx = context with { AliasIndex = context.AliasIndex + 1 };
+        var aliasIndex = ctx.AliasIndex;
+
+        foreach (var expr in FlattenTuple(tuple))
+        {            
+            if (ctx.ProjectionAliases.TryGetValue(expr, out var existingAlias))
+            {
+                ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.SetItem(expr, new SqlExprAlias($"a{aliasIndex}", existingAlias.Field)) };
+            }
+            else
+                throw new InvalidOperationException($"Expression {expr} does not have a projection alias defined in the context.");         
+        }
+        return ctx;
+    }
+
+    /// <summary>
+    /// Compiles a tuple projection into a SELECT list.
+    /// </summary>
+    /// <param name="tuple">The tuple to compile</param>
+    /// <param name="table">The table being selected from (for alias resolution)</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    protected virtual (string, Context) CompileTupleProjection(ITuple tuple, int aliasIndex, Context context)
+    {
+        var items = new List<(string Projection, string Alias)>();
+        var ctx = context;        
+        int projectionCount = 0;
+
+        foreach (var expr in FlattenTuple(tuple))
+        {            
+            var (compiled, newCtx) = Compile(expr, ctx);
+            ctx = newCtx;
+
+            string fieldAlias = expr is ISqlColumn sqlColumn ? sqlColumn.ColumnName : $"prj{projectionCount++}";
+            items.Add((compiled, fieldAlias));
+
+            ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.SetItem(expr, new SqlExprAlias($"a{ctx.AliasIndex}", fieldAlias)) };
+         
         }
 
         return (string.Join(", ", items.Select(i => $"{i.Projection} AS {i.Alias}")), ctx);

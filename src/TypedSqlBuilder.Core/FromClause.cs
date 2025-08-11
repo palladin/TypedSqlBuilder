@@ -134,7 +134,9 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 /// Establishes the source table for a query.
 /// </summary>
 /// <param name="Table">The table being queried</param>
-public record FromClause(ISqlTable Table) : ISqlQuery;
+public record FromTableClause(ISqlTable Table) : ISqlQuery;
+
+public record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed FROM clause that preserves column type information.
@@ -142,8 +144,12 @@ public record FromClause(ISqlTable Table) : ISqlQuery;
 /// </summary>
 /// <typeparam name="TColumns">The tuple type representing the table's columns</typeparam>
 /// <param name="Table">The table being queried</param>
-public record FromClause<TColumns>(ISqlTable Table) : FromClause(Table), ISqlQuery<TColumns>
+public record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
     where TColumns : ITuple;
+
+public record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQueryClause(query), ISqlQuery<TSource>
+    where TSource : ITuple;
+
 
 /// <summary>
 /// Base record representing a SQL SELECT clause with tuple projection.
