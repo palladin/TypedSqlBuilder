@@ -18,3 +18,12 @@ public class Product() : SqlTable<SqlIntColumn, SqlStringColumn>("products")
     public SqlIntColumn ProductId => Column1("ProductId");
     public SqlStringColumn ProductName => Column2("ProductName");
 }
+
+/// <summary>
+/// Database instance containing static readonly table instances for testing
+/// </summary>
+public static class Db
+{
+    public static readonly Customer Customers = new();
+    public static readonly Product Products = new();
+}

@@ -5,29 +5,75 @@ using System.Text.RegularExpressions;
 
 namespace TypedSqlBuilder.Core;
 
+/// <summary>
+/// Represents an alias mapping for SQL expressions in projection contexts.
+/// Used to track how expressions from inner queries should be referenced in outer queries.
+/// </summary>
+/// <param name="Name">The table alias name (e.g., "a0", "a1")</param>
+/// <param name="Field">The field name within the aliased table</param>
 public record SqlExprAlias(string Name, string Field);
 
+/// <summary>
+/// Represents the compilation context used during SQL query compilation.
+/// Tracks table aliases, projection aliases, parameters, and alias indices to ensure
+/// consistent SQL generation across nested queries and complex expressions.
+/// </summary>
 public record Context
 {
+    /// <summary>
+    /// Gets or sets the mapping of SQL expressions to their projection aliases.
+    /// Used to reference expressions in outer queries when they were projected in inner queries.
+    /// </summary>
     public ImmutableDictionary<SqlExpr, SqlExprAlias> ProjectionAliases { get; init; } = ImmutableDictionary<SqlExpr, SqlExprAlias>.Empty;
 
+    /// <summary>
+    /// Gets or sets the current alias index used for generating unique table aliases.
+    /// Incremented each time a new table alias is needed (e.g., a0, a1, a2, etc.).
+    /// </summary>
     public int AliasIndex { get; init; } = -1;
 
+    /// <summary>
+    /// Gets or sets the mapping of SQL tables to their assigned alias indices.
+    /// Ensures that the same table gets the same alias throughout the compilation process.
+    /// </summary>
     public ImmutableDictionary<ISqlTable, int> TableAliases { get; init; } = ImmutableDictionary<ISqlTable, int>.Empty;
 
+    /// <summary>
+    /// Gets or sets the collection of named parameters and their values.
+    /// Used to generate parameterized SQL queries to prevent SQL injection.
+    /// </summary>
     public ImmutableDictionary<string, object> Parameters { get; init; } = ImmutableDictionary<string, object>.Empty;
 
+    /// <summary>
+    /// Adds a named parameter with its value to the context.
+    /// </summary>
+    /// <param name="name">The parameter name (including prefix like @p0)</param>
+    /// <param name="value">The parameter value</param>
+    /// <returns>A new context with the parameter added</returns>
     public Context AddParameter(string name, object value)
     {
         return this with { Parameters = Parameters.Add(name, value) };
     }
 
+    /// <summary>
+    /// Generates a unique parameter name and adds the value to the context.
+    /// </summary>
+    /// <param name="value">The parameter value</param>
+    /// <param name="prefix">The parameter prefix (default is "@")</param>
+    /// <returns>A tuple containing the generated parameter name and the updated context</returns>
     public (string paramName, Context newContext) GenerateParameter(object value, string prefix = "@")
     {
         var paramName = $"{prefix}p{Parameters.Count}";
         return (paramName, AddParameter(paramName, value));
     }
 
+    /// <summary>
+    /// Gets or creates a table alias for the specified table.
+    /// If the table already has an alias, returns the existing one.
+    /// Otherwise, creates a new alias and increments the alias index.
+    /// </summary>
+    /// <param name="table">The table to get or create an alias for</param>
+    /// <returns>A tuple containing the alias index and the updated context</returns>
     public (int aliasIndex, Context newContext) GetOrAddTableAlias(ISqlTable table)
     {
         if (TableAliases.TryGetValue(table, out var existingAlias))
@@ -44,6 +90,13 @@ public record Context
         return (newAliasIndex, newContext);
     }
 
+    /// <summary>
+    /// Gets or creates a table alias for the specified table in statement contexts.
+    /// Similar to GetOrAddTableAlias but doesn't update the AliasIndex when adding new tables.
+    /// This is used specifically for SQL statements where alias behavior differs from queries.
+    /// </summary>
+    /// <param name="table">The table to get or create an alias for</param>
+    /// <returns>A tuple containing the alias index and the updated context</returns>
     public (int aliasIndex, Context newContext) GetOrAddTableAliasForStatement(ISqlTable table)
     {
         if (TableAliases.TryGetValue(table, out var existingAlias))
@@ -51,7 +104,7 @@ public record Context
             return (existingAlias, this);
         }
         
-        // For statements, use AliasIndex directly (not incremented)
+        // For statements, increment from current AliasIndex but don't update it in context
         var newAliasIndex = AliasIndex + 1;
         var newContext = this with 
         { 
@@ -88,7 +141,11 @@ public abstract class SqlCompiler
 
     /// <summary>
     /// Generates a parameter for the given value using the database-specific parameter prefix.
+    /// This method delegates to the context's GenerateParameter method with the compiler's prefix.
     /// </summary>
+    /// <param name="context">The compilation context</param>
+    /// <param name="value">The value to parameterize</param>
+    /// <returns>A tuple containing the generated parameter name and updated context</returns>
     protected (string paramName, Context newContext) GenerateParameter(Context context, object value)
     {
         return context.GenerateParameter(value, ParameterPrefix);
@@ -209,9 +266,12 @@ public abstract class SqlCompiler
 
     /// <summary>
     /// Compiles SQL queries and clauses to SQL string representation.
+    /// First normalizes the query to apply fusion rules, then pattern matches
+    /// to generate appropriate SQL for each query structure.
     /// </summary>
     /// <param name="query">The SQL query or clause to compile</param>
-    /// <returns>The SQL string representation</returns>
+    /// <param name="context">The compilation context for tracking aliases and parameters</param>
+    /// <returns>A tuple containing the SQL string, the selected tuple, and updated context</returns>
     public virtual (string, ITuple, Context) Compile(ISqlQuery query, Context context)
     {
         // First normalize the query to apply all fusion rules
@@ -861,6 +921,7 @@ public abstract class SqlCompiler
 
     /// <summary>
     /// Compiles a projection based on the selected value, handling both identity selectors (SELECT *) and tuple projections.
+    /// This is the basic version without explicit alias support.
     /// </summary>
     /// <param name="selected">The selected value from the selector - either the table itself or a tuple projection</param>
     /// <param name="table">The table being selected from</param>
@@ -877,6 +938,15 @@ public abstract class SqlCompiler
         return CompileTupleProjection(selected, [], context);
     }
 
+    /// <summary>
+    /// Compiles a projection based on the selected value with explicit aliases support.
+    /// Handles both identity selectors (SELECT *) and tuple projections with optional field aliases.
+    /// </summary>
+    /// <param name="selected">The selected value from the selector - either the table itself or a tuple projection</param>
+    /// <param name="table">The table being selected from</param>
+    /// <param name="aliases">Optional array of field aliases for the projection columns</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The projection SQL string and updated context</returns>
     protected virtual (string, Context) CompileProjection(ITuple selected, ITuple table, ImmutableArray<string?> aliases, Context context)
     {
         // If selector returns the same table object (identity selector), use SELECT *
@@ -888,6 +958,13 @@ public abstract class SqlCompiler
         return CompileTupleProjection(selected, aliases, context);
     }
 
+    /// <summary>
+    /// Recursively flattens a tuple structure into a flat array of SQL expressions.
+    /// Handles nested tuples and ignores null values, extracting only SqlExpr instances.
+    /// </summary>
+    /// <param name="tuple">The tuple to flatten</param>
+    /// <returns>An immutable array containing all SqlExpr instances found in the tuple hierarchy</returns>
+    /// <exception cref="NotSupportedException">Thrown when a tuple contains unsupported item types</exception>
     private ImmutableArray<SqlExpr> FlattenTuple(ITuple tuple)
     {
         var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
@@ -913,6 +990,14 @@ public abstract class SqlCompiler
         return flattened.ToImmutable();
     }
 
+    /// <summary>
+    /// Updates projection aliases for tuple expressions when wrapping queries as subqueries.
+    /// This method ensures that expressions from inner queries can be properly referenced
+    /// in outer queries by updating their alias table references.
+    /// </summary>
+    /// <param name="tuple">The tuple containing expressions to update aliases for</param>
+    /// <param name="context">The current compilation context</param>
+    /// <returns>A new context with updated projection aliases and incremented alias index</returns>
     private Context UpdateProjectionAliases(ITuple tuple, Context context)
     {
         // Update projection aliases for the tuple items        
@@ -932,10 +1017,11 @@ public abstract class SqlCompiler
     }
 
     /// <summary>
-    /// Compiles a tuple projection into a SELECT list.
+    /// Compiles a tuple projection into a SELECT list with proper aliasing.
+    /// Flattens nested tuples, generates appropriate field aliases, and updates projection aliases in context.
     /// </summary>
     /// <param name="tuple">The tuple to compile</param>
-    /// <param name="table">The table being selected from (for alias resolution)</param>
+    /// <param name="aliases">Optional array of explicit field aliases</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The SQL string representation and updated context</returns>
     protected virtual (string, Context) CompileTupleProjection(ITuple tuple, ImmutableArray<string?> aliases, Context context)
@@ -1074,8 +1160,12 @@ public abstract class SqlCompiler
     }
 
     /// <summary>
-    /// Helper method to extract table and set clauses from an UPDATE statement chain.
+    /// Helper method to extract table and SET clauses from an UPDATE statement chain.
+    /// Recursively processes nested SetStatement structures to build the complete list of SET clauses.
     /// </summary>
+    /// <param name="statement">The UPDATE or SET statement to extract from</param>
+    /// <returns>A tuple containing the target table and all SET clauses</returns>
+    /// <exception cref="NotSupportedException">Thrown when the statement type is not supported for extraction</exception>
     private (ISqlTable table, ImmutableArray<SetClause> setClauses) ExtractUpdateTableAndClauses(ISqlStatement statement)
     {
         switch (statement)
@@ -1091,8 +1181,12 @@ public abstract class SqlCompiler
     }
 
     /// <summary>
-    /// Helper method to extract table and value clauses from an INSERT statement chain.
+    /// Helper method to extract table and VALUE clauses from an INSERT statement chain.
+    /// Recursively processes nested ValueStatement structures to build the complete list of VALUE clauses.
     /// </summary>
+    /// <param name="statement">The INSERT or VALUE statement to extract from</param>
+    /// <returns>A tuple containing the target table and all VALUE clauses</returns>
+    /// <exception cref="NotSupportedException">Thrown when the statement type is not supported for extraction</exception>
     private (ISqlTable table, ImmutableArray<ValueClause> valueClauses) ExtractInsertTableAndClauses(ISqlStatement statement)
     {
         switch (statement)

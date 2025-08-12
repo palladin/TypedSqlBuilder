@@ -23,6 +23,20 @@ public class SqlServerQueryTests
     }
 
     [Fact]
+    public void FromStatic_GeneratesCorrectSql()
+    {
+        // Test the old static TypedSql.From<T>() pattern
+        var query = TestQueries.FromStatic();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT * FROM customers a0", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void FromSelect_GeneratesCorrectSql()
     {
         // Arrange

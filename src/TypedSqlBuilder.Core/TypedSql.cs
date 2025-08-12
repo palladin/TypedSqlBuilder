@@ -25,6 +25,35 @@ public static class TypedSql
     {
         return new FromTableClause<TSqlTable>(new TSqlTable());
     }
+    
+    /// <summary>
+    /// Creates a query from a SqlTable instance using extension method syntax for more fluent method chaining.
+    /// This extension method provides a more natural and readable way to start query chains by allowing
+    /// table instances to be used directly in fluent syntax patterns.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="_">The table instance (parameter is ignored, a fresh instance is created internally)</param>
+    /// <returns>A typed SQL query that can be further composed with additional clauses</returns>
+    /// <example>
+    /// <code>
+    /// var users = new UsersTable();
+    /// var query = users.From()  // More fluent than TypedSql.From&lt;UsersTable&gt;()
+    ///                  .Where(u => u.Age > 18)
+    ///                  .Select(u => new { u.Name, u.Email });
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// This method creates a fresh instance of the table internally rather than using the passed instance.
+    /// This is essential for proper alias disambiguation during SQL compilation, ensuring each table reference
+    /// gets a unique alias (e.g., a0, a1, a2) and preventing conflicts when the same table type is used
+    /// multiple times in complex queries or joins.
+    /// </remarks>
+    public static ISqlQuery<TSqlTable> From<TSqlTable>(this TSqlTable _)
+        where TSqlTable : ISqlTable, new()
+    {
+        // Create a fresh instance of the table
+        return new FromTableClause<TSqlTable>(new TSqlTable());
+    }
 
     /// <summary>
     /// Creates a query from a subquery.
@@ -34,7 +63,7 @@ public static class TypedSql
     /// <param name="query">The subquery to use as the source</param>
     /// <returns>A typed SQL query that can be further composed</returns>
     public static ISqlQuery<TSource> From<TSource>(ISqlQuery<TSource> query)
-        where TSource : ITuple        
+        where TSource : ITuple
     {
         return new FromSubQueryClause<TSource>(query);
     }
