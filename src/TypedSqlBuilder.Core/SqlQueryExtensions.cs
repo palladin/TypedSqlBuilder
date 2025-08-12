@@ -344,24 +344,6 @@ public static class SqlQueryExtensions
 
 
     /// <summary>
-    /// Compiles the SQL query using the specified SQL compiler.
-    /// </summary>
-    /// <param name="query">The SQL query to compile</param>
-    /// <param name="compiler">The SQL compiler to use for compilation</param>
-    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
-    /// <example>
-    /// <code>
-    /// var (sql, parameters) = query.ToSqlRaw(SqlCompiler.SqlServer);
-    /// var (sql2, parameters2) = query.ToSqlRaw(SqlCompiler.Sqlite);
-    /// </code>
-    /// </example>
-    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlQuery query, SqlCompiler compiler)
-    {
-        var (sql, _, context) = compiler.Compile(query, new Context());
-        return (sql, context.Parameters);
-    }
-
-    /// <summary>
     /// Compiles the SQL query to SQL Server syntax with parameters.
     /// </summary>
     /// <param name="query">The SQL query to compile</param>
@@ -373,8 +355,9 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlQuery query)
     {
-        var (sql, _, context) = SqlCompiler.SqlServer.Compile(query, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SqlServer };
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context);
+        return (sql, resultContext.Parameters);
     }
 
     /// <summary>
@@ -389,26 +372,9 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlQuery query)
     {
-        var (sql, _, context) = SqlCompiler.Sqlite.Compile(query, new Context());
-        return (sql, context.Parameters);
-    }
-
-    /// <summary>
-    /// Compiles the SQL statement using the specified SQL compiler.
-    /// </summary>
-    /// <param name="statement">The SQL statement to compile</param>
-    /// <param name="compiler">The SQL compiler to use for compilation</param>
-    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
-    /// <example>
-    /// <code>
-    /// var (sql, parameters) = statement.ToSqlRaw(SqlCompiler.SqlServer);
-    /// var (sql2, parameters2) = statement.ToSqlRaw(SqlCompiler.Sqlite);
-    /// </code>
-    /// </example>
-    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlStatement statement, SqlCompiler compiler)
-    {
-        var (sql, context) = compiler.Compile(statement, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SQLite };
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context);
+        return (sql, resultContext.Parameters);
     }
 
     /// <summary>
@@ -423,8 +389,9 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlStatement statement)
     {
-        var (sql, context) = SqlCompiler.SqlServer.Compile(statement, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SqlServer };
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context);
+        return (sql, resultContext.Parameters);
     }
 
     /// <summary>
@@ -439,26 +406,9 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlStatement statement)
     {
-        var (sql, context) = SqlCompiler.Sqlite.Compile(statement, new Context());
-        return (sql, context.Parameters);
-    }
-
-    /// <summary>
-    /// Compiles the SQL scalar query using the specified SQL compiler.
-    /// </summary>
-    /// <param name="scalarQuery">The SQL scalar query to compile</param>
-    /// <param name="compiler">The SQL compiler to use for compilation</param>
-    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
-    /// <example>
-    /// <code>
-    /// var (sql, parameters) = countQuery.ToSqlRaw(SqlCompiler.SqlServer);
-    /// var (sql2, parameters2) = countQuery.ToSqlRaw(SqlCompiler.Sqlite);
-    /// </code>
-    /// </example>
-    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlScalarQuery scalarQuery, SqlCompiler compiler)
-    {
-        var (sql, context) = compiler.Compile(scalarQuery, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SQLite };
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context);
+        return (sql, resultContext.Parameters);
     }
 
     /// <summary>
@@ -473,8 +423,9 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlScalarQuery scalarQuery)
     {
-        var (sql, context) = SqlCompiler.SqlServer.Compile(scalarQuery, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SqlServer };
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context);
+        return (sql, resultContext.Parameters);
     }
 
     /// <summary>
@@ -489,7 +440,8 @@ public static class SqlQueryExtensions
     /// </example>
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlScalarQuery scalarQuery)
     {
-        var (sql, context) = SqlCompiler.Sqlite.Compile(scalarQuery, new Context());
-        return (sql, context.Parameters);
+        var context = new Context { Dialect = SqlDialect.SQLite };
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context);
+        return (sql, resultContext.Parameters);
     }
 }
