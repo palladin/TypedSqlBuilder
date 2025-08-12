@@ -671,4 +671,36 @@ public class SqliteQueryTests
         Assert.Single(parameters);
         Assert.Equal(1, parameters[":p0"]);        
     }
+
+    [Fact]
+    public void FromWhereSelectWhereFromNested_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereSelectWhereFromNested();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - Nested subquery: select(where(select(where(from))))
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM (SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE a0.Age > :p0) a1 WHERE a1.Id > :p1", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal(100, parameters[":p1"]);
+    }
+
+    [Fact]
+    public void FromWhereSelectWhereNested_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereSelectWhereNested();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - Linear chain: from().where().select().where().select()
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name FROM (SELECT a0.Id AS Id, a0.Name AS Name FROM customers a0 WHERE a0.Age > :p0) a1 WHERE a1.Id > :p1", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal(100, parameters[":p1"]);
+    }
 }

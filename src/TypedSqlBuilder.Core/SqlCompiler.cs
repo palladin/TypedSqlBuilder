@@ -205,24 +205,13 @@ public abstract class SqlCompiler
         
         switch (normalizedQuery)
         {
+            // ========== FROM TABLE CASES ==========
             case SelectClause(FromTableClause(var table), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
                 var selected = selector(table);
                 var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, newContext);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex}", selected, projectionCtx);
-            }
-
-            case SelectClause(FromSubQueryClause(var subQuery), var selector):
-            {
-                // Compile the subquery
-                var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
-                var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
-                var aliasIndex = newContext.AliasIndex;
-
-                var selected = selector(tuple);
-                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, newContext);
-                return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex}", selected, projectionCtx);
             }
 
             case SelectClause(WhereClause(FromTableClause(var table), var predicate), var selector):
@@ -254,6 +243,49 @@ public abstract class SqlCompiler
                 var selected = selector(table);
                 var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
+            }
+
+            // ========== FROM SUBQUERY CASES ==========
+            case SelectClause(FromSubQueryClause(var subQuery), var selector):
+            {
+                // Compile the subquery
+                var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
+                var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                var selected = selector(tuple);
+                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, newContext);
+                return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex}", selected, projectionCtx);
+            }
+
+            case SelectClause(WhereClause(FromSubQueryClause(var subQuery), var predicate), var selector):
+            {
+                // Compile the subquery
+                var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
+                var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                // Apply WHERE clause to the subquery result
+                var (whereClause, whereCtx) = Compile(predicate(tuple), newContext);
+                var selected = selector(tuple);
+                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, whereCtx);
+                return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
+            }
+
+            // General case: WHERE clause applied to any other query type (not FromTableClause or FromSubQueryClause)
+            // This automatically wraps the inner query as a subquery
+            case SelectClause(WhereClause(var innerQuery, var predicate), var selector):
+            {
+                // Compile the inner query and treat it as a subquery
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(innerQuery, context);
+                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                // Apply WHERE clause to the subquery result
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, whereCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
             }
 
             default:

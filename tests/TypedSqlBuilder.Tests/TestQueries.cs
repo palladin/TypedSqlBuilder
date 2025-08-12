@@ -223,8 +223,25 @@ public static class TestQueries
             ));
 
     public static ISqlQuery FromSubquery()
-        => TypedSql.From(TypedSql.From<Customer>().Select(x => (x.Id, NewAge: x.Age + 1)))            
+        => TypedSql.From(TypedSql.From<Customer>().Select(x => (x.Id, NewAge: x.Age + 1)))
             .Select(x => (x.Id, x.NewAge));
+
+    // Nested subquery test: select(where(select(where(from))))
+    public static ISqlQuery FromWhereSelectWhereFromNested()
+        => TypedSql.From(
+                TypedSql.From<Customer>()
+                    .Where(c => c.Age > 18)
+                    .Select(c => (c.Id, c.Name))
+            )
+            .Where(x => x.Id > 100)
+            .Select(x => (x.Id, x.Name));
+            
+    public static ISqlQuery FromWhereSelectWhereNested() =>
+        TypedSql.From<Customer>()
+                .Where(c => c.Age > 18)
+                .Select(c => (c.Id, c.Name))
+                .Where(x => x.Id > 100)
+                .Select(x => (x.Id, x.Name));
             
             
 
