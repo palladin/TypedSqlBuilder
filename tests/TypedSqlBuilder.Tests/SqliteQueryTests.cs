@@ -245,7 +245,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - SQLite uses || for string concatenation instead of CONCAT
-        var expectedSql = "SELECT a0.Id AS Id, (a0.Name || :p2) AS prj0, (a0.Age + :p3) AS prj1 FROM customers a0 WHERE (a0.Age >= :p0) AND (a0.Name != :p1) ORDER BY a0.Name ASC";
+    var expectedSql = "SELECT a0.Id AS CustomerId, (a0.Name || :p2) AS CustomerInfo, (a0.Age + :p3) AS AdjustedAge FROM customers a0 WHERE (a0.Age >= :p0) AND (a0.Name != :p1) ORDER BY a0.Name ASC";
         Assert.Equal(expectedSql, sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(21, parameters[":p0"]);
@@ -298,7 +298,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT a0.Id AS Id, ((a0.Id * :p1) + a0.Age) AS prj0, a0.Name AS Name FROM customers a0 WHERE a0.Age > :p0", sql);
+    Assert.Equal("SELECT a0.Id AS OriginalId, ((a0.Id * :p1) + a0.Age) AS ModifiedId, a0.Name AS CustomerName FROM customers a0 WHERE a0.Age > :p0", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(100, parameters[":p1"]);
@@ -667,7 +667,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert - Subquery in FROM clause should be wrapped in parentheses with alias and projection columns should use generated aliases
-        Assert.Equal("SELECT a1.Id AS Id, a1.prj0 AS prj0 FROM (SELECT a0.Id AS Id, (a0.Age + :p0) AS prj0 FROM customers a0) a1", sql);
+    Assert.Equal("SELECT a1.Id AS Id, a1.NewAge AS NewAge FROM (SELECT a0.Id AS Id, (a0.Age + :p0) AS NewAge FROM customers a0) a1", sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters[":p0"]);        
     }
@@ -703,7 +703,6 @@ public class SqliteQueryTests
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(100, parameters[":p1"]);
     }
-
     [Fact]
     public void FromGroupBySelect_GeneratesCorrectSql()
     {
@@ -714,7 +713,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age", sql);
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS Count FROM customers a0 GROUP BY a0.Age", sql);
         Assert.Empty(parameters);
     }
 
@@ -728,7 +727,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT a0.Age AS Age, a0.Name AS Name, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age, a0.Name", sql);
+        Assert.Equal("SELECT a0.Age AS Age, a0.Name AS Name, COUNT(*) AS Count FROM customers a0 GROUP BY a0.Age, a0.Name", sql);
         Assert.Empty(parameters);
     }
 
@@ -742,7 +741,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age HAVING COUNT(*) > :p0", sql);
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS Count FROM customers a0 GROUP BY a0.Age HAVING COUNT(*) > :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters[":p0"]);
     }
@@ -757,7 +756,7 @@ public class SqliteQueryTests
         var (sql, parameters) = query.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 WHERE a0.Age >= :p0 GROUP BY a0.Age", sql);
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS Count FROM customers a0 WHERE a0.Age >= :p0 GROUP BY a0.Age", sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters[":p0"]);
     }

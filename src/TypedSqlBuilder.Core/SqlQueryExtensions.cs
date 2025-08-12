@@ -9,6 +9,18 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public static class SqlQueryExtensions
 {
+    private static ImmutableArray<string?> GetTupleElementNames(Delegate @delegate)
+    {
+        var method = @delegate.Method;
+        // Prefer ReturnParameter custom attributes which reliably carry TupleElementNamesAttribute
+        var tupleNamesAttr = method.ReturnParameter?.GetCustomAttributes(typeof(TupleElementNamesAttribute), false)
+            .Cast<TupleElementNamesAttribute>()
+            .FirstOrDefault();
+
+        return tupleNamesAttr?.TransformNames?.ToImmutableArray() ?? [];
+    }
+
+
     /// <summary>
     /// Projects the query result to a different tuple type.
     /// Transforms query results while maintaining type safety.
@@ -27,7 +39,9 @@ public static class SqlQueryExtensions
         where TSource : ITuple
         where TResult : ITuple
     {
-        return new SelectClause<TSource, TResult>(query, selector);
+        // Capture tuple element names (if any) from the selector's return type
+        var names = GetTupleElementNames(selector);
+        return new SelectClause<TSource, TResult>(query, selector, names);
     }
 
     /// <summary>
@@ -46,7 +60,7 @@ public static class SqlQueryExtensions
     public static ISqlQuery<ValueTuple<SqlExprInt>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprInt>>(query, x => ValueTuple.Create(selector(x)));
+        return new SelectClause<TSource, ValueTuple<SqlExprInt>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -65,7 +79,7 @@ public static class SqlQueryExtensions
     public static ISqlQuery<ValueTuple<SqlExprBool>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprBool>>(query, x => ValueTuple.Create(selector(x)));
+        return new SelectClause<TSource, ValueTuple<SqlExprBool>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -84,7 +98,7 @@ public static class SqlQueryExtensions
     public static ISqlQuery<ValueTuple<SqlExprString>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprString>>(query, x => ValueTuple.Create(selector(x)));
+        return new SelectClause<TSource, ValueTuple<SqlExprString>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -299,7 +313,9 @@ public static class SqlQueryExtensions
         where TSource : ITuple
         where TResult : ITuple
     {
-        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc())); // Using a new SqlAggregateFunc instance to access aggregate functions
+        // Capture tuple element names from the original selector that constructs the tuple
+        var names = GetTupleElementNames(selector);
+        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc()), names);
     }
 
     /// <summary>
@@ -320,7 +336,9 @@ public static class SqlQueryExtensions
         where TSource : ITuple
         where TResult : ITuple
     {
-        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc())); // Using a new SqlAggregateFunc instance to access aggregate functions
+        // Capture tuple element names from the original selector that constructs the tuple
+        var names = GetTupleElementNames(selector);    
+        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc()), names);
     }
 
 

@@ -190,7 +190,7 @@ public record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQue
 /// </summary>
 /// <param name="Query">The source query</param>
 /// <param name="Selector">Function that transforms input tuples to output tuples</param>
-public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector) : ISqlQuery;
+public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed SELECT clause for tuple projections.
@@ -200,8 +200,8 @@ public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector) : ISq
 /// <typeparam name="TResult">The output tuple type after projection</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedSelector">Function that transforms source tuples to result tuples</param>
-public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector) 
-    : SelectClause(TypedQuery, x => TypedSelector((TSource) x)), ISqlQuery<TResult>
+public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases) 
+    : SelectClause(TypedQuery, x => TypedSelector((TSource) x), Aliases), ISqlQuery<TResult>
     where TSource : ITuple
     where TResult : ITuple;
 

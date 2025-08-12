@@ -183,6 +183,35 @@ public class SqlServerStatementsTests
     }
 
     [Fact]
+    public void UpdateSetNullInt_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNullInt();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("UPDATE customers SET customers.Age = NULL", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void UpdateSetNullWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNullWhere();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("UPDATE customers SET customers.Name = NULL WHERE customers.Id = @p0", sql);
+        Assert.Single(parameters);
+        Assert.Equal(1, parameters["@p0"]);
+    }
+
+    [Fact]
     public void InsertWithNull_GeneratesCorrectSql()
     {
         // Arrange
@@ -196,5 +225,21 @@ public class SqlServerStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(1, parameters["@p0"]);
         Assert.Equal(25, parameters["@p1"]);
+    }
+
+    [Fact]
+    public void InsertWithNullInt_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.InsertWithNullInt();
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (@p0, @p1, NULL)", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters["@p0"]);
+        Assert.Equal("John", parameters["@p1"]);
     }
 }
