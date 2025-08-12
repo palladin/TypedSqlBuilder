@@ -263,19 +263,16 @@ public abstract class SqlCompiler
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
 
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
-                string havingClause = "";
-                Context finalCtx = groupCtx;
+                var selected = selector(table);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
                 
-                if (havingPredicate is {})
+                if (havingPredicate is null)
+                    return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}", selected, projectionCtx);
+                else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
-                    havingClause = $" HAVING {havingSql}";
-                    finalCtx = havingCtx;
+                    return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause} HAVING {havingSql}", selected, havingCtx);
                 }
-                
-                var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, finalCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
             }
 
             case SelectClause(GroupByClause(WhereClause(FromTableClause(var table), var predicate), var keySelector, var havingPredicate), var selector):
@@ -284,19 +281,17 @@ public abstract class SqlCompiler
 
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, whereCtx);
-                string havingClause = "";
-                Context finalCtx = groupCtx;
+                var selected = selector(table);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
                 
-                if (havingPredicate is {})
+                if (havingPredicate is null)
+                    return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
+                else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
-                    havingClause = $" HAVING {havingSql}";
-                    finalCtx = havingCtx;
+                    return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause} HAVING {havingSql}", selected, havingCtx);
                 }
-                
-                var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, finalCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
+
             }
 
             // ========== GENERAL CASES ==========
@@ -379,19 +374,16 @@ public abstract class SqlCompiler
                 // Apply WHERE and GROUP BY clauses to the subquery result
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx);
-                string havingClause = "";
-                Context finalCtx = groupCtx;
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, groupCtx);
                 
-                if (havingPredicate is {})
+                if (havingPredicate is null)
+                    return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
+                else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
-                    havingClause = $" HAVING {havingSql}";
-                    finalCtx = havingCtx;
+                    return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause} HAVING {havingSql}", selected, havingCtx);
                 }
-                
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, finalCtx);
-                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
             }
 
 
