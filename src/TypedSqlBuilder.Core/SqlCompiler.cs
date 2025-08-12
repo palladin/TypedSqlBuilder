@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace TypedSqlBuilder.Core;
 
@@ -179,15 +180,24 @@ public abstract class SqlCompiler
         return query switch
         {
             // Wrap non-SELECT queries with SELECT * to match compiler patterns
-            WhereClause(_, var predicate) =>
+            WhereClause =>
                 new SelectClause(query, tuple => tuple),
                 
-            OrderByClause(_, var keySelectors) =>
+            OrderByClause =>
                 new SelectClause(query, tuple => tuple),
                 
-            FromTableClause(var table) =>
+            FromTableClause =>
                 new SelectClause(query, tuple => tuple),
-            
+
+            FromSubQueryClause =>
+                new SelectClause(query, tuple => tuple),
+
+            GroupByClause =>
+                new SelectClause(query, tuple => tuple),
+
+            HavingClause =>
+                new SelectClause(query, tuple => tuple),
+
             // Already in canonical form
             _ => query
         };
@@ -244,10 +254,42 @@ public abstract class SqlCompiler
                 var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
+            
+            case SelectClause(GroupByClause(FromTableClause(var table), var keySelector), var selector):
+            {
+                var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
+                var selected = selector(table);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}", selected, projectionCtx);
+            }
+
+            case SelectClause(GroupByClause(WhereClause(FromTableClause(var table), var predicate), var keySelector), var selector):
+            {
+                var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
+                var (whereClause, whereCtx) = Compile(predicate(table), newContext);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, whereCtx);
+                var selected = selector(table);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
+            }
+
+            case SelectClause(HavingClause(GroupByClause(FromTableClause(var table), var keySelector), var havingPredicate), var selector):
+            {
+                var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
+
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
+                var (havingClause, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
+                var selected = selector(table);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, havingCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause} HAVING {havingClause}", selected, projectionCtx);
+            }
 
             // ========== GENERAL CASES ==========
             // These cases handle any inner query type (including subqueries) by automatically wrapping them
-            
+
             // General case: SELECT from subquery (FromSubQueryClause)
             case SelectClause(FromSubQueryClause(var subQuery), var selector):
             {
@@ -311,6 +353,43 @@ public abstract class SqlCompiler
                 var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, orderCtx);
                 return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} ORDER BY {orderByClause}", selected, projectionCtx);
             }
+
+            // General case: GROUP BY + WHERE clause applied to any other query type
+            // This automatically wraps the inner query as a subquery
+            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector), var selector):
+            {
+                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
+                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
+                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                // Apply WHERE and GROUP BY clauses to the subquery result
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, groupCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
+            }
+
+            // General case: HAVING + GROUP BY clause applied to any other query type
+            // This automatically wraps the inner query as a subquery
+            case SelectClause(HavingClause(GroupByClause(var innerQuery, var keySelector), var havingPredicate), var selector):
+            {
+                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
+                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
+                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                // Apply GROUP BY and HAVING clauses to the subquery result
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, newContext);
+                var (havingClause, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, havingCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} GROUP BY {groupByClause} HAVING {havingClause}", selected, projectionCtx);
+            }
+
 
             default:
                 throw new NotSupportedException($"Query type {query.GetType().Name} is not supported");
@@ -904,6 +983,29 @@ public abstract class SqlCompiler
         }
 
         return (string.Join(", ", orderItems), ctx);
+    }
+
+    /// <summary>
+    /// Compiles GROUP BY clauses with key selectors.
+    /// </summary>
+    /// <param name="keySelector">The function that extracts grouping keys from input tuples</param>
+    /// <param name="table">The table being queried</param>
+    /// <param name="context">The compilation context</param>
+    /// <returns>The compiled GROUP BY clause and updated context</returns>
+    protected virtual (string, Context) CompileGroupBy(Func<ITuple, ImmutableArray<SqlExpr>> keySelector, ITuple table, Context context)
+    {
+        var groupItems = new List<string>();
+        var ctx = context;
+
+        var keys = keySelector(table);
+        foreach (var key in keys)
+        {
+            var (groupByClause, groupCtx) = Compile(key, ctx);
+            groupItems.Add(groupByClause);
+            ctx = groupCtx;
+        }
+
+        return (string.Join(", ", groupItems), ctx);
     }
 
     /// <summary>

@@ -673,4 +673,62 @@ public class SqlServerQueryTests
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
     }
+
+    [Fact]
+    public void FromGroupBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByMultipleSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByMultipleSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Age AS Age, a0.Name AS Name, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age, a0.Name", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByHavingSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByHavingSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 GROUP BY a0.Age HAVING COUNT(*) > @p0", sql);
+        Assert.Single(parameters);
+        Assert.Equal(1, parameters["@p0"]);
+    }
+
+    [Fact]
+    public void FromWhereGroupBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereGroupBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Age AS Age, COUNT(*) AS prj0 FROM customers a0 WHERE a0.Age >= @p0 GROUP BY a0.Age", sql);
+        Assert.Single(parameters);
+        Assert.Equal(18, parameters["@p0"]);
+    }
 }

@@ -242,6 +242,29 @@ public static class TestQueries
                 .Select(c => (c.Id, c.Name))
                 .Where(x => x.Id > 100)
                 .Select(x => (x.Id, x.Name));
+
+    // GROUP BY test cases
+    public static ISqlQuery FromGroupBySelect()
+        => TypedSql.From<Customer>()
+            .GroupBy(c => c.Age)
+            .Select((c, agg) => (Age: c.Age, Count: agg.Count()));
+
+    public static ISqlQuery FromGroupByMultipleSelect()
+        => TypedSql.From<Customer>()
+            .GroupBy(c => (c.Age, c.Name))
+            .Select((c, agg) => (c.Age, c.Name, Count: agg.Count()));
+
+    public static ISqlQuery FromGroupByHavingSelect()
+        => TypedSql.From<Customer>()
+            .GroupBy(c => c.Age)
+            .Having((c, agg) => agg.Count() > 1)
+            .Select((c, agg) => (Age: c.Age, Count: agg.Count()));
+
+    public static ISqlQuery FromWhereGroupBySelect()
+        => TypedSql.From<Customer>()
+            .Where(c => c.Age >= 18)
+            .GroupBy(c => c.Age)
+            .Select((c, agg) => (Age: c.Age, Count: agg.Count()));
             
             
 

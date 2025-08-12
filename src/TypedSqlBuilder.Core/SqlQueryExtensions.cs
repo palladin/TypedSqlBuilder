@@ -220,6 +220,112 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
+    /// Groups query results by a single key expression.
+    /// Creates a grouped query that can be used with aggregate functions.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to group</param>
+    /// <param name="keySelector">Function that extracts the grouping key from source tuples</param>
+    /// <returns>A grouped query that supports aggregate operations</returns>
+    /// <example>
+    /// <code>
+    /// var groupedByAge = userQuery.GroupBy(user => user.Age);
+    /// </code>
+    /// </example>
+    public static ISqlGroupByQuery<TSource> GroupBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExpr> keySelector)
+        where TSource : ITuple
+    {
+        return new GroupByClause<TSource>(query, x => [keySelector(x)]);
+    }
+
+    /// <summary>
+    /// Groups query results by multiple key expressions.
+    /// Creates a grouped query using a tuple of grouping keys.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to group</param>
+    /// <param name="keySelector">Function that extracts multiple grouping keys as a tuple</param>
+    /// <returns>A grouped query that supports aggregate operations</returns>
+    /// <example>
+    /// <code>
+    /// var groupedByRegionAndYear = salesQuery.GroupBy(sale => (sale.Region, sale.Year));
+    /// </code>
+    /// </example>
+    public static ISqlGroupByQuery<TSource> GroupBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, (SqlExpr, SqlExpr)> keySelector)
+        where TSource : ITuple
+    {
+        return new GroupByClause<TSource>(query, x => {
+            var (key1, key2) = keySelector(x);
+            return [key1, key2];
+        });
+    }
+
+
+
+    /// <summary>
+    /// Adds a HAVING clause to filter grouped query results.
+    /// Applies aggregate-based predicates to filter groups.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
+    /// <param name="query">The grouped query to filter</param>
+    /// <param name="predicate">Function that creates aggregate-based filter conditions</param>
+    /// <returns>A grouped query with HAVING clause that supports aggregate operations</returns>
+    /// <example>
+    /// <code>
+    /// var highValueGroups = groupedQuery.Having((row, agg) => agg.Sum(row.Amount) > 1000);
+    /// </code>
+    /// </example>
+    public static ISqlGroupByHavingQuery<TSource> Having<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, SqlExprBool> predicate)
+        where TSource : ITuple
+    {
+        return new HavingClause<TSource>(query, predicate);
+    }
+
+    /// <summary>
+    /// Applies a SELECT clause to a grouped query with aggregate functions.
+    /// Transforms grouped results using aggregate operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
+    /// <typeparam name="TResult">The output tuple type after projection with aggregates</typeparam>
+    /// <param name="query">The grouped query to project from</param>
+    /// <param name="selector">Function that transforms source tuples using aggregate functions</param>
+    /// <returns>A query that produces the projected result with aggregates</returns>
+    /// <example>
+    /// <code>
+    /// var results = groupedQuery.Select((row, agg) => (row.Category, Total: agg.Sum(row.Amount)));
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TResult> Select<TSource, TResult>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, TResult> selector)
+        where TSource : ITuple
+        where TResult : ITuple
+    {
+        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc())); // Using a new SqlAggregateFunc instance to access aggregate functions
+    }
+
+    /// <summary>
+    /// Applies a SELECT clause to a grouped query with HAVING clause and aggregate functions.
+    /// Transforms filtered grouped results using aggregate operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
+    /// <typeparam name="TResult">The output tuple type after projection with aggregates</typeparam>
+    /// <param name="query">The grouped query with HAVING clause to project from</param>
+    /// <param name="selector">Function that transforms source tuples using aggregate functions</param>
+    /// <returns>A query that produces the projected result with aggregates</returns>
+    /// <example>
+    /// <code>
+    /// var results = groupedHavingQuery.Select((row, agg) => (row.Category, Total: agg.Sum(row.Amount)));
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TResult> Select<TSource, TResult>(this ISqlGroupByHavingQuery<TSource> query, Func<TSource, SqlAggregateFunc, TResult> selector)
+        where TSource : ITuple
+        where TResult : ITuple
+    {
+        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc())); // Using a new SqlAggregateFunc instance to access aggregate functions
+    }
+
+
+
+    /// <summary>
     /// Compiles the SQL query using the specified SQL compiler.
     /// </summary>
     /// <param name="query">The SQL query to compile</param>

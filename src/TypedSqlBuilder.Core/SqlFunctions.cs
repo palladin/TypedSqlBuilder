@@ -4,6 +4,45 @@ using System.Linq;
 namespace TypedSqlBuilder.Core;
 
 /// <summary>
+/// Provides access to SQL aggregate functions for use in GROUP BY queries.
+/// This class encapsulates all available aggregate operations that can be applied to grouped data.
+/// </summary>
+public class SqlAggregateFunc
+{
+    /// <summary>
+    /// Applies the COUNT aggregate function.
+    /// Counts the number of rows in the current group.
+    /// </summary>
+    /// <returns>A SQL integer expression representing the count</returns>
+    public SqlExprInt Count()
+    {
+        return new SqlIntCount();
+    }
+
+    /// <summary>
+    /// Applies the SUM aggregate function to an integer expression.
+    /// Computes the sum of all values in the current group.
+    /// </summary>
+    /// <param name="value">The integer expression to sum</param>
+    /// <returns>A SQL integer expression representing the sum</returns>
+    public SqlExprInt Sum(SqlExprInt value)
+    {
+        return new SqlIntSum(value);
+    }
+
+    /// <summary>
+    /// Applies the AVG aggregate function to an integer expression.
+    /// Computes the average of all values in the current group.
+    /// </summary>
+    /// <param name="value">The integer expression to average</param>
+    /// <returns>A SQL integer expression representing the average</returns>
+    public SqlExprInt Avg(SqlExprInt value)
+    {
+        return new SqlIntAvg(value);
+    }
+}
+
+/// <summary>
 /// Provides SQL function utilities and extension methods for creating SQL expressions.
 /// This static class contains methods for creating SQL parameters, aggregate functions,
 /// and various SQL operations in a type-safe manner.

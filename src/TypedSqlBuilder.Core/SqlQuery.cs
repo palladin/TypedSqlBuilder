@@ -31,6 +31,28 @@ public interface ISqlScalarQuery;
 public interface ISqlScalarQuery<T> : ISqlScalarQuery where T : SqlExpr;
 
 /// <summary>
+/// Base interface for SQL queries that include a GROUP BY clause.
+/// Represents queries that group rows by one or more expressions.
+/// </summary>
+public interface ISqlGroupByQuery : ISqlQuery;
+
+/// <summary>
+/// Generic interface for SQL queries that include a GROUP BY clause with typed source data.
+/// Enables strongly-typed grouping operations and aggregate function usage.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the grouped query</typeparam>
+public interface ISqlGroupByQuery<TSource> : ISqlGroupByQuery, ISqlQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
+/// Interface for SQL queries that include both GROUP BY and HAVING clauses.
+/// Represents grouped queries with additional filtering on grouped results.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the grouped query</typeparam>
+public interface ISqlGroupByHavingQuery<TSource> : ISqlGroupByQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
 /// Interface for SQL table representations that support tuple-like indexing.
 /// Extends ITuple to provide column access capabilities.
 /// </summary>
@@ -284,4 +306,46 @@ public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, ImmutableArr
 public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) 
     : OrderByClause<TSource>(TypedQuery, [(x => TypedKeySelector((TSource) x), Descending)])
     where TSource : ITuple
-    where TKey : SqlExpr;    
+    where TKey : SqlExpr;
+
+/// <summary>
+/// Base record representing a SQL GROUP BY clause for result grouping.
+/// Defines the grouping criteria for aggregating query results.
+/// </summary>
+/// <param name="Query">The source query to group</param>
+/// <param name="KeySelectors">Array of functions that extract grouping keys from input tuples</param>
+public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector) : ISqlGroupByQuery;
+
+/// <summary>
+/// Strongly-typed GROUP BY clause for grouping query results.
+/// Provides type-safe grouping based on extracted key values.
+/// </summary>
+/// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+/// <param name="TypedQuery">The strongly-typed source query</param>
+/// <param name="TypedKeySelector">Function that extracts an array of grouping keys from source tuples</param>
+public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector) 
+    : GroupByClause(TypedQuery, x => TypedKeySelector((TSource) x)), ISqlGroupByQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
+/// Base record representing a SQL HAVING clause for filtering grouped query results.
+/// Applies aggregate-based predicates to filter grouped data.
+/// </summary>
+/// <param name="GroupedQuery">The grouped query to filter</param>
+/// <param name="Predicate">Function that evaluates aggregate-based filtering conditions on input tuples</param>
+public record HavingClause(ISqlGroupByQuery GroupedQuery, Func<ITuple, SqlAggregateFunc, SqlExprBool> Predicate) 
+    : ISqlQuery;
+
+/// <summary>
+/// Strongly-typed HAVING clause for filtering grouped query results.
+/// Provides type-safe aggregate-based filtering.
+/// </summary>
+/// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
+/// <param name="TypedGroupedQuery">The grouped query to filter</param>
+/// <param name="TypedPredicate">Function that evaluates aggregate-based filtering conditions</param>
+public record HavingClause<TSource>(ISqlGroupByQuery<TSource> TypedGroupedQuery, Func<TSource, SqlAggregateFunc, SqlExprBool> TypedPredicate) 
+    : HavingClause(TypedGroupedQuery, (x, agg) => TypedPredicate((TSource) x, agg)), ISqlGroupByHavingQuery<TSource>
+    where TSource : ITuple;
+
+
+   
