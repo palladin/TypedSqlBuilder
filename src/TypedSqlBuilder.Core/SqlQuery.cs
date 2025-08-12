@@ -314,7 +314,7 @@ public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<T
 /// </summary>
 /// <param name="Query">The source query to group</param>
 /// <param name="KeySelectors">Array of functions that extract grouping keys from input tuples</param>
-public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector) : ISqlGroupByQuery;
+public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector, Func<ITuple, SqlAggregateFunc, SqlExprBool>? Predicate) : ISqlGroupByQuery;
 
 /// <summary>
 /// Strongly-typed GROUP BY clause for grouping query results.
@@ -323,8 +323,9 @@ public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts an array of grouping keys from source tuples</param>
-public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector) 
-    : GroupByClause(TypedQuery, x => TypedKeySelector((TSource) x)), ISqlGroupByQuery<TSource>
+public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector,
+                                                                    Func<TSource, SqlAggregateFunc, SqlExprBool>? TypedPredicate = null) 
+    : GroupByClause(TypedQuery, x => TypedKeySelector((TSource)x), TypedPredicate is { } ? ((x, agg) => TypedPredicate((TSource)x, agg)) : null), ISqlGroupByQuery<TSource>
     where TSource : ITuple;
 
 /// <summary>
@@ -333,7 +334,7 @@ public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource
 /// </summary>
 /// <param name="GroupedQuery">The grouped query to filter</param>
 /// <param name="Predicate">Function that evaluates aggregate-based filtering conditions on input tuples</param>
-public record HavingClause(ISqlGroupByQuery GroupedQuery, Func<ITuple, SqlAggregateFunc, SqlExprBool> Predicate) 
+public record HavingClause(ISqlQuery GroupedQuery, Func<ITuple, SqlAggregateFunc, SqlExprBool> Predicate) 
     : ISqlQuery;
 
 /// <summary>

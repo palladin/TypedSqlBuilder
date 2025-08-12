@@ -139,9 +139,12 @@ public abstract class SqlCompiler
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
             SelectClause(SelectClause(var innerQuery, var innerSelector), var outerSelector) =>
                 (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple))), true),
-            
+
+            HavingClause(GroupByClause(var innerQuery, var keySelector, null), var predicate) =>
+                (new GroupByClause(innerQuery, keySelector, predicate), true),
+
             // Recursive normalization of subqueries - WHERE
-            WhereClause(var subQuery, var predicate) =>
+            WhereClause (var subQuery, var predicate) =>
                 ApplyToSubQuery(subQuery, q => new WhereClause(q, predicate)),
             
             // Recursive normalization of subqueries - SELECT  
@@ -151,7 +154,10 @@ public abstract class SqlCompiler
             // Recursive normalization of subqueries - ORDER BY
             OrderByClause(var subQuery, var keySelectors) =>
                 ApplyToSubQuery(subQuery, q => new OrderByClause(q, keySelectors)),
-            
+
+            GroupByClause(var subQuery, var keySelector, var havingPredicate) =>
+                ApplyToSubQuery(subQuery, q => new GroupByClause(q, keySelector, havingPredicate)),
+
             // No changes needed
             _ => (query, false)
         };
@@ -193,9 +199,6 @@ public abstract class SqlCompiler
                 new SelectClause(query, tuple => tuple),
 
             GroupByClause =>
-                new SelectClause(query, tuple => tuple),
-
-            HavingClause =>
                 new SelectClause(query, tuple => tuple),
 
             // Already in canonical form
@@ -255,36 +258,45 @@ public abstract class SqlCompiler
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
             
-            case SelectClause(GroupByClause(FromTableClause(var table), var keySelector), var selector):
+            case SelectClause(GroupByClause(FromTableClause(var table), var keySelector, var havingPredicate), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
 
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
+                string havingClause = "";
+                Context finalCtx = groupCtx;
+                
+                if (havingPredicate is {})
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
+                    havingClause = $" HAVING {havingSql}";
+                    finalCtx = havingCtx;
+                }
+                
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}", selected, projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, finalCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
             }
 
-            case SelectClause(GroupByClause(WhereClause(FromTableClause(var table), var predicate), var keySelector), var selector):
+            case SelectClause(GroupByClause(WhereClause(FromTableClause(var table), var predicate), var keySelector, var havingPredicate), var selector):
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
 
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, whereCtx);
+                string havingClause = "";
+                Context finalCtx = groupCtx;
+                
+                if (havingPredicate is {})
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
+                    havingClause = $" HAVING {havingSql}";
+                    finalCtx = havingCtx;
+                }
+                
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, groupCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
-            }
-
-            case SelectClause(HavingClause(GroupByClause(FromTableClause(var table), var keySelector), var havingPredicate), var selector):
-            {
-                var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
-
-                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
-                var (havingClause, havingCtx) = Compile(havingPredicate(table, new SqlAggregateFunc()), groupCtx);
-                var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, havingCtx);
-                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause} HAVING {havingClause}", selected, projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, table, aliasIndex, finalCtx);
+                return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
             }
 
             // ========== GENERAL CASES ==========
@@ -356,7 +368,7 @@ public abstract class SqlCompiler
 
             // General case: GROUP BY + WHERE clause applied to any other query type
             // This automatically wraps the inner query as a subquery
-            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector), var selector):
+            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector):
             {
                 // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
                 var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
@@ -367,27 +379,19 @@ public abstract class SqlCompiler
                 // Apply WHERE and GROUP BY clauses to the subquery result
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx);
+                string havingClause = "";
+                Context finalCtx = groupCtx;
+                
+                if (havingPredicate is {})
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
+                    havingClause = $" HAVING {havingSql}";
+                    finalCtx = havingCtx;
+                }
+                
                 var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, groupCtx);
-                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
-            }
-
-            // General case: HAVING + GROUP BY clause applied to any other query type
-            // This automatically wraps the inner query as a subquery
-            case SelectClause(HavingClause(GroupByClause(var innerQuery, var keySelector), var havingPredicate), var selector):
-            {
-                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
-                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
-                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
-                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
-                var aliasIndex = newContext.AliasIndex;
-
-                // Apply GROUP BY and HAVING clauses to the subquery result
-                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, newContext);
-                var (havingClause, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, havingCtx);
-                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} GROUP BY {groupByClause} HAVING {havingClause}", selected, projectionCtx);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, finalCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}{havingClause}", selected, projectionCtx);
             }
 
 
