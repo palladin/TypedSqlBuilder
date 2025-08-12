@@ -245,10 +245,13 @@ public abstract class SqlCompiler
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
-            // ========== FROM SUBQUERY CASES ==========
+            // ========== GENERAL CASES ==========
+            // These cases handle any inner query type (including subqueries) by automatically wrapping them
+            
+            // General case: SELECT from subquery (FromSubQueryClause)
             case SelectClause(FromSubQueryClause(var subQuery), var selector):
             {
-                // Compile the subquery
+                // Compile the subquery directly (no double-wrapping needed)
                 var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
                 var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
                 var aliasIndex = newContext.AliasIndex;
@@ -257,27 +260,14 @@ public abstract class SqlCompiler
                 var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, newContext);
                 return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex}", selected, projectionCtx);
             }
-
-            case SelectClause(WhereClause(FromSubQueryClause(var subQuery), var predicate), var selector):
-            {
-                // Compile the subquery
-                var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);                              
-                var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
-                var aliasIndex = newContext.AliasIndex;
-
-                // Apply WHERE clause to the subquery result
-                var (whereClause, whereCtx) = Compile(predicate(tuple), newContext);
-                var selected = selector(tuple);
-                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliasIndex, whereCtx);
-                return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
-            }
-
-            // General case: WHERE clause applied to any other query type (not FromTableClause or FromSubQueryClause)
+            
+            // General case: WHERE clause applied to any query type (including FromSubQueryClause)
             // This automatically wraps the inner query as a subquery
             case SelectClause(WhereClause(var innerQuery, var predicate), var selector):
             {
-                // Compile the inner query and treat it as a subquery
-                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(innerQuery, context);
+                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
+                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
                 var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
                 var aliasIndex = newContext.AliasIndex;
 
@@ -286,6 +276,40 @@ public abstract class SqlCompiler
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, whereCtx);
                 return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
+            }
+
+            // General case: ORDER BY + WHERE clause applied to any other query type
+            // This automatically wraps the inner query as a subquery
+            case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector):
+            {
+                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
+                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
+                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                // Apply WHERE clause to the subquery result
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, orderCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
+            }
+
+            // General case: ORDER BY clause applied to any other query type  
+            // This automatically wraps the inner query as a subquery
+            case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector):
+            {
+                // If innerQuery is FromSubQueryClause, extract its inner query to avoid double-wrapping
+                var actualInnerQuery = innerQuery is FromSubQueryClause(var subQuery) ? subQuery : innerQuery;
+                var (innerQuerySql, innerTuple, innerQueryCtx) = Compile(actualInnerQuery, context);
+                var newContext = UpdateProjectionAliases(innerTuple, innerQueryCtx);
+                var aliasIndex = newContext.AliasIndex;
+
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, newContext);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliasIndex, orderCtx);
+                return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
             default:
@@ -867,7 +891,7 @@ public abstract class SqlCompiler
     /// <param name="table">The table being queried</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The compiled ORDER BY clause and updated context</returns>
-    protected virtual (string, Context) CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ISqlTable table, Context context)
+    protected virtual (string, Context) CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ITuple table, Context context)
     {
         var orderItems = new List<string>();
         var ctx = context;
