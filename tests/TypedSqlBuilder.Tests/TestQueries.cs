@@ -195,17 +195,6 @@ public static class TestQueries
         => Db.Customers.From()
             .Where(c => c.Name == SqlNull.Value && c.Age != SqlNull.Value);
 
-    public static ISqlQuery FromSelectNull()
-        => Db.Customers.From()
-            .Select(c => (c.Id, NullName: SqlNull.Value));
-
-    public static ISqlQuery FromSelectNullComplex()
-        => Db.Customers.From()
-            .Select(c => (
-                c.Id,
-                NullName: SqlNull.Value
-            ));
-
     // Scalar aggregate queries 
     public static ISqlScalarQuery<SqlExprInt> SumAgesWithDb()
         => Db.Customers.From().Select(c => c.Age).Sum();

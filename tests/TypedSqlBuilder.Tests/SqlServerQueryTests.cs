@@ -205,6 +205,22 @@ public class SqlServerQueryTests
     }
 
     [Fact]
+    public void FromWhereOrderBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereOrderBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE (a0.Age > @p0) AND (a0.Name != @p1) ORDER BY a0.Age ASC", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal("", parameters["@p1"]);
+    }
+
+    [Fact]
     public void FromWhereOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
@@ -580,6 +596,63 @@ public class SqlServerQueryTests
     }
 
     [Fact]
+    public void SumAgesWithDb_GeneratesCorrectSql()
+    {
+        // Arrange
+        var sumExpr = TestQueries.SumAgesWithDb();
+        
+        // Act
+        var (sql, parameters) = sumExpr.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT SUM(a0.Age) AS prj0 FROM customers a0", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void CountCustomersWithDb_GeneratesCorrectSql()
+    {
+        // Arrange
+        var countExpr = TestQueries.CountCustomersWithDb();
+        
+        // Act
+        var (sql, parameters) = countExpr.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a0", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void CountActiveCustomersWithDb_GeneratesCorrectSql()
+    {
+        // Arrange
+        var countExpr = TestQueries.CountActiveCustomersWithDb();
+        
+        // Act
+        var (sql, parameters) = countExpr.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT COUNT(*) AS prj0 FROM customers a0 WHERE a0.Age >= @p0", sql);
+        Assert.Single(parameters);
+        Assert.Equal(18, parameters["@p0"]);
+    }
+
+    [Fact]
+    public void FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAgeGreaterThanSum();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age > (SELECT SUM(a1.Age) AS prj0 FROM customers a1)", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
     {
         // Arrange
@@ -804,6 +877,36 @@ public class SqlServerQueryTests
     }
 
     [Fact]
+    public void InnerJoinWithWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.InnerJoinWithWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, a1.Age AS Age, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age >= @p0) a1 INNER JOIN orders a2 ON a1.Id = a2.CustomerId WHERE a2.Amount > @p1", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters["@p0"]);
+        Assert.Equal(100, parameters["@p1"]);
+    }
+
+    [Fact]
+    public void InnerJoinWithOrderBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.InnerJoinWithOrderBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a2.Id AS Id, a2.Name AS Name, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId) a2 ORDER BY a2.Name ASC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
     public void LeftJoinBasic_GeneratesCorrectSql()
     {
         // Arrange
@@ -829,6 +932,64 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal("SELECT CONCAT(a0.Name, @p0) AS prj0, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId", sql);
         Assert.Equal(" (Customer)", parameters["@p0"]);
+    }
+
+    [Fact]
+    public void LeftJoinWithWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LeftJoinWithWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, a1.Age AS Age, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age >= @p0) a1 LEFT JOIN orders a2 ON a1.Id = a2.CustomerId WHERE a1.Age < @p1", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal(65, parameters["@p1"]);
+    }
+
+    [Fact]
+    public void LeftJoinWithOrderBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LeftJoinWithOrderBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a2.Id AS Id, a2.Name AS Name, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId) a2 ORDER BY a2.Name ASC, a2.Amount DESC", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void InnerJoinWithGroupBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.InnerJoinWithGroupBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a2.Id AS CustomerId, a2.Name AS CustomerName, SUM(a2.Amount) AS TotalAmount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId) a2 GROUP BY a2.Id", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void LeftJoinWithAggregates_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LeftJoinWithAggregates();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a2.Id AS CustomerId, a2.Name AS CustomerName, a2.Age AS CustomerAge, COUNT(*) AS OrderCount, SUM(a2.Amount) AS TotalSpent FROM (SELECT a0.Id AS Id, a0.Name AS Name, a0.Age AS Age, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId) a2 GROUP BY a2.Id", sql);
+        Assert.Empty(parameters);
     }
 
     // JOIN Fusion Tests - Testing the new JoinClause fusion functionality
