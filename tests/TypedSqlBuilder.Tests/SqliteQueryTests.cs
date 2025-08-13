@@ -639,6 +639,21 @@ public class SqliteQueryTests
     }
 
     [Fact]
+    public void FromWhereAgeInSubquery_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAgeInSubquery();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age IN (SELECT a1.Age AS Age FROM customers a1 WHERE a1.Name = :p0)", sql);
+        Assert.Single(parameters);
+        Assert.Equal("VIP", parameters[":p0"]);
+    }
+
+    [Fact]
     public void DatabaseComparison_SameQuery_DifferentSyntax()
     {
         // Arrange
@@ -815,8 +830,65 @@ public class SqliteQueryTests
         
         // Assert
         System.Console.WriteLine($"Actual SQL: {sql}");
-        Assert.Equal("SELECT a4.Id AS Id, a4.Name AS Name, a4.Amount AS Amount, a4.ProductName AS ProductName FROM customers a4 INNER JOIN orders a5 ON a4.Id = a5.CustomerId INNER JOIN products a6 ON a5.Amount = a6.ProductId WHERE (a4.Age >= :p0) AND (a5.Amount > :p1)", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, a2.Amount AS Amount, a3.ProductName AS ProductName FROM (SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age >= :p0) a1 INNER JOIN orders a2 ON a1.Id = a2.CustomerId INNER JOIN products a3 ON a2.Amount = a3.ProductId WHERE a2.Amount > :p1", sql);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal(100, parameters[":p1"]);
+    }
+
+    // Basic JOIN tests for parity with SQL Server tests
+    [Fact]
+    public void InnerJoinBasic_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.InnerJoinBasic();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void InnerJoinWithSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.InnerJoinWithSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Name AS Name, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void LeftJoinBasic_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LeftJoinBasic();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId", sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void LeftJoinWithSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LeftJoinWithSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("SELECT (a0.Name || :p0) AS prj0, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId", sql);
+        Assert.Equal(" (Customer)", parameters[":p0"]);
     }
 }

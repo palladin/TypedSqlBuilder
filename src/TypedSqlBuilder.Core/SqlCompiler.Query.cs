@@ -288,6 +288,24 @@ public static partial class SqlCompiler
         var normalizedQuery = Normalize(query);            
         switch (normalizedQuery)
         {            
+            // ========== JOIN CASES ==========
+            // General case: WHERE clause applied to JOIN (must come before general WHERE case)
+            case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases):
+            {
+                // Start with the outer query
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context);                    
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext);
+                
+                // Apply WHERE clause to the joined result
+                var (whereClause, whereCtx) = Compile(predicate(updatedTuple), joinContext);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
+                
+                // Combine FROM clause with all JOIN clauses and WHERE
+                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} WHERE {whereClause}";
+                return (joinSql, selected, projectionCtx);
+            }
+
             // General case: WHERE clause applied to any query type
             case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases):
             {
@@ -362,7 +380,6 @@ public static partial class SqlCompiler
                 }
             }
 
-            // ========== JOIN CASES ==========
             // JOIN clauses are always wrapped with SelectClause by canonical form normalization
             case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
             {            

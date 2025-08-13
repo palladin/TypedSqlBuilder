@@ -870,7 +870,7 @@ public class SqlServerQueryTests
         var (sql, parameters) = query.ToSqlServerRaw();
         
         // Assert
-        Assert.Equal("SELECT a4.Id AS Id, a4.Name AS Name, a4.Amount AS Amount, a4.ProductName AS ProductName FROM customers a4 INNER JOIN orders a5 ON a4.Id = a5.CustomerId INNER JOIN products a6 ON a5.Amount = a6.ProductId WHERE (a4.Age >= @p0) AND (a5.Amount > @p1)", sql);
+        Assert.Equal("SELECT a1.Id AS Id, a1.Name AS Name, a2.Amount AS Amount, a3.ProductName AS ProductName FROM (SELECT a0.Id AS Id, a0.Age AS Age, a0.Name AS Name FROM customers a0 WHERE a0.Age >= @p0) a1 INNER JOIN orders a2 ON a1.Id = a2.CustomerId INNER JOIN products a3 ON a2.Amount = a3.ProductId WHERE a2.Amount > @p1", sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
     }
