@@ -369,9 +369,9 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, o.Amount))
-            .GroupBy(result => result.Id)
-            .Select((result, agg) => (CustomerId: result.Id, CustomerName: result.Name, TotalAmount: agg.Sum(result.Amount)));
+                (c, o) => (CustomerId: c.Id, CustomerName: c.Name, Amount: o.Amount))
+            .GroupBy(result => (result.CustomerId, result.CustomerName))
+            .Select((result, agg) => (CustomerId: result.CustomerId, CustomerName: result.CustomerName, TotalAmount: agg.Sum(result.Amount)));
 
     public static ISqlQuery LeftJoinWithAggregates()
         => Db.Customers.From()

@@ -288,8 +288,11 @@ public static partial class SqlCompiler
         var normalizedQuery = Normalize(query);            
         switch (normalizedQuery)
         {            
-            // ========== JOIN CASES ==========
-            // General case: WHERE clause applied to JOIN (must come before general WHERE case)
+            // ========================================
+            // JOIN-OPTIMIZED PATTERNS (most specific)
+            // ========================================
+            
+            // JOIN + WHERE: Optimized case for WHERE clause applied directly to JOIN
             case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases):
             {
                 // Start with the outer query
@@ -306,43 +309,70 @@ public static partial class SqlCompiler
                 return (joinSql, selected, projectionCtx);
             }
 
-            // General case: WHERE clause applied to any query type
-            case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases):
+            // JOIN + GROUP BY: Optimized case for GROUP BY applied directly to JOIN
+            case SelectClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var selector, var aliases):
             {
-                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
+                // Start with the outer query
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context);                    
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext);
                 
-                // Apply WHERE clause to the result
-                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext);
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
-                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause}", selected, projectionCtx);
+                // Apply GROUP BY directly to the joined result
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, joinContext);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
+
+                // Generate compact SQL: SELECT ... FROM table1 JOIN table2 ... GROUP BY ...
+                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} GROUP BY {groupByClause}";
+                
+                if (havingPredicate is null)
+                    return (joinSql, selected, projectionCtx);
+                else
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx);
+                    return ($"{joinSql} HAVING {havingSql}", selected, havingCtx);
+                }
             }
 
-            // General case: ORDER BY + WHERE clause applied to any query type
-            case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector, var aliases):
+            // JOIN + ORDER BY: Optimized case for ORDER BY applied directly to JOIN
+            case SelectClause(OrderByClause(JoinClause(var outer, var joinData), var keySelectors), var selector, var aliases):
             {
-                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
+                // Start with the outer query
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context);                    
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext);
                 
-                // Apply WHERE clause to the result
-                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext);
-                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx);
-                var selected = selector(innerTuple);
+                // Apply ORDER BY directly to the joined result
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, joinContext);
+                var selected = selector(updatedTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
-                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
+
+                // Generate compact SQL: SELECT ... FROM table1 JOIN table2 ... ORDER BY ...
+                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} ORDER BY {orderByClause}";
+                return (joinSql, selected, projectionCtx);
             }
 
-            // General case: ORDER BY clause applied to any query type
-            case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector, var aliases):
-            {
-                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
-                
-                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, innerContext);
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
-                return ($"SELECT {projection} FROM {fromClause} ORDER BY {orderByClause}", selected, projectionCtx);
+            // Basic JOIN: Standard JOIN clause compilation
+            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
+            {            
+                // Start with the outer query
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context);                    
+                var (joinClauses, updatedTuple, finalContext) = CompileJoin(joinData, currentTuple, currentContext);                    
+                // Apply the selector to get the final selected tuple
+                var selected = selector(updatedTuple);
+
+                // For JOINs, we never want SELECT * - always project the individual fields
+                // even if the selector is an identity function
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext);
+
+                // Combine FROM clause with all JOIN clauses
+                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)}";
+                return (joinSql, selected, projectionCtx);
             }
 
-            // General case: GROUP BY + WHERE clause applied to any query type
+            // ========================================
+            // GROUP BY PATTERNS (specific to general)
+            // ========================================
+
+            // GROUP BY + WHERE: GROUP BY with WHERE clause applied to any query type
             case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector, var aliases):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
@@ -362,7 +392,7 @@ public static partial class SqlCompiler
                 }
             }
 
-            // General case: GROUP BY clause applied to any query type
+            // Basic GROUP BY: GROUP BY clause applied to any query type
             case SelectClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var selector, var aliases):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
@@ -380,23 +410,55 @@ public static partial class SqlCompiler
                 }
             }
 
-            // JOIN clauses are always wrapped with SelectClause by canonical form normalization
-            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
-            {            
-                // Start with the outer query
-                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context);                    
-                var (joinClauses, updatedTuple, finalContext) = CompileJoin(joinData, currentTuple, currentContext);                    
-                // Apply the selector to get the final selected tuple
-                var selected = selector(updatedTuple);
+            // ========================================
+            // ORDER BY PATTERNS (specific to general)
+            // ========================================
 
-                // For JOINs, we never want SELECT * - always project the individual fields
-                // even if the selector is an identity function
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext);
-
-                // Combine FROM clause with all JOIN clauses
-                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)}";
-                return (joinSql, selected, projectionCtx);
+            // ORDER BY + WHERE: ORDER BY with WHERE clause applied to any query type
+            case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
+                
+                // Apply WHERE clause to the result
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
+                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
+
+            // Basic ORDER BY: ORDER BY clause applied to any query type
+            case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
+                
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, innerContext);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
+                return ($"SELECT {projection} FROM {fromClause} ORDER BY {orderByClause}", selected, projectionCtx);
+            }
+
+            // ========================================
+            // WHERE PATTERNS
+            // ========================================
+
+            // Basic WHERE: WHERE clause applied to any query type
+            case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context);
+                
+                // Apply WHERE clause to the result
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
+                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause}", selected, projectionCtx);
+            }
+
+            // ========================================
+            // GENERAL PATTERNS
+            // ========================================
+
+            // Basic SELECT: General SELECT clause pattern
 
             case SelectClause(var innerQuery, var selector, var aliases):
             {

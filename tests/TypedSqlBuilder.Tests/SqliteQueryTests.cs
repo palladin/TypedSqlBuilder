@@ -962,8 +962,8 @@ public class SqliteQueryTests
         // Act
         var (sql, parameters) = query.ToSqliteRaw();
         
-        // Assert
-        Assert.Equal("SELECT a2.Id AS Id, a2.Name AS Name, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId) a2 ORDER BY a2.Name ASC", sql);
+        // Assert - now generates compact SQL without subquery
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId ORDER BY a0.Name ASC", sql);
         Assert.Empty(parameters);
     }
 
@@ -1020,8 +1020,8 @@ public class SqliteQueryTests
         // Act
         var (sql, parameters) = query.ToSqliteRaw();
         
-        // Assert
-        Assert.Equal("SELECT a2.Id AS Id, a2.Name AS Name, a2.OrderId AS OrderId, a2.Amount AS Amount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId) a2 ORDER BY a2.Name ASC, a2.Amount DESC", sql);
+        // Assert - now generates compact SQL without subquery
+        Assert.Equal("SELECT a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId ORDER BY a0.Name ASC, a1.Amount DESC", sql);
         Assert.Empty(parameters);
     }
 
@@ -1034,8 +1034,8 @@ public class SqliteQueryTests
         // Act
         var (sql, parameters) = query.ToSqliteRaw();
         
-        // Assert
-        Assert.Equal("SELECT a2.Id AS CustomerId, a2.Name AS CustomerName, SUM(a2.Amount) AS TotalAmount FROM (SELECT a0.Id AS Id, a0.Name AS Name, a1.Amount AS Amount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId) a2 GROUP BY a2.Id", sql);
+        // Assert - now generates compact SQL without subquery
+        Assert.Equal("SELECT a0.Id AS CustomerId, a0.Name AS CustomerName, SUM(a1.Amount) AS TotalAmount FROM customers a0 INNER JOIN orders a1 ON a0.Id = a1.CustomerId GROUP BY a0.Id, a0.Name", sql);
         Assert.Empty(parameters);
     }
 
@@ -1048,8 +1048,8 @@ public class SqliteQueryTests
         // Act
         var (sql, parameters) = query.ToSqliteRaw();
         
-        // Assert
-        Assert.Equal("SELECT a2.Id AS CustomerId, a2.Name AS CustomerName, a2.Age AS CustomerAge, COUNT(*) AS OrderCount, SUM(a2.Amount) AS TotalSpent FROM (SELECT a0.Id AS Id, a0.Name AS Name, a0.Age AS Age, a1.Amount AS Amount FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId) a2 GROUP BY a2.Id", sql);
+        // Assert - now generates compact SQL without subquery
+        Assert.Equal("SELECT a0.Id AS CustomerId, a0.Name AS CustomerName, a0.Age AS CustomerAge, COUNT(*) AS OrderCount, SUM(a1.Amount) AS TotalSpent FROM customers a0 LEFT JOIN orders a1 ON a0.Id = a1.CustomerId GROUP BY a0.Id", sql);
         Assert.Empty(parameters);
     }
 }
