@@ -299,7 +299,147 @@ public static class TestQueries
             .Where(c => c.Age >= 18)
             .GroupBy(c => c.Age)
             .Select((c, agg) => (Age: c.Age, Count: agg.Count()));
-            
-            
+
+    // JOIN test cases - INNER JOIN
+    public static ISqlQuery InnerJoinBasic()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount));
+
+    public static ISqlQuery InnerJoinWithSelect()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (CustomerName: c.Name, OrderAmount: o.Amount));
+
+    public static ISqlQuery InnerJoinWithWhere()
+        => Db.Customers.From()
+            .Where(c => c.Age >= 18)
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, c.Age, o.OrderId, o.Amount))
+            .Where(result => result.Amount > 100);
+
+    public static ISqlQuery InnerJoinWithOrderBy()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
+            .OrderBy(result => result.Name);
+
+    // JOIN test cases - LEFT JOIN
+    public static ISqlQuery LeftJoinBasic()
+        => Db.Customers.From()
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount));
+
+    public static ISqlQuery LeftJoinWithSelect()
+        => Db.Customers.From()
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (CustomerInfo: c.Name + " (Customer)", OrderAmount: o.Amount));
+
+    public static ISqlQuery LeftJoinWithWhere()
+        => Db.Customers.From()
+            .Where(c => c.Age >= 21)
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, c.Age, OrderId: o.OrderId, OrderAmount: o.Amount))
+            .Where(result => result.Age < 65);
+
+    public static ISqlQuery LeftJoinWithOrderBy()
+        => Db.Customers.From()
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
+            .OrderBy(result => result.Name)
+            .ThenByDescending(result => result.Amount);
+
+    // Complex JOIN scenarios
+    public static ISqlQuery InnerJoinWithGroupBy()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, o.Amount))
+            .GroupBy(result => result.Id)
+            .Select((result, agg) => (CustomerId: result.Id, CustomerName: result.Name, TotalAmount: agg.Sum(result.Amount)));
+
+    public static ISqlQuery LeftJoinWithAggregates()
+        => Db.Customers.From()
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (c.Id, c.Name, c.Age, o.Amount))
+            .GroupBy(result => result.Id)
+            .Select((result, agg) => (
+                CustomerId: result.Id,
+                CustomerName: result.Name,
+                CustomerAge: result.Age,
+                OrderCount: agg.Count(),
+                TotalSpent: agg.Sum(result.Amount)
+            ));
+
+    // JOIN Fusion test cases - tests the new JoinClause fusion rule
+    public static ISqlQuery MultipleInnerJoinsFusion()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (Customer: c, Order: o))
+            .InnerJoin(
+                Db.Products,
+                joined => joined.Order.Amount, // Using Amount as a simple join key for testing
+                p => p.ProductId,
+                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.OrderId, p.ProductName));
+
+    public static ISqlQuery MixedJoinTypesFusion()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (Customer: c, Order: o))
+            .LeftJoin(
+                Db.Products,
+                joined => joined.Order.Amount,
+                p => p.ProductId,
+                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.OrderId, ProductName: p.ProductName));
+
+    public static ISqlQuery JoinFusionWithWhere()
+        => Db.Customers.From()
+            .Where(c => c.Age >= 18)
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (Customer: c, Order: o))
+            .InnerJoin(
+                Db.Products,
+                joined => joined.Order.Amount,
+                p => p.ProductId,
+                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Amount, p.ProductName))
+            .Where(result => result.Amount > 100);
 
 }

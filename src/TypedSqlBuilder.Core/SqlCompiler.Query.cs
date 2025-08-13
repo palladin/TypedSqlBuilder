@@ -43,42 +43,49 @@ public static partial class SqlCompiler
     /// <returns>A tuple containing the normalized query and whether any changes were made</returns>
     private static (ISqlQuery Query, bool Changed) ApplyNormalizationRules(ISqlQuery query)
     {
-        return query switch
+        switch (query)
         {
             // WHERE clause fusion: WHERE(WHERE(q, p1), p2) → WHERE(q, p1 AND p2)
-            WhereClause(WhereClause(var innerQuery, var innerPred), var outerPred) =>
-                (new WhereClause(innerQuery, tuple => innerPred(tuple) && outerPred(tuple)), true),
+            case WhereClause(WhereClause(var innerQuery, var innerPred), var outerPred):
+                return (new WhereClause(innerQuery, tuple => innerPred(tuple) && outerPred(tuple)), true);
             
             // ORDER BY fusion: OrderBy(OrderBy(q, keys1), keys2) → OrderBy(q, keys1 + keys2)  
-            OrderByClause(OrderByClause(var innerQuery, var innerKeys), var outerKeys) =>
-                (new OrderByClause(innerQuery, innerKeys.AddRange(outerKeys)), true),
+            case OrderByClause(OrderByClause(var innerQuery, var innerKeys), var outerKeys):
+                return (new OrderByClause(innerQuery, innerKeys.AddRange(outerKeys)), true);
             
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
             // Preserve outer Select's Aliases (projection names)
-            SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases), var outerSelector, var outerAliases) =>
-                (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases), true),
+            case SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases), var outerSelector, var outerAliases):
+                return (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases), true);
 
-            HavingClause(GroupByClause(var innerQuery, var keySelector, null), var predicate) =>
-                (new GroupByClause(innerQuery, keySelector, predicate), true),
+            case HavingClause(GroupByClause(var innerQuery, var keySelector, null), var predicate):
+                return (new GroupByClause(innerQuery, keySelector, predicate), true);
+
+            case JoinClause(JoinClause(var innerOuter, var innerJoinData), var outerJoinData):
+                return (new JoinClause(innerOuter, [..innerJoinData, ..outerJoinData]), true);
 
             // Recursive normalization of subqueries - WHERE
-            WhereClause (var subQuery, var predicate) =>
-                ApplyToSubQuery(subQuery, q => new WhereClause(q, predicate)),
+            case WhereClause(var subQuery, var predicate):
+                return ApplyToSubQuery(subQuery, q => new WhereClause(q, predicate));
             
             // Recursive normalization of subqueries - SELECT (preserve Aliases)
-            SelectClause(var subQuery, var selector, var aliases) =>
-                ApplyToSubQuery(subQuery, q => new SelectClause(q, selector, aliases)),
+            case SelectClause(var subQuery, var selector, var aliases):
+                return ApplyToSubQuery(subQuery, q => new SelectClause(q, selector, aliases));
             
             // Recursive normalization of subqueries - ORDER BY
-            OrderByClause(var subQuery, var keySelectors) =>
-                ApplyToSubQuery(subQuery, q => new OrderByClause(q, keySelectors)),
+            case OrderByClause(var subQuery, var keySelectors):
+                return ApplyToSubQuery(subQuery, q => new OrderByClause(q, keySelectors));
 
-            GroupByClause(var subQuery, var keySelector, var havingPredicate) =>
-                ApplyToSubQuery(subQuery, q => new GroupByClause(q, keySelector, havingPredicate)),
+            case GroupByClause(var subQuery, var keySelector, var havingPredicate):
+                return ApplyToSubQuery(subQuery, q => new GroupByClause(q, keySelector, havingPredicate));
+
+            case JoinClause(var outer, var joinData):
+                return ApplyToSubQuery(outer, q => new JoinClause(q, joinData));
 
             // No changes needed
-            _ => (query, false)
-        };
+            default:
+                return (query, false);
+        }
     }
 
     /// <summary>
@@ -105,43 +112,26 @@ public static partial class SqlCompiler
         {
             // Wrap non-SELECT queries with SELECT * to match compiler patterns
             WhereClause =>
-                new SelectClause(query, tuple => tuple, ImmutableArray<string?>.Empty),
+                new SelectClause(query, tuple => tuple, []),
                 
             OrderByClause =>
-                new SelectClause(query, tuple => tuple, ImmutableArray<string?>.Empty),
-                
+                new SelectClause(query, tuple => tuple, []),
+
             FromTableClause =>
-                new SelectClause(query, tuple => tuple, ImmutableArray<string?>.Empty),
+                new SelectClause(query, tuple => tuple, []),
 
             FromSubQueryClause =>
-                new SelectClause(query, tuple => tuple, ImmutableArray<string?>.Empty),
+                new SelectClause(query, tuple => tuple, []),
 
             GroupByClause =>
-                new SelectClause(query, tuple => tuple, ImmutableArray<string?>.Empty),
+                new SelectClause(query, tuple => tuple, []),
+
+            JoinClause =>
+                new SelectClause(query, tuple => tuple, []),
 
             // Already in canonical form
             _ => query
         };
-    }
-
-    /// <summary>
-    /// Compiles a projection based on the selected value with explicit aliases support.
-    /// Handles both identity selectors (SELECT *) and tuple projections with optional field aliases.
-    /// </summary>
-    /// <param name="selected">The selected value from the selector - either the table itself or a tuple projection</param>
-    /// <param name="table">The table being selected from</param>
-    /// <param name="aliases">Optional array of field aliases for the projection columns</param>
-    /// <param name="context">The compilation context</param>
-    /// <returns>The projection SQL string and updated context</returns>
-    private static (string, Context) CompileProjection(ITuple selected, ITuple table, ImmutableArray<string?> aliases, Context context)
-    {
-        // If selector returns the same table object (identity selector), use SELECT *
-        if (ReferenceEquals(selected, table))
-        {
-            return ("*", context);
-        }
-
-        return CompileTupleProjection(selected, aliases, context);
     }
 
     /// <summary>
@@ -153,28 +143,63 @@ public static partial class SqlCompiler
     /// <exception cref="NotSupportedException">Thrown when a tuple contains unsupported item types</exception>
     private static ImmutableArray<SqlExpr> FlattenTuple(ITuple tuple)
     {
+        if (tuple is ISqlTable sqlTable)
+        {
+            return FlattenTable(sqlTable);
+        }
+
         var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
         for (int i = 0; i < tuple.Length; i++)
         {
             var item = tuple[i];
             switch (item)
-            {
+            {                
                 case null:
                     // ignore null values
                     break;
                 case SqlExpr expr:
                     flattened.Add(expr);
                     break;
+                case ISqlTable table:
+                {
+                    flattened.AddRange(FlattenTable(table));
+                    break;
+                }
                 case ITuple subTuple:
                     // Recursively flatten nested tuples
                     flattened.AddRange(FlattenTuple(subTuple));
-                    break;
+                    break;                
                 default:
                     throw new NotSupportedException($"Tuple item type {item?.GetType().Name} is not supported");
             }
         }
         return flattened.ToImmutable();
     }
+
+    private static ImmutableArray<SqlExpr> FlattenTable(ISqlTable sqlTable)
+    {
+        if (sqlTable.Columns.All(c => c is { } && c is SqlExpr sqlExpr))
+        {
+            return sqlTable.Columns.Cast<SqlExpr>().ToImmutableArray();
+        }
+
+        var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
+        // use reflection on sqlTable to get properties that return ISqlColumn and have no parameters
+        var properties = sqlTable.GetType().GetProperties()
+            .Where(prop => prop.GetIndexParameters().Length == 0 && typeof(ISqlColumn).IsAssignableFrom(prop.PropertyType));
+            
+        foreach (var prop in properties)
+        {
+            if (prop.GetValue(sqlTable) is SqlExpr sqlExpr)
+            {
+                flattened.Add(sqlExpr);
+            }
+        }
+        return flattened.ToImmutable();
+    }
+
+          
+    
 
     /// <summary>
     /// Updates projection aliases for tuple expressions when wrapping queries as subqueries.
@@ -191,13 +216,17 @@ public static partial class SqlCompiler
         var aliasIndex = ctx.AliasIndex;
 
         foreach (var expr in FlattenTuple(tuple))
-        {            
+        {
             if (ctx.ProjectionAliases.TryGetValue(expr, out var existingAlias))
             {
                 ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.SetItem(expr, new SqlExprAlias($"a{aliasIndex}", existingAlias.Field)) };
             }
+            else if (expr is ISqlColumn sqlColumn)
+            {
+                ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.SetItem(expr, new SqlExprAlias($"a{aliasIndex}", sqlColumn.ColumnName)) };
+            }
             else
-                throw new InvalidOperationException($"Expression {expr} does not have a projection alias defined in the context.");         
+                throw new InvalidOperationException($"Expression {expr} does not have a projection alias defined in the context.");
         }
         return ctx;
     }
@@ -264,7 +293,7 @@ public static partial class SqlCompiler
             {
                 var (aliasIndex, newContext) = context.GetOrAddTableAlias(table);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, newContext);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, newContext);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex}", selected, projectionCtx);
             }
 
@@ -274,7 +303,7 @@ public static partial class SqlCompiler
 
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, whereCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
             }
 
@@ -284,7 +313,7 @@ public static partial class SqlCompiler
 
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, newContext);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, orderCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
@@ -295,7 +324,7 @@ public static partial class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, table, whereCtx);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, orderCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
                 return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
             
@@ -305,8 +334,8 @@ public static partial class SqlCompiler
 
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, newContext);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, groupCtx);
-                
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
+
                 if (havingPredicate is null)
                     return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} GROUP BY {groupByClause}", selected, projectionCtx);
                 else
@@ -323,7 +352,7 @@ public static partial class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(table), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, table, whereCtx);
                 var selected = selector(table);
-                var (projection, projectionCtx) = CompileProjection(selected, table, aliases, groupCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
                 
                 if (havingPredicate is null)
                     return ($"SELECT {projection} FROM {table.TableName} a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
@@ -347,7 +376,7 @@ public static partial class SqlCompiler
                 var aliasIndex = newContext.AliasIndex;
 
                 var selected = selector(tuple);
-                var (projection, projectionCtx) = CompileProjection(selected, tuple, aliases, newContext);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, newContext);
                 return ($"SELECT {projection} FROM ({subQuerySql}) a{aliasIndex}", selected, projectionCtx);
             }
             
@@ -364,7 +393,7 @@ public static partial class SqlCompiler
                 // Apply WHERE clause to the subquery result
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
                 var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliases, whereCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
                 return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause}", selected, projectionCtx);
             }
 
@@ -382,7 +411,7 @@ public static partial class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx);
                 var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliases, orderCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
                 return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
@@ -398,7 +427,7 @@ public static partial class SqlCompiler
 
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, newContext);
                 var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliases, orderCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
                 return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} ORDER BY {orderByClause}", selected, projectionCtx);
             }
 
@@ -416,7 +445,7 @@ public static partial class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), newContext);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx);
                 var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileProjection(selected, innerTuple, aliases, groupCtx);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
                 
                 if (havingPredicate is null)
                     return ($"SELECT {projection} FROM ({innerQuerySql}) a{aliasIndex} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
@@ -427,10 +456,88 @@ public static partial class SqlCompiler
                 }
             }
 
+            // ========== JOIN CASES ==========
+            // JOIN clauses are always wrapped with SelectClause by canonical form normalization
+            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
+                {
+                    if (joinData.IsEmpty)
+                        throw new InvalidOperationException("JoinClause must contain at least one join operation");
+
+                    // Start with the outer query
+                    var (currentQuerySql, currentTuple, currentContext) = Compile(outer, context);
+
+                    // Build the FROM clause - handle if outer is a table or subquery
+                    string fromClause;
+                    if (outer is FromTableClause fromTable)
+                    {
+                        var (outerAliasIndex, _) = context.GetOrAddTableAlias(fromTable.Table);
+                        fromClause = $"{fromTable.Table.TableName} a{outerAliasIndex}";
+                    }
+                    else
+                    {
+                        // Outer query is a subquery, wrap it
+                        var outerAliasIndex = currentContext.AliasIndex;
+                        fromClause = $"({currentQuerySql}) a{outerAliasIndex}";
+                        currentContext = currentContext with { AliasIndex = currentContext.AliasIndex + 1 };
+                    }
+
+                    List<string> joinClauses;
+                    Context finalContext;
+                    currentTuple = CompileJoin(joinData, currentTuple, currentContext, out joinClauses, out finalContext);
+
+                    // Apply the selector to get the final selected tuple
+                    var selected = selector(currentTuple);
+
+                    // For JOINs, we never want SELECT * - always project the individual fields
+                    // even if the selector is an identity function
+                    var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext);
+
+                    // Combine FROM clause with all JOIN clauses
+                    var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)}";
+
+                    return (joinSql, selected, projectionCtx);
+                }
 
             default:
                 throw new NotSupportedException($"Query type {query.GetType().Name} is not supported");
         }
+    }
+
+    private static ITuple CompileJoin(ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> joinData, ITuple currentTuple, Context currentContext, out List<string> joinClauses, out Context finalContext)
+    {
+        joinClauses = new List<string>();
+        finalContext = currentContext;
+
+        // Process each join in sequence
+        foreach (var (joinType, inner, outerKeySelector, innerKeySelector, resultSelector, joinAliases) in joinData)
+        {
+            // Get or add alias for the inner table
+            var (innerAliasIndex, innerContext) = finalContext.GetOrAddTableAlias(inner);
+
+            // Extract the join condition using current tuple state
+            var outerKey = outerKeySelector(currentTuple);
+            var innerKey = innerKeySelector(inner);
+
+            var (outerKeySql, outerKeyCtx) = Compile(outerKey, innerContext);
+            var (innerKeySql, innerKeyCtx) = Compile(innerKey, outerKeyCtx);
+
+            // Determine join type SQL
+            var joinTypeSql = joinType switch
+            {
+                JoinType.Inner => "INNER JOIN",
+                JoinType.Left => "LEFT JOIN",
+                _ => throw new NotSupportedException($"Join type {joinType} is not supported")
+            };
+
+            // Add this join clause
+            joinClauses.Add($"{joinTypeSql} {inner.TableName} a{innerAliasIndex} ON {outerKeySql} = {innerKeySql}");
+
+            // Update the current tuple by applying the result selector
+            currentTuple = resultSelector(currentTuple, inner);
+            finalContext = innerKeyCtx;
+        }
+
+        return currentTuple;
     }
 
     /// <summary>

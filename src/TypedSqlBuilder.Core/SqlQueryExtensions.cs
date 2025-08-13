@@ -342,6 +342,72 @@ public static class SqlQueryExtensions
     }
 
 
+    /// <summary>
+    /// Performs an INNER JOIN between the outer query and an inner table.
+    /// Returns only rows where there are matching keys in both the outer query and inner table.
+    /// </summary>
+    /// <typeparam name="TOuter">The tuple type from the outer query</typeparam>
+    /// <typeparam name="TInner">The type of the inner table to join with</typeparam>
+    /// <typeparam name="TKey">The type of the join key, must be a SQL expression</typeparam>
+    /// <typeparam name="TResult">The result tuple type after joining</typeparam>
+    /// <param name="outer">The outer query to join from</param>
+    /// <param name="inner">The inner table to join with</param>
+    /// <param name="outerKeySelector">Function to extract the join key from the outer query</param>
+    /// <param name="innerKeySelector">Function to extract the join key from the inner table</param>
+    /// <param name="resultSelector">Function to combine outer and inner rows into the result</param>
+    /// <returns>A new query representing the INNER JOIN operation</returns>
+    /// <example>
+    /// <code>
+    /// var joinedQuery = customerQuery.InnerJoin(
+    ///     Db.Orders,
+    ///     c => c.Id,
+    ///     o => o.CustomerId,
+    ///     (c, o) => (c.Name, o.OrderId, o.Amount));
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TResult> InnerJoin<TOuter, TInner, TKey, TResult>(this ISqlQuery<TOuter> outer, TInner inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
+        where TOuter : ITuple
+        where TInner : ISqlTable, new()
+        where TKey : SqlExpr
+        where TResult : ITuple        
+    {
+        var names = GetTupleElementNames(resultSelector); 
+        return new JoinClause<TOuter, TInner, TKey, TResult>(JoinType.Inner, outer, new TInner(), outerKeySelector, innerKeySelector, resultSelector, names);
+    }
+
+    /// <summary>
+    /// Performs a LEFT JOIN between the outer query and an inner table.
+    /// Returns all rows from the outer query and matching rows from the inner table.
+    /// If no match is found, NULL values are used for the inner table columns.
+    /// </summary>
+    /// <typeparam name="TOuter">The tuple type from the outer query</typeparam>
+    /// <typeparam name="TInner">The type of the inner table to join with</typeparam>
+    /// <typeparam name="TKey">The type of the join key, must be a SQL expression</typeparam>
+    /// <typeparam name="TResult">The result tuple type after joining</typeparam>
+    /// <param name="outer">The outer query to join from</param>
+    /// <param name="inner">The inner table to join with</param>
+    /// <param name="outerKeySelector">Function to extract the join key from the outer query</param>
+    /// <param name="innerKeySelector">Function to extract the join key from the inner table</param>
+    /// <param name="resultSelector">Function to combine outer and inner rows into the result</param>
+    /// <returns>A new query representing the LEFT JOIN operation</returns>
+    /// <example>
+    /// <code>
+    /// var joinedQuery = customerQuery.LeftJoin(
+    ///     Db.Orders,
+    ///     c => c.Id,
+    ///     o => o.CustomerId,
+    ///     (c, o) => (c.Name, o.OrderId, o.Amount));
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this ISqlQuery<TOuter> outer, TInner inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
+        where TOuter : ITuple
+        where TInner : ISqlTable, new()
+        where TKey : SqlExpr
+        where TResult : ITuple        
+    {
+        var names = GetTupleElementNames(resultSelector); 
+        return new JoinClause<TOuter, TInner, TKey, TResult>(JoinType.Left, outer, new TInner(), outerKeySelector, innerKeySelector, resultSelector, names);
+    }
 
     /// <summary>
     /// Compiles the SQL query to SQL Server syntax with parameters.

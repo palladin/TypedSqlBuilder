@@ -57,8 +57,9 @@ public interface ISqlGroupByHavingQuery<TSource> : ISqlGroupByQuery<TSource>
 /// Extends ITuple to provide column access capabilities.
 /// </summary>
 public interface ISqlTable : ITuple
-{ 
+{
     string TableName { get; }
+    object?[] Columns { get; }
 }
 
 
@@ -72,28 +73,33 @@ public abstract class SqlTable<TCol1, TCol2> : ISqlTable
     where TCol1 : ISqlColumn<TCol1>
     where TCol2 : ISqlColumn<TCol2>
 {
-    private readonly object[] columns;
+    private readonly object?[] columns;
+    public object?[] Columns => columns;
 
     protected SqlTable(string tableName)
     {
-        TableName = tableName;        
-        columns = new object[2];
+        TableName = tableName;
+        columns = new object?[2];
     }
 
     public object? this[int index] => columns[index];
 
     public TCol1 Column1(string columnName)
     {
-        TCol1 col1 = TCol1.Create(this, columnName);
-        columns[0] = col1;
-        return col1;
+        if (columns[0] == null)
+        {
+            columns[0] = TCol1.Create(this, columnName);
+        }
+        return (TCol1)columns[0]!;
     }
 
     public TCol2 Column2(string columnName) 
     {
-        TCol2 col2 = TCol2.Create(this, columnName);
-        columns[1] = col2;
-        return col2;
+        if (columns[1] == null)
+        {
+            columns[1] = TCol2.Create(this, columnName);
+        }
+        return (TCol2)columns[1]!;
     }
      
     public string TableName { get; }
@@ -113,35 +119,42 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
     where TCol2 : ISqlColumn<TCol2>
     where TCol3 : ISqlColumn<TCol3>
 {
-    private readonly object[] columns;
+    private readonly object?[] columns;
+    public object?[] Columns => columns;
 
     protected SqlTable(string tableName)
     {
-        TableName = tableName;        
-        columns = new object[3];
+        TableName = tableName;
+        columns = new object?[3];
     }
 
     public object? this[int index] => columns[index];
 
     public TCol1 Column1(string columnName)
     {
-        TCol1 col1 = TCol1.Create(this, columnName);
-        columns[0] = col1;
-        return col1;
+        if (columns[0] == null)
+        {
+            columns[0] = TCol1.Create(this, columnName);
+        }
+        return (TCol1)columns[0]!;
     }
 
     public TCol2 Column2(string columnName) 
     {
-        TCol2 col2 = TCol2.Create(this, columnName);
-        columns[1] = col2;
-        return col2;
+        if (columns[1] == null)
+        {
+            columns[1] = TCol2.Create(this, columnName);
+        }
+        return (TCol2)columns[1]!;
     }
 
     public TCol3 Column3(string columnName) 
     {
-        TCol3 col3 = TCol3.Create(this, columnName);
-        columns[2] = col3;
-        return col3;
+        if (columns[2] == null)
+        {
+            columns[2] = TCol3.Create(this, columnName);
+        }
+        return (TCol3)columns[2]!;
     }
      
     public string TableName { get; }
@@ -349,4 +362,17 @@ public record HavingClause<TSource>(ISqlGroupByQuery<TSource> TypedGroupedQuery,
     where TSource : ITuple;
 
 
-   
+public enum JoinType
+{
+    Inner,
+    Left,    
+}
+
+public record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
+
+public record JoinClause<TOuter, TInner, TKey, TResult>(JoinType JoinType, ISqlQuery<TOuter> TypedOuter, TInner Inner, Func<TOuter, TKey> OuterKeySelector, Func<TInner, TKey> InnerKeySelector, Func<TOuter, TInner, TResult> ResultSelector, ImmutableArray<string?> Aliases) 
+    : JoinClause(TypedOuter, [(JoinType, Inner, x => OuterKeySelector((TOuter)x), x => InnerKeySelector((TInner)x), (x, y) => ResultSelector((TOuter)x, (TInner)y), Aliases)]), ISqlQuery<TResult>
+        where TOuter : ITuple
+        where TInner : ISqlTable
+        where TKey : SqlExpr
+        where TResult : ITuple;
