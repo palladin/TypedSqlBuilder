@@ -97,13 +97,13 @@ public abstract class SqlExprString : SqlExpr,
 
 public interface ISqlColumn
 { 
-	public ISqlTable Table { get; }
+	public string TableName { get; }
 	public string ColumnName { get; }
 }
 
 public interface ISqlColumn<TCol> : ISqlColumn where TCol : ISqlColumn<TCol>
 {	
-	static abstract TCol Create(ISqlTable table, string columnName);
+	static abstract TCol Create(string tableName, string columnName);
 }
 
 // Generic comparison base classes for reducing compiler repetition and eliminating type-specific classes

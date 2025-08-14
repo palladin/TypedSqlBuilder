@@ -477,9 +477,10 @@ public static partial class SqlCompiler
     private static (string, ITuple, Context) CompileFrom(ISqlQuery query, Context context)
     {
         if (query is FromTableClause fromTable)
-        {
-            var (outerAliasIndex, newContext) = context.GetOrAddTableAlias(fromTable.Table);
-            return ($"{fromTable.Table.TableName} a{outerAliasIndex}", fromTable.Table, newContext);
+        {            
+            var newContext = UpdateProjectionAliases(fromTable.Table, context);
+            var aliasIndex = newContext.AliasIndex;
+            return ($"{fromTable.Table.TableName} a{aliasIndex}", fromTable.Table, newContext);
         }
         if (query is FromSubQueryClause(var subQuery))
         {
@@ -508,9 +509,9 @@ public static partial class SqlCompiler
 
         // Process each join in sequence
         foreach (var (joinType, inner, outerKeySelector, innerKeySelector, resultSelector, joinAliases) in joinData)
-        {
-            // Get or add alias for the inner table
-            var (innerAliasIndex, innerContext) = context.GetOrAddTableAlias(inner);
+        {                
+            var innerContext = UpdateProjectionAliases(inner, context);
+            var innerAliasIndex = innerContext.AliasIndex;
 
             // Extract the join condition using current tuple state
             var outerKey = outerKeySelector(currentTuple);

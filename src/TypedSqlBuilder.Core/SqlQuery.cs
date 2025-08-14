@@ -88,7 +88,7 @@ public abstract class SqlTable<TCol1, TCol2> : ISqlTable
     {
         if (columns[0] == null)
         {
-            columns[0] = TCol1.Create(this, columnName);
+            columns[0] = TCol1.Create(TableName, columnName);
         }
         return (TCol1)columns[0]!;
     }
@@ -97,7 +97,7 @@ public abstract class SqlTable<TCol1, TCol2> : ISqlTable
     {
         if (columns[1] == null)
         {
-            columns[1] = TCol2.Create(this, columnName);
+            columns[1] = TCol2.Create(TableName, columnName);
         }
         return (TCol2)columns[1]!;
     }
@@ -134,7 +134,7 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
     {
         if (columns[0] == null)
         {
-            columns[0] = TCol1.Create(this, columnName);
+            columns[0] = TCol1.Create(TableName, columnName);
         }
         return (TCol1)columns[0]!;
     }
@@ -143,7 +143,7 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
     {
         if (columns[1] == null)
         {
-            columns[1] = TCol2.Create(this, columnName);
+            columns[1] = TCol2.Create(TableName, columnName);
         }
         return (TCol2)columns[1]!;
     }
@@ -152,7 +152,7 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
     {
         if (columns[2] == null)
         {
-            columns[2] = TCol3.Create(this, columnName);
+            columns[2] = TCol3.Create(TableName, columnName);
         }
         return (TCol3)columns[2]!;
     }

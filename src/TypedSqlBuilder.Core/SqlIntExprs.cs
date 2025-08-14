@@ -154,20 +154,20 @@ public class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 /// </summary>
 public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
 {    
-    private SqlIntColumn(ISqlTable table, string columnName)
+    private SqlIntColumn(string tableName, string columnName)
     {
-        Table = table;
+        TableName = tableName;
         ColumnName = columnName;        
     }
     
-    public ISqlTable Table { get; }
+    public string TableName { get; }
     public string ColumnName { get; }
     
-    public static SqlIntColumn Create(ISqlTable table, string columnName) => new SqlIntColumn(table, columnName);
+    public static SqlIntColumn Create(string tableName, string columnName) => new SqlIntColumn(tableName, columnName);
     
-    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+    public void Deconstruct(out string tableNameOut, out string nameOut)
     {
-        tableOut = Table;
+        tableNameOut = TableName;
         nameOut = ColumnName;
     }
 }

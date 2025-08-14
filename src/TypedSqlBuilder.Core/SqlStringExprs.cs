@@ -31,21 +31,21 @@ public class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExprS
 /// </summary>
 public class SqlStringColumn : SqlExprString, ISqlColumn<SqlStringColumn>
 {
-    private SqlStringColumn(ISqlTable table, string columnName)
+    private SqlStringColumn(string tableName, string columnName)
     {
-        Table = table;
+        TableName = tableName;
         ColumnName = columnName;        
     }
     
-    public ISqlTable Table { get; }
+    public string TableName { get; }
     public string ColumnName { get; }
-    
-    public static SqlStringColumn Create(ISqlTable table, string columnName) => new SqlStringColumn(table, columnName);
-    
-    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+
+    public static SqlStringColumn Create(string tableName, string columnName) => new SqlStringColumn(tableName, columnName);
+
+    public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {
-        tableOut = Table;
-        nameOut = ColumnName;
+        tableNameOut = TableName;
+        columnNameOut = ColumnName;
     }
 }
 

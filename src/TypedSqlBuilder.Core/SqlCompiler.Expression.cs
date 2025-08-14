@@ -382,15 +382,7 @@ public static partial class SqlCompiler
                 return ($"({sql})", ctx);
             }
             case ISqlColumn column:
-            {
-                
-                // Check if this table is already registered
-                if (context.TableAliases.TryGetValue(column.Table, out var existingAlias))
-                {
-                    return ($"a{existingAlias}.{column.ColumnName}", context);
-                }
-                return ($"{column.Table.TableName}.{column.ColumnName}", context);
-            }
+                return ($"{column.TableName}.{column.ColumnName}", context);
 
             case SqlExprBool boolExpr:
                 return CompileExprBool(boolExpr, context);

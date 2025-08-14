@@ -80,13 +80,7 @@ public record Context
     /// Gets or sets the current alias index used for generating unique table aliases.
     /// Incremented each time a new table alias is needed (e.g., a0, a1, a2, etc.).
     /// </summary>
-    public int AliasIndex { get; init; } = -1;
-
-    /// <summary>
-    /// Gets or sets the mapping of SQL tables to their assigned alias indices.
-    /// Ensures that the same table gets the same alias throughout the compilation process.
-    /// </summary>
-    public ImmutableDictionary<ISqlTable, int> TableAliases { get; init; } = ImmutableDictionary<ISqlTable, int>.Empty;
+    public int AliasIndex { get; init; } = -1;    
 
     /// <summary>
     /// Gets or sets the collection of named parameters and their values.
@@ -129,26 +123,5 @@ public record Context
         return (paramName, AddParameter(paramName, value));
     }
 
-    /// <summary>
-    /// Gets or creates a table alias for the specified table.
-    /// If the table already has an alias, returns the existing one.
-    /// Otherwise, creates a new alias and increments the alias index.
-    /// </summary>
-    /// <param name="table">The table to get or create an alias for</param>
-    /// <returns>A tuple containing the alias index and the updated context</returns>
-    public (int aliasIndex, Context newContext) GetOrAddTableAlias(ISqlTable table)
-    {
-        if (TableAliases.TryGetValue(table, out var existingAlias))
-        {
-            return (existingAlias, this);
-        }
-        
-        var newAliasIndex = AliasIndex + 1;
-        var newContext = this with 
-        { 
-            AliasIndex = newAliasIndex,
-            TableAliases = TableAliases.Add(table, newAliasIndex)
-        };
-        return (newAliasIndex, newContext);
-    }
+    
 }

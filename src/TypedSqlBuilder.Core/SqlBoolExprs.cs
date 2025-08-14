@@ -48,20 +48,20 @@ public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// </summary>
 public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
 {    
-    private SqlBoolColumn(ISqlTable table, string columnName)
+    private SqlBoolColumn(string tableName, string columnName)
     {
-        Table = table;
+        TableName = tableName;
         ColumnName = columnName;        
     }
     
-    public ISqlTable Table { get; }
+    public string TableName { get; }
     public string ColumnName { get; }
     
-    public static SqlBoolColumn Create(ISqlTable table, string columnName) => new SqlBoolColumn(table, columnName);
+    public static SqlBoolColumn Create(string tableName, string columnName) => new SqlBoolColumn(tableName, columnName);
     
-    public void Deconstruct(out ISqlTable tableOut, out string nameOut)
+    public void Deconstruct(out string tableNameOut, out string nameOut)
     {
-        tableOut = Table;
+        tableNameOut = TableName;
         nameOut = ColumnName;
     }
 }
