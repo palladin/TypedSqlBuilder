@@ -1481,8 +1481,7 @@ public class SqliteQueryTests
         // Act
         var (sql, parameters) = query.ToSqliteRaw();
         
-        // Assert
-        System.Console.WriteLine($"Actual SQL: {sql}");
+        // Assert        
         var expectedSql = """
         SELECT 
             a1.Id AS Id,

@@ -422,7 +422,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlQuery query)
     {
         var context = new Context { Dialect = SqlDialect.SqlServer };
-        var (sql, _, resultContext) = SqlCompiler.Compile(query, context);
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context, 0);
         return (sql, resultContext.Parameters);
     }
 
@@ -439,7 +439,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlQuery query)
     {
         var context = new Context { Dialect = SqlDialect.SQLite };
-        var (sql, _, resultContext) = SqlCompiler.Compile(query, context);
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context, 0);
         return (sql, resultContext.Parameters);
     }
 
@@ -456,7 +456,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlStatement statement)
     {
         var context = new Context { Dialect = SqlDialect.SqlServer };
-        var (sql, resultContext) = SqlCompiler.Compile(statement, context);
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context, 0);
         return (sql, resultContext.Parameters);
     }
 
@@ -473,7 +473,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlStatement statement)
     {
         var context = new Context { Dialect = SqlDialect.SQLite };
-        var (sql, resultContext) = SqlCompiler.Compile(statement, context);
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context, 0);
         return (sql, resultContext.Parameters);
     }
 
@@ -490,7 +490,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlServerRaw(this ISqlScalarQuery scalarQuery)
     {
         var context = new Context { Dialect = SqlDialect.SqlServer };
-        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context);
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
         return (sql, resultContext.Parameters);
     }
 
@@ -507,7 +507,7 @@ public static class SqlQueryExtensions
     public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqliteRaw(this ISqlScalarQuery scalarQuery)
     {
         var context = new Context { Dialect = SqlDialect.SQLite };
-        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context);
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
         return (sql, resultContext.Parameters);
     }
 }

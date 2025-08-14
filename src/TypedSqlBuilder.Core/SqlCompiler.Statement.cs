@@ -16,8 +16,9 @@ public static partial class SqlCompiler
     /// </summary>
     /// <param name="statement">The SQL statement to compile</param>
     /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
     /// <returns>The SQL string representation and updated context</returns>
-    public static (string, Context) Compile(ISqlStatement statement, Context context)
+    public static (string, Context) Compile(ISqlStatement statement, Context context, int scopeLevel)
     {
         switch (statement)
         {
@@ -27,7 +28,7 @@ public static partial class SqlCompiler
 
             case DeleteWhereStatement(DeleteStatement(var table), var predicate):
             {                
-                var (whereClause, whereCtx) = Compile(predicate(table), context);
+                var (whereClause, whereCtx) = Compile(predicate(table), context, scopeLevel);
                 return ($"DELETE FROM {table.TableName} WHERE {whereClause}", whereCtx);
             }
 
@@ -50,7 +51,7 @@ public static partial class SqlCompiler
             {
                 var (table, setClauses) = ExtractUpdateTableAndClauses(innerStatement);                
                 var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
-                var (setClauseSql, setCtx) = CompileSetClauses(newSetClauses, table, context);
+                var (setClauseSql, setCtx) = CompileSetClauses(newSetClauses, table, context, scopeLevel);
                 return ($"UPDATE {table.TableName} SET {setClauseSql}", setCtx);
             }    
 
@@ -58,17 +59,15 @@ public static partial class SqlCompiler
             case UpdateWhereFromStatement(var updateStatement, var predicate):
             {
                 var (table, setClauses) = ExtractUpdateTableAndClauses(updateStatement);                
-                var (setClauseSql, setCtx) = CompileSetClauses(setClauses, table, context);
-                var (whereClause, whereCtx) = Compile(predicate(table), setCtx);
+                var (setClauseSql, setCtx) = CompileSetClauses(setClauses, table, context, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(table), setCtx, scopeLevel);
                 return ($"UPDATE {table.TableName} SET {setClauseSql} WHERE {whereClause}", whereCtx);
-            }        
-
-            // ========== STATEMENT FUSION PATTERNS ==========
+            }            // ========== STATEMENT FUSION PATTERNS ==========
             case ValueStatement(var innerStatement, var valueClause):
             {
                 var (table, valueClauses) = ExtractInsertTableAndClauses(innerStatement);
                 var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();                
-                var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(newValueClauses, table, context);
+                var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(newValueClauses, table, context, scopeLevel);
                 return ($"INSERT INTO {table.TableName} ({columnsClause}) VALUES ({valuesClause})", valuesCtx);            
             }            
 
@@ -84,7 +83,7 @@ public static partial class SqlCompiler
     /// <param name="table">The table being updated</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The SQL string representation and updated context</returns>
-    private static (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, ISqlTable table, Context context)
+    private static (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, ISqlTable table, Context context, int scopeLevel)
     {
         var items = new List<string>();
         var ctx = context;
@@ -92,8 +91,8 @@ public static partial class SqlCompiler
         foreach (var setClause in setClauses)
         {
             var column = setClause.ColumnSelector(table);
-            var (columnSql, columnCtx) = Compile(column, ctx);
-            var (valueSql, valueCtx) = Compile(setClause.Value, columnCtx);
+            var (columnSql, columnCtx) = Compile(column, ctx, scopeLevel);
+            var (valueSql, valueCtx) = Compile(setClause.Value, columnCtx, scopeLevel);
             items.Add($"{columnSql} = {valueSql}");
             ctx = valueCtx;
         }
@@ -108,7 +107,7 @@ public static partial class SqlCompiler
     /// <param name="table">The table being inserted into</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The columns clause, values clause, and updated context</returns>
-    private static (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, ISqlTable table, Context context)
+    private static (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, ISqlTable table, Context context, int scopeLevel)
     {
         var columns = new List<string>();
         var valuesSql = new List<string>();
@@ -117,7 +116,7 @@ public static partial class SqlCompiler
         foreach (var valueClause in valueClauses)
         {
             var column = valueClause.ColumnSelector(table);
-            var (valueSql, valueCtx) = Compile(valueClause.Value, ctx);
+            var (valueSql, valueCtx) = SqlCompiler.Compile(valueClause.Value, ctx, scopeLevel);
 
             if (column is ISqlColumn sqlColumn)
                 columns.Add(sqlColumn.ColumnName);
