@@ -639,7 +639,7 @@ public static partial class SqlCompiler
             var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context, scopeLevel + 1);
             var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
             var aliasIndex = newContext.AliasIndex;
-            return ($"({subQuerySql}) a{aliasIndex}", tuple, newContext);
+            return ($"({subQuerySql.TrimStart()}) a{aliasIndex}", tuple, newContext);
         }
         else
         {
@@ -647,7 +647,7 @@ public static partial class SqlCompiler
             var (currentQuerySql, currentTuple, currentContext) = Compile(query, context, scopeLevel + 1);
             var newContext = UpdateProjectionAliases(currentTuple, currentContext);
             var aliasIndex = newContext.AliasIndex;
-            return ($"({currentQuerySql}) a{aliasIndex}", currentTuple, newContext);
+            return ($"({currentQuerySql.TrimStart()}) a{aliasIndex}", currentTuple, newContext);
         }
     }
 

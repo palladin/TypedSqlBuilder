@@ -1250,7 +1250,7 @@ public class SqliteQueryTests
             a1.Id AS Id,
             a1.NewAge AS NewAge
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 (a0.Age + :p0) AS NewAge
             FROM 
@@ -1276,7 +1276,7 @@ public class SqliteQueryTests
             a1.Id AS Id,
             a1.Name AS Name
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 a0.Name AS Name
             FROM 
@@ -1307,7 +1307,7 @@ public class SqliteQueryTests
             a1.Id AS Id,
             a1.Name AS Name
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 a0.Name AS Name
             FROM 
@@ -1489,7 +1489,7 @@ public class SqliteQueryTests
             a2.Amount AS Amount,
             a3.ProductName AS ProductName
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
                 a0.Name AS Name
@@ -1572,7 +1572,7 @@ public class SqliteQueryTests
             a2.OrderId AS OrderId,
             a2.Amount AS Amount
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
                 a0.Name AS Name
@@ -1680,7 +1680,7 @@ public class SqliteQueryTests
             a2.OrderId AS OrderId,
             a2.Amount AS Amount
         FROM 
-            (    SELECT 
+            (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
                 a0.Name AS Name
