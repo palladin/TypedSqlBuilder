@@ -12,6 +12,17 @@ namespace TypedSqlBuilder.Core;
 public static partial class SqlCompiler
 {
     /// <summary>
+    /// Helper method to generate indentation strings for SQL formatting.
+    /// </summary>
+    /// <param name="indentLevel">The current indentation level</param>
+    /// <returns>A tuple containing the base indent and sub-indent strings</returns>
+    private static (string Indent, string SubIndent) GetIndentation(int indentLevel)
+    {
+        var indent = new string(' ', indentLevel * 4);
+        var subIndent = new string(' ', (indentLevel + 1) * 4);
+        return (indent, subIndent);
+    }
+    /// <summary>
     /// Normalizes a SQL query by applying fusion rules until a fixpoint is reached.
     /// Moves all fusion logic from extension methods to centralized normalization.
     /// Handles WHERE clause fusion, ORDER BY fusion, and SELECT composition.
@@ -304,8 +315,17 @@ public static partial class SqlCompiler
                 var selected = selector(updatedTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
                 
-                // Combine FROM clause with all JOIN clauses and WHERE
-                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} WHERE {whereClause}";
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var joinSql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                """;
+                
                 return (joinSql, selected, projectionCtx);
             }
 
@@ -321,15 +341,23 @@ public static partial class SqlCompiler
                 var selected = selector(updatedTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
 
-                // Generate compact SQL: SELECT ... FROM table1 JOIN table2 ... GROUP BY ...
-                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} GROUP BY {groupByClause}";
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var joinSql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                {{indent}}GROUP BY 
+                {{subIndent}}{{groupByClause}}
+                """;
                 
                 if (havingPredicate is null)
                     return (joinSql, selected, projectionCtx);
                 else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx);
-                    return ($"{joinSql} HAVING {havingSql}", selected, havingCtx);
+                    return ($"{joinSql}\n{indent}HAVING {havingSql}", selected, havingCtx);
                 }
             }
 
@@ -345,8 +373,16 @@ public static partial class SqlCompiler
                 var selected = selector(updatedTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
 
-                // Generate compact SQL: SELECT ... FROM table1 JOIN table2 ... ORDER BY ...
-                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)} ORDER BY {orderByClause}";
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var joinSql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                {{indent}}ORDER BY 
+                {{subIndent}}{{orderByClause}}
+                """;
                 return (joinSql, selected, projectionCtx);
             }
 
@@ -363,8 +399,14 @@ public static partial class SqlCompiler
                 // even if the selector is an identity function
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext);
 
-                // Combine FROM clause with all JOIN clauses
-                var joinSql = $"SELECT {projection} FROM {fromClause} {string.Join(" ", joinClauses)}";
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var joinSql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                """;
                 return (joinSql, selected, projectionCtx);
             }
 
@@ -384,11 +426,36 @@ public static partial class SqlCompiler
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
                 
                 if (havingPredicate is null)
-                    return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause} GROUP BY {groupByClause}", selected, projectionCtx);
+                {
+                    // Format SQL with proper indentation
+                    var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                    var sql = $$"""
+                    {{indent}}SELECT 
+                    {{subIndent}}{{projection}}
+                    {{indent}}FROM {{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    return (sql, selected, projectionCtx);
+                }
                 else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
-                    return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause} GROUP BY {groupByClause} HAVING {havingSql}", selected, havingCtx);
+                    var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                    var sql = $$"""
+                    {{indent}}SELECT 
+                    {{subIndent}}{{projection}}
+                    {{indent}}FROM {{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    return (sql, selected, havingCtx);
                 }
             }
 
@@ -402,11 +469,32 @@ public static partial class SqlCompiler
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx);
 
                 if (havingPredicate is null)
-                    return ($"SELECT {projection} FROM {fromClause} GROUP BY {groupByClause}", selected, projectionCtx);
+                {
+                    // Format SQL with proper indentation
+                    var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                    var sql = $$"""
+                    {{indent}}SELECT 
+                    {{subIndent}}{{projection}}
+                    {{indent}}FROM {{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    return (sql, selected, projectionCtx);
+                }
                 else
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx);
-                    return ($"SELECT {projection} FROM {fromClause} GROUP BY {groupByClause} HAVING {havingSql}", selected, havingCtx);
+                    var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                    var sql = $$"""
+                    {{indent}}SELECT 
+                    {{subIndent}}{{projection}}
+                    {{indent}}FROM {{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    return (sql, selected, havingCtx);
                 }
             }
 
@@ -424,7 +512,19 @@ public static partial class SqlCompiler
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
-                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause} ORDER BY {orderByClause}", selected, projectionCtx);
+                
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                {{indent}}ORDER BY 
+                {{subIndent}}{{orderByClause}}
+                """;
+                return (sql, selected, projectionCtx);
             }
 
             // Basic ORDER BY: ORDER BY clause applied to any query type
@@ -435,7 +535,17 @@ public static partial class SqlCompiler
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, innerContext);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx);
-                return ($"SELECT {projection} FROM {fromClause} ORDER BY {orderByClause}", selected, projectionCtx);
+                
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}ORDER BY 
+                {{subIndent}}{{orderByClause}}
+                """;
+                return (sql, selected, projectionCtx);
             }
 
             // ========================================
@@ -451,7 +561,17 @@ public static partial class SqlCompiler
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx);
-                return ($"SELECT {projection} FROM {fromClause} WHERE {whereClause}", selected, projectionCtx);
+                
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{fromClause}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                """;
+                return (sql, selected, projectionCtx);
             }
 
             // ========================================
@@ -459,13 +579,21 @@ public static partial class SqlCompiler
             // ========================================
 
             // Basic SELECT: General SELECT clause pattern
-
             case SelectClause(var innerQuery, var selector, var aliases):
             {
                 var (innerSql, innerTuple, innerContext) = CompileFrom(innerQuery, context);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, innerContext);
-                return ($"SELECT {projection} FROM {innerSql}", selected, projectionCtx);
+                
+                // Format SQL with proper indentation
+                var (indent, subIndent) = GetIndentation(context.IndentLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{subIndent}}{{projection}}
+                {{indent}}FROM {{innerSql}}
+                """;
+                
+                return (sql, selected, projectionCtx);
             }
 
 
@@ -484,15 +612,16 @@ public static partial class SqlCompiler
         }
         if (query is FromSubQueryClause(var subQuery))
         {
-            // Compile the subquery directly (no double-wrapping needed)
-            var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context);
+            // Compile the subquery with increased indentation
+            var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context.Indent());
             var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
             var aliasIndex = newContext.AliasIndex;
             return ($"({subQuerySql}) a{aliasIndex}", tuple, newContext);
         }
         else
         {
-            var (currentQuerySql, currentTuple, currentContext) = Compile(query, context);
+            // Compile as subquery with increased indentation
+            var (currentQuerySql, currentTuple, currentContext) = Compile(query, context.Indent());
             var newContext = UpdateProjectionAliases(currentTuple, currentContext);
             var aliasIndex = newContext.AliasIndex;
             return ($"({currentQuerySql}) a{aliasIndex}", currentTuple, newContext);

@@ -83,6 +83,12 @@ public record Context
     public int AliasIndex { get; init; } = -1;    
 
     /// <summary>
+    /// Gets or sets the current indentation level for SQL formatting.
+    /// Used to properly indent subqueries and nested SQL structures.
+    /// </summary>
+    public int IndentLevel { get; init; } = 0;
+
+    /// <summary>
     /// Gets or sets the collection of named parameters and their values.
     /// Used to generate parameterized SQL queries to prevent SQL injection.
     /// </summary>
@@ -122,6 +128,13 @@ public record Context
         var paramName = $"{prefix}p{Parameters.Count}";
         return (paramName, AddParameter(paramName, value));
     }
+
+    /// <summary>
+    /// Creates a new context with an incremented indentation level.
+    /// Used when entering nested query structures like subqueries.
+    /// </summary>
+    /// <returns>A new context with IndentLevel incremented by 1</returns>
+    public Context Indent() => this with { IndentLevel = IndentLevel + 1 };
 
     
 }
