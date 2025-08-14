@@ -20,8 +20,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -39,8 +42,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -56,8 +62,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -76,7 +84,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             a0.Age AS Age
-        FROM customers a0
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -94,8 +103,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Age > @p0
         """;
@@ -116,8 +128,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Name = @p0
         """;
@@ -138,8 +153,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name != @p1)
         """;
@@ -161,8 +179,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC
         """;
@@ -182,8 +203,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Age DESC
         """;
@@ -203,8 +227,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            (a0.Id + @p1) AS prj0, CONCAT(a0.Name, @p2) AS prj1
-        FROM customers a0
+            (a0.Id + @p1) AS prj0,
+            CONCAT(a0.Name, @p2) AS prj1
+        FROM 
+            customers a0
         WHERE 
             a0.Age > @p0
         ORDER BY 
@@ -229,8 +255,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Age >= @p0
         """;
@@ -251,8 +279,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             ((a0.Age > @p0) AND (a0.Age < @p1)) OR (a0.Name = @p2)
         """;
@@ -276,8 +307,10 @@ public class SqlServerQueryTests
         // Assert - SQL Server uses CONCAT for string concatenation
         var expectedSql = """
         SELECT 
-            ((a0.Id * @p0) + a0.Age) AS prj0, CONCAT(a0.Name, @p1) AS prj1
-        FROM customers a0
+            ((a0.Id * @p0) + a0.Age) AS prj0,
+            CONCAT(a0.Name, @p1) AS prj1
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -297,8 +330,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name != @p1)
         ORDER BY 
@@ -322,8 +358,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name, (a0.Age + @p2) AS prj0
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name,
+            (a0.Age + @p2) AS prj0
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name != @p1)
         ORDER BY 
@@ -348,8 +387,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name = @p1)
         """;
@@ -384,8 +426,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS CustomerId, CONCAT(a0.Name, @p2) AS CustomerInfo, (a0.Age + @p3) AS AdjustedAge
-        FROM customers a0
+            a0.Id AS CustomerId,
+            CONCAT(a0.Name, @p2) AS CustomerInfo,
+            (a0.Age + @p3) AS AdjustedAge
+        FROM 
+            customers a0
         WHERE 
             (a0.Age >= @p0) AND (a0.Name != @p1)
         ORDER BY 
@@ -411,8 +456,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.ProductId AS ProductId, a0.ProductName AS ProductName
-        FROM products a0
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName
+        FROM 
+            products a0
         WHERE 
             a0.ProductName != @p0
         """;
@@ -436,8 +483,10 @@ public class SqlServerQueryTests
         // Assert - The structure should be consistent regardless of parameter values
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 (a0.Age >= @p0) AND (a0.Age <= @p1)
             """, sql);
@@ -458,8 +507,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS OriginalId, ((a0.OriginalId * @p1) + a0.Age) AS ModifiedId, a0.Name AS CustomerName
-        FROM customers a0
+            a0.Id AS OriginalId,
+            ((a0.OriginalId * @p1) + a0.Age) AS ModifiedId,
+            a0.Name AS CustomerName
+        FROM 
+            customers a0
         WHERE 
             a0.Age > @p0
         """;
@@ -481,8 +533,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name, (a0.Age + @p0) AS prj0
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name,
+            (a0.Age + @p0) AS prj0
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC
         """;
@@ -502,8 +557,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age >= @p0) AND (a0.Name != @p1)
         """;
@@ -525,8 +582,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name != @p1)
         """;
@@ -547,8 +607,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND ((a0.Name != @p1) AND (a0.Age < @p2))
         """;
@@ -570,8 +633,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age >= @p0) AND (a0.Name != @p1)
         """;
@@ -592,8 +657,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Age > @p0) AND (a0.Name != @p1)
         ORDER BY 
@@ -616,8 +684,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC, a0.Age ASC
         """;
@@ -637,8 +708,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC, a0.Age DESC
         """;
@@ -658,8 +732,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Age DESC, a0.Name ASC
         """;
@@ -679,8 +756,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC, a0.Age DESC, a0.Id ASC
         """;
@@ -700,8 +780,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Age > @p0
         ORDER BY 
@@ -723,8 +806,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
         ORDER BY 
             a0.Name ASC, a0.Age ASC
         """;
@@ -744,8 +829,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Name IS NULL
         """;
@@ -765,8 +853,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Name IS NOT NULL
         """;
@@ -786,8 +877,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             (a0.Name IS NULL) AND (a0.Age IS NOT NULL)
         """;
@@ -808,7 +902,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             SUM(a0.Age) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -827,7 +922,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             COUNT(*) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -846,7 +942,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             COUNT(*) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         WHERE 
             a0.Age >= @p0
         """;
@@ -868,7 +965,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             SUM(a0.Age) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -887,7 +985,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             COUNT(*) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -906,7 +1005,8 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             COUNT(*) AS prj0
-        FROM customers a0
+        FROM 
+            customers a0
         WHERE 
             a0.Age >= @p0
         """;
@@ -927,12 +1027,16 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age > (SELECT 
                 SUM(a1.Age) AS prj0
-            FROM customers a1)
+            FROM 
+                customers a1)
             """, sql);
         Assert.Empty(parameters);
     }
@@ -949,12 +1053,16 @@ public class SqlServerQueryTests
         // Assert - Scalar query used as expression should have parentheses
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age > (SELECT 
                 SUM(a1.Age) AS prj0
-            FROM customers a1)
+            FROM 
+                customers a1)
             """, sql);
         Assert.Empty(parameters);
     }
@@ -971,8 +1079,11 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age IN (@p0, @p1, @p2, @p3)
             """, sql);
@@ -995,12 +1106,16 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age IN (SELECT 
                 a1.Age AS Age
-            FROM customers a1
+            FROM 
+                customers a1
             WHERE 
                 a1.Name = @p0)
             """, sql);
@@ -1020,12 +1135,16 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age IN (SELECT 
                 a1.Age AS Age
-            FROM customers a1
+            FROM 
+                customers a1
             WHERE 
                 a1.Name = CONCAT(a0.Name, @p0))
             """, sql);
@@ -1045,10 +1164,14 @@ public class SqlServerQueryTests
         // Assert - Subquery in FROM clause should be wrapped in parentheses with alias and projection columns should use generated aliases
         Assert.Equal($$"""
             SELECT 
-                a1.Id AS Id, a1.NewAge AS NewAge
-            FROM (    SELECT 
-                    a0.Id AS Id, (a0.Age + @p0) AS NewAge
-                FROM customers a0) a1
+                a1.Id AS Id,
+                a1.NewAge AS NewAge
+            FROM 
+                (    SELECT 
+                    a0.Id AS Id,
+                    (a0.Age + @p0) AS NewAge
+                FROM 
+                    customers a0) a1
             """, sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters["@p0"]);        
@@ -1066,10 +1189,14 @@ public class SqlServerQueryTests
         // Assert - Nested subquery: select(where(select(where(from))))
         var expectedSql = """
         SELECT 
-            a1.Id AS Id, a1.Name AS Name
-        FROM (    SELECT 
-                a0.Id AS Id, a0.Name AS Name
-            FROM customers a0
+            a1.Id AS Id,
+            a1.Name AS Name
+        FROM 
+            (    SELECT 
+                a0.Id AS Id,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age > @p0) a1
         WHERE 
@@ -1094,10 +1221,14 @@ public class SqlServerQueryTests
         // Assert - Linear chain: from().where().select().where().select()
         var expectedSql = """
         SELECT 
-            a1.Id AS Id, a1.Name AS Name
-        FROM (    SELECT 
-                a0.Id AS Id, a0.Name AS Name
-            FROM customers a0
+            a1.Id AS Id,
+            a1.Name AS Name
+        FROM 
+            (    SELECT 
+                a0.Id AS Id,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age > @p0) a1
         WHERE 
@@ -1121,8 +1252,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Age AS Age, COUNT(*) AS Count
-        FROM customers a0
+            a0.Age AS Age,
+            COUNT(*) AS Count
+        FROM 
+            customers a0
         GROUP BY 
             a0.Age
         """;
@@ -1142,8 +1275,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Age AS Age, a0.Name AS Name, COUNT(*) AS Count
-        FROM customers a0
+            a0.Age AS Age,
+            a0.Name AS Name,
+            COUNT(*) AS Count
+        FROM 
+            customers a0
         GROUP BY 
             a0.Age, a0.Name
         """;
@@ -1163,8 +1299,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Age AS Age, COUNT(*) AS Count
-        FROM customers a0
+            a0.Age AS Age,
+            COUNT(*) AS Count
+        FROM 
+            customers a0
         GROUP BY 
             a0.Age
         HAVING 
@@ -1187,8 +1325,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Age AS Age, COUNT(*) AS Count
-        FROM customers a0
+            a0.Age AS Age,
+            COUNT(*) AS Count
+        FROM 
+            customers a0
         WHERE 
             a0.Age >= @p0
         GROUP BY 
@@ -1211,8 +1351,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Age IS NULL
         """;
@@ -1232,8 +1375,11 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name
+        FROM 
+            customers a0
         WHERE 
             a0.Age IS NOT NULL
         """;
@@ -1254,8 +1400,12 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a1.OrderId AS OrderId,
+            a1.Amount AS Amount
+        FROM 
+            customers a0
         INNER JOIN orders a1 ON a0.Id = a1.CustomerId
         """;
         Assert.Equal(expectedSql, sql);
@@ -1274,8 +1424,10 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Name AS Name, a1.Amount AS Amount
-        FROM customers a0
+            a0.Name AS Name,
+            a1.Amount AS Amount
+        FROM 
+            customers a0
         INNER JOIN orders a1 ON a0.Id = a1.CustomerId
         """;
         Assert.Equal(expectedSql, sql);
@@ -1294,10 +1446,18 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a1.Id AS Id, a1.Name AS Name, a1.Age AS Age, a2.OrderId AS OrderId, a2.Amount AS Amount
-        FROM (    SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+            a1.Id AS Id,
+            a1.Name AS Name,
+            a1.Age AS Age,
+            a2.OrderId AS OrderId,
+            a2.Amount AS Amount
+        FROM 
+            (    SELECT 
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age >= @p0) a1
         INNER JOIN orders a2 ON a1.Id = a2.CustomerId
@@ -1322,8 +1482,12 @@ public class SqlServerQueryTests
         // Assert - now generates compact SQL without subquery
         var expectedSql = """
         SELECT 
-            a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount
-        FROM customers a0
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a1.OrderId AS OrderId,
+            a1.Amount AS Amount
+        FROM 
+            customers a0
         INNER JOIN orders a1 ON a0.Id = a1.CustomerId
         ORDER BY 
             a0.Name ASC
@@ -1344,8 +1508,12 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Name AS Name,
+                a1.OrderId AS OrderId,
+                a1.Amount AS Amount
+            FROM 
+                customers a0
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             """, sql);
         Assert.Empty(parameters);
@@ -1363,8 +1531,10 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                CONCAT(a0.Name, @p0) AS prj0, a1.Amount AS Amount
-            FROM customers a0
+                CONCAT(a0.Name, @p0) AS prj0,
+                a1.Amount AS Amount
+            FROM 
+                customers a0
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             """, sql);
         Assert.Equal(" (Customer)", parameters["@p0"]);
@@ -1382,10 +1552,18 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a1.Id AS Id, a1.Name AS Name, a1.Age AS Age, a2.OrderId AS OrderId, a2.Amount AS Amount
-        FROM (    SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+            a1.Id AS Id,
+            a1.Name AS Name,
+            a1.Age AS Age,
+            a2.OrderId AS OrderId,
+            a2.Amount AS Amount
+        FROM 
+            (    SELECT 
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age >= @p0) a1
         LEFT JOIN orders a2 ON a1.Id = a2.CustomerId
@@ -1410,8 +1588,12 @@ public class SqlServerQueryTests
         // Assert - now generates compact SQL without subquery
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a1.Amount AS Amount
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Name AS Name,
+                a1.OrderId AS OrderId,
+                a1.Amount AS Amount
+            FROM 
+                customers a0
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             ORDER BY 
                 a0.Name ASC, a1.Amount DESC
@@ -1431,8 +1613,11 @@ public class SqlServerQueryTests
         // Assert - now generates compact SQL without subquery
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS CustomerId, a0.Name AS CustomerName, SUM(a1.Amount) AS TotalAmount
-            FROM customers a0
+                a0.Id AS CustomerId,
+                a0.Name AS CustomerName,
+                SUM(a1.Amount) AS TotalAmount
+            FROM 
+                customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
             GROUP BY 
                 a0.Id, a0.Name
@@ -1452,8 +1637,13 @@ public class SqlServerQueryTests
         // Assert - now generates compact SQL without subquery
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS CustomerId, a0.Name AS CustomerName, a0.Age AS CustomerAge, COUNT(*) AS OrderCount, SUM(a1.Amount) AS TotalSpent
-            FROM customers a0
+                a0.Id AS CustomerId,
+                a0.Name AS CustomerName,
+                a0.Age AS CustomerAge,
+                COUNT(*) AS OrderCount,
+                SUM(a1.Amount) AS TotalSpent
+            FROM 
+                customers a0
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             GROUP BY 
                 a0.Id
@@ -1474,8 +1664,12 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a2.ProductName AS ProductName
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Name AS Name,
+                a1.OrderId AS OrderId,
+                a2.ProductName AS ProductName
+            FROM 
+                customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
             INNER JOIN products a2 ON a1.Amount = a2.ProductId
             """, sql);
@@ -1494,8 +1688,12 @@ public class SqlServerQueryTests
         // Assert
         Assert.Equal($$"""
             SELECT 
-                a0.Id AS Id, a0.Name AS Name, a1.OrderId AS OrderId, a2.ProductName AS ProductName
-            FROM customers a0
+                a0.Id AS Id,
+                a0.Name AS Name,
+                a1.OrderId AS OrderId,
+                a2.ProductName AS ProductName
+            FROM 
+                customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
             LEFT JOIN products a2 ON a1.Amount = a2.ProductId
             """, sql);
@@ -1514,10 +1712,17 @@ public class SqlServerQueryTests
         // Assert
         var expectedSql = """
         SELECT 
-            a1.Id AS Id, a1.Name AS Name, a2.Amount AS Amount, a3.ProductName AS ProductName
-        FROM (    SELECT 
-                a0.Id AS Id, a0.Age AS Age, a0.Name AS Name
-            FROM customers a0
+            a1.Id AS Id,
+            a1.Name AS Name,
+            a2.Amount AS Amount,
+            a3.ProductName AS ProductName
+        FROM 
+            (    SELECT 
+                a0.Id AS Id,
+                a0.Age AS Age,
+                a0.Name AS Name
+            FROM 
+                customers a0
             WHERE 
                 a0.Age >= @p0) a1
         INNER JOIN orders a2 ON a1.Id = a2.CustomerId
