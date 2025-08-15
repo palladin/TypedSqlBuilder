@@ -295,40 +295,231 @@ public static partial class SqlCompiler
         
         return (string.Join("\n", projectionLines), ctx);
     }
-    /// <summary>
-    /// Compiles SQL queries and clauses to SQL string representation.
-    /// First normalizes the query to apply fusion rules, then pattern matches
-    /// to generate appropriate SQL for each query structure.
-    /// </summary>
-    /// <param name="query">The SQL query or clause to compile</param>
-    /// <param name="context">The compilation context for tracking aliases and parameters</param>
-    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
-    /// <returns>A tuple containing the SQL string, the selected tuple, and updated context</returns>
+
     public static (string, ITuple, Context) Compile(ISqlQuery query, Context context, int scopeLevel)
     {
         // First normalize the query to apply all fusion rules
-        var normalizedQuery = Normalize(query);            
+        var normalizedQuery = Normalize(query);
+        
+        // Implement pattern matches in reverse order (most specific to most general)
         switch (normalizedQuery)
-        {            
-            // ========================================
-            // JOIN-OPTIMIZED PATTERNS (most specific)
-            // ========================================
-            
-            // JOIN + WHERE: Optimized case for WHERE clause applied directly to JOIN
-            case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases):
+        {
+            // 16. select(orderby(groupby(where(join(rest)))))
+            case SelectClause(OrderByClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
             {
-                // Start with the outer query
-                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);                    
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
-                
-                // Apply WHERE clause to the joined result
                 var (whereClause, whereCtx) = Compile(predicate(updatedTuple), joinContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, whereCtx, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, groupCtx, scopeLevel);
                 var selected = selector(updatedTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx, scopeLevel);
-                
-                // Format SQL with proper indentation
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
                 var (indent, subIndent) = GetIndentation(scopeLevel);
-                var joinSql = $$"""
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 15. select(orderby(groupby(where(rest))))
+            case SelectClause(OrderByClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, groupCtx, scopeLevel);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 14. select(orderby(groupby(join(rest))))
+            case SelectClause(OrderByClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, joinContext, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, groupCtx, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 13. select(orderby(groupby(rest)))
+            case SelectClause(OrderByClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, innerContext, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, groupCtx, scopeLevel);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}ORDER BY 
+                    {{subIndent}}{{orderByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 12. select(orderby(where(join(rest))))
+            case SelectClause(OrderByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(updatedTuple), joinContext, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, whereCtx, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
                 {{indent}}SELECT 
                 {{projection}}
                 {{indent}}FROM 
@@ -336,203 +527,21 @@ public static partial class SqlCompiler
                 {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
                 {{indent}}WHERE 
                 {{subIndent}}{{whereClause}}
-                """;
-                
-                return (joinSql, selected, projectionCtx);
-            }
-
-            // JOIN + GROUP BY: Optimized case for GROUP BY applied directly to JOIN
-            case SelectClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var selector, var aliases):
-            {
-                // Start with the outer query
-                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);                    
-                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
-                
-                // Apply GROUP BY directly to the joined result
-                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, joinContext, scopeLevel);
-                var selected = selector(updatedTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
-
-                // Format SQL with proper indentation
-                var (indent, subIndent) = GetIndentation(scopeLevel);
-                var joinSql = $$"""
-                {{indent}}SELECT 
-                {{projection}}
-                {{indent}}FROM 
-                {{subIndent}}{{fromClause}}
-                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
-                {{indent}}GROUP BY 
-                {{subIndent}}{{groupByClause}}
-                """;
-                
-                if (havingPredicate is null)
-                    return (joinSql, selected, projectionCtx);
-                else
-                {
-                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
-                    return ($"{joinSql}\n{indent}HAVING {havingSql}", selected, havingCtx);
-                }
-            }
-
-            // JOIN + ORDER BY: Optimized case for ORDER BY applied directly to JOIN
-            case SelectClause(OrderByClause(JoinClause(var outer, var joinData), var keySelectors), var selector, var aliases):
-            {
-                // Start with the outer query
-                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);                    
-                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
-                
-                // Apply ORDER BY directly to the joined result
-                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, joinContext, scopeLevel);
-                var selected = selector(updatedTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
-
-                // Format SQL with proper indentation
-                var (indent, subIndent) = GetIndentation(scopeLevel);
-                var joinSql = $$"""
-                {{indent}}SELECT 
-                {{projection}}
-                {{indent}}FROM 
-                {{subIndent}}{{fromClause}}
-                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
                 {{indent}}ORDER BY 
                 {{subIndent}}{{orderByClause}}
                 """;
-                return (joinSql, selected, projectionCtx);
+                return (sql, selected, projectionCtx);
             }
 
-            // Basic JOIN: Standard JOIN clause compilation
-            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
-            {            
-                // Start with the outer query
-                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);                    
-                var (joinClauses, updatedTuple, finalContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);                    
-                // Apply the selector to get the final selected tuple
-                var selected = selector(updatedTuple);
-
-                // For JOINs, we never want SELECT * - always project the individual fields
-                // even if the selector is an identity function
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext, scopeLevel);
-
-                // Format SQL with proper indentation
-                var (indent, subIndent) = GetIndentation(scopeLevel);
-                var joinSql = $$"""
-                {{indent}}SELECT 
-                {{projection}}
-                {{indent}}FROM 
-                {{subIndent}}{{fromClause}}
-                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
-                """;
-                return (joinSql, selected, projectionCtx);
-            }
-
-            // ========================================
-            // GROUP BY PATTERNS (specific to general)
-            // ========================================
-
-            // GROUP BY + WHERE: GROUP BY with WHERE clause applied to any query type
-            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector, var aliases):
-            {
-                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
-                
-                // Apply WHERE clause to the result
-                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
-                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx, scopeLevel);
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
-                
-                if (havingPredicate is null)
-                {
-                    // Format SQL with proper indentation
-                    var (indent, subIndent) = GetIndentation(scopeLevel);
-                    var sql = $$"""
-                    {{indent}}SELECT 
-                    {{projection}}
-                    {{indent}}FROM 
-                    {{subIndent}}{{fromClause}}
-                    {{indent}}WHERE 
-                    {{subIndent}}{{whereClause}}
-                    {{indent}}GROUP BY 
-                    {{subIndent}}{{groupByClause}}
-                    """;
-                    return (sql, selected, projectionCtx);
-                }
-                else
-                {
-                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
-                    var (indent, subIndent) = GetIndentation(scopeLevel);
-                    var sql = $$"""
-                    {{indent}}SELECT 
-                    {{projection}}
-                    {{indent}}FROM 
-                    {{subIndent}}{{fromClause}}
-                    {{indent}}WHERE 
-                    {{subIndent}}{{whereClause}}
-                    {{indent}}GROUP BY 
-                    {{subIndent}}{{groupByClause}}
-                    {{indent}}HAVING 
-                    {{subIndent}}{{havingSql}}
-                    """;
-                    return (sql, selected, havingCtx);
-                }
-            }
-
-            // Basic GROUP BY: GROUP BY clause applied to any query type
-            case SelectClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var selector, var aliases):
-            {
-                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
-                
-                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, innerContext, scopeLevel);
-                var selected = selector(innerTuple);
-                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
-
-                if (havingPredicate is null)
-                {
-                    // Format SQL with proper indentation
-                    var (indent, subIndent) = GetIndentation(scopeLevel);
-                    var sql = $$"""
-                    {{indent}}SELECT 
-                    {{projection}}
-                    {{indent}}FROM 
-                    {{subIndent}}{{fromClause}}
-                    {{indent}}GROUP BY 
-                    {{subIndent}}{{groupByClause}}
-                    """;
-                    return (sql, selected, projectionCtx);
-                }
-                else
-                {
-                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
-                    var (indent, subIndent) = GetIndentation(scopeLevel);
-                    var sql = $$"""
-                    {{indent}}SELECT 
-                    {{projection}}
-                    {{indent}}FROM 
-                    {{subIndent}}{{fromClause}}
-                    {{indent}}GROUP BY 
-                    {{subIndent}}{{groupByClause}}
-                    {{indent}}HAVING 
-                    {{subIndent}}{{havingSql}}
-                    """;
-                    return (sql, selected, havingCtx);
-                }
-            }
-
-            // ========================================
-            // ORDER BY PATTERNS (specific to general)
-            // ========================================
-
-            // ORDER BY + WHERE: ORDER BY with WHERE clause applied to any query type
+            // 11. select(orderby(where(rest)))
             case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector, var aliases):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
-                
-                // Apply WHERE clause to the result
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, whereCtx, scopeLevel);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
-                
-                // Format SQL with proper indentation
+
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
                 {{indent}}SELECT 
@@ -547,16 +556,36 @@ public static partial class SqlCompiler
                 return (sql, selected, projectionCtx);
             }
 
-            // Basic ORDER BY: ORDER BY clause applied to any query type
+            // 10. select(orderby(join(rest)))
+            case SelectClause(OrderByClause(JoinClause(var outer, var joinData), var keySelectors), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, updatedTuple, joinContext, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{projection}}
+                {{indent}}FROM 
+                {{subIndent}}{{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                {{indent}}ORDER BY 
+                {{subIndent}}{{orderByClause}}
+                """;
+                return (sql, selected, projectionCtx);
+            }
+
+            // 9. select(orderby(rest))
             case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector, var aliases):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
-                
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, innerContext, scopeLevel);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, orderCtx, scopeLevel);
-                
-                // Format SQL with proper indentation
+
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
                 {{indent}}SELECT 
@@ -569,21 +598,220 @@ public static partial class SqlCompiler
                 return (sql, selected, projectionCtx);
             }
 
-            // ========================================
-            // WHERE PATTERNS
-            // ========================================
+            // 8. select(groupby(where(join(rest))))
+            case SelectClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(updatedTuple), joinContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, whereCtx, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
 
-            // Basic WHERE: WHERE clause applied to any query type
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 7. select(groupby(where(rest)))
+            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, whereCtx, scopeLevel);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}WHERE 
+                    {{subIndent}}{{whereClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+                }
+
+            // 6. select(groupby(join(rest)))
+            case SelectClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, updatedTuple, joinContext, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 5. select(groupby(rest))
+            case SelectClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var selector, var aliases):
+            {
+                var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
+                var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, innerContext, scopeLevel);
+                var selected = selector(innerTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, groupCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                string sql;
+                Context finalCtx;
+
+                if (havingPredicate is not null)
+                {
+                    var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    {{indent}}HAVING 
+                    {{subIndent}}{{havingSql}}
+                    """;
+                    finalCtx = havingCtx;
+                }
+                else
+                {
+                    sql = $$"""
+                    {{indent}}SELECT 
+                    {{projection}}
+                    {{indent}}FROM 
+                    {{subIndent}}{{fromClause}}
+                    {{indent}}GROUP BY 
+                    {{subIndent}}{{groupByClause}}
+                    """;
+                    finalCtx = projectionCtx;
+                }
+                return (sql, selected, finalCtx);
+            }
+
+            // 4. select(where(join(rest)))
+            case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var (whereClause, whereCtx) = Compile(predicate(updatedTuple), joinContext, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx, scopeLevel);
+
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{projection}}
+                {{indent}}FROM 
+                {{subIndent}}{{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                """;
+                return (sql, selected, projectionCtx);
+            }
+
+            // 3. select(where(rest))
             case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
-                
-                // Apply WHERE clause to the result
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, whereCtx, scopeLevel);
-                
-                // Format SQL with proper indentation
+
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
                 {{indent}}SELECT 
@@ -596,18 +824,32 @@ public static partial class SqlCompiler
                 return (sql, selected, projectionCtx);
             }
 
-            // ========================================
-            // GENERAL PATTERNS
-            // ========================================
+            // 2. select(join(rest))
+            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
+            {
+                var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
+                var (joinClauses, updatedTuple, finalContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
+                var selected = selector(updatedTuple);
+                var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, finalContext, scopeLevel);
 
-            // Basic SELECT: General SELECT clause pattern
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{indent}}SELECT 
+                {{projection}}
+                {{indent}}FROM 
+                {{subIndent}}{{fromClause}}
+                {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
+                """;
+                return (sql, selected, projectionCtx);
+            }
+
+            // 1. select(rest)
             case SelectClause(var innerQuery, var selector, var aliases):
             {
                 var (innerSql, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var selected = selector(innerTuple);
                 var (projection, projectionCtx) = CompileTupleProjection(selected, aliases, innerContext, scopeLevel);
-                
-                // Format SQL with proper indentation
+
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
                 {{indent}}SELECT 
@@ -615,13 +857,11 @@ public static partial class SqlCompiler
                 {{indent}}FROM 
                 {{subIndent}}{{innerSql}}
                 """;
-                
                 return (sql, selected, projectionCtx);
             }
 
-
             default:
-                throw new NotSupportedException($"Query type {query.GetType().Name} is not supported");
+                throw new NotSupportedException($"Query type {normalizedQuery.GetType().Name} is not supported");
         }
     }
 
