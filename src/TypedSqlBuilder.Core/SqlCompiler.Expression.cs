@@ -9,7 +9,7 @@ namespace TypedSqlBuilder.Core;
 /// SQL Compiler - Expression compilation methods.
 /// This partial class contains all methods related to compiling SQL expressions (SqlExpr and its derivatives).
 /// </summary>
-public static partial class SqlCompiler
+internal static partial class SqlCompiler
 {
     /// <summary>
     /// Compiles boolean expressions to SQL string representation.

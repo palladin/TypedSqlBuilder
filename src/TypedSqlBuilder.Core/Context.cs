@@ -5,7 +5,7 @@ namespace TypedSqlBuilder.Core;
 /// <summary>
 /// Represents the different SQL database types supported by the compiler.
 /// </summary>
-public enum DatabaseType
+internal enum DatabaseType
 {
     SQLite,
     SqlServer
@@ -19,7 +19,7 @@ public enum DatabaseType
 /// <param name="ParameterPrefix">The prefix used for parameters (e.g., "@" for SQL Server, ":" for SQLite)</param>
 /// <param name="StringConcatOperator">The operator or function name used for string concatenation</param>
 /// <param name="UsesConcatFunction">Whether string concatenation uses a function syntax (true) or operator syntax (false)</param>
-public record SqlDialect(
+internal record SqlDialect(
     DatabaseType Type,
     string ParameterPrefix,
     string StringConcatOperator,
@@ -55,14 +55,14 @@ public record SqlDialect(
 /// </summary>
 /// <param name="Name">The table alias name (e.g., "a0", "a1")</param>
 /// <param name="Field">The field name within the aliased table</param>
-public record SqlExprAlias(string Name, string Field);
+internal record SqlExprAlias(string Name, string Field);
 
 /// <summary>
 /// Represents the compilation context used during SQL query compilation.
 /// Tracks table aliases, projection aliases, parameters, dialect, and alias indices to ensure
 /// consistent SQL generation across nested queries and complex expressions.
 /// </summary>
-public record Context
+internal record Context
 {
     /// <summary>
     /// Gets or sets the SQL dialect used for compilation.

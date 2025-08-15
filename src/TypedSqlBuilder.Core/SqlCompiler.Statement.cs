@@ -9,7 +9,7 @@ namespace TypedSqlBuilder.Core;
 /// SQL Compiler - Statement compilation methods.
 /// This partial class contains all methods related to compiling SQL statements (INSERT, UPDATE, DELETE).
 /// </summary>
-public static partial class SqlCompiler
+internal static partial class SqlCompiler
 {
     /// <summary>
     /// Compiles SQL statements to SQL string representation.
@@ -18,7 +18,7 @@ public static partial class SqlCompiler
     /// <param name="context">The compilation context</param>
     /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
     /// <returns>The SQL string representation and updated context</returns>
-    public static (string, Context) Compile(ISqlStatement statement, Context context, int scopeLevel)
+    internal static (string, Context) Compile(ISqlStatement statement, Context context, int scopeLevel)
     {
         switch (statement)
         {

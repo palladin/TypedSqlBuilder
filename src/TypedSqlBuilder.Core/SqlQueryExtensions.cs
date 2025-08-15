@@ -112,7 +112,7 @@ public static class SqlQueryExtensions
     /// var totalAge = userQuery.Select(user => user.Age).Sum();
     /// </code>
     /// </example>
-    public static SumSqlIntClause Sum(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    public static SqlScalarQuery<SqlExprInt> Sum(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new SumSqlIntClause(query);
     }
@@ -128,7 +128,7 @@ public static class SqlQueryExtensions
     /// var avgAge = userQuery.Select(user => user.Age).Avg();
     /// </code>
     /// </example>
-    public static AvgSqlIntClause Avg(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    public static SqlScalarQuery<SqlExprInt> Avg(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new AvgSqlIntClause(query);
     }
@@ -144,7 +144,7 @@ public static class SqlQueryExtensions
     /// var minAge = userQuery.Select(user => user.Age).Min();
     /// </code>
     /// </example>
-    public static MinSqlIntClause Min(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    public static SqlScalarQuery<SqlExprInt> Min(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new MinSqlIntClause(query);
     }
@@ -160,7 +160,7 @@ public static class SqlQueryExtensions
     /// var maxAge = userQuery.Select(user => user.Age).Max();
     /// </code>
     /// </example>
-    public static MaxSqlIntClause Max(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    public static SqlScalarQuery<SqlExprInt> Max(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new MaxSqlIntClause(query);
     }
@@ -176,7 +176,7 @@ public static class SqlQueryExtensions
     /// var userCount = userQuery.Count();
     /// </code>
     /// </example>
-    public static CountClause Count<TSource>(this ISqlQuery<TSource> query)
+    public static SqlScalarQuery<SqlExprInt> Count<TSource>(this ISqlQuery<TSource> query)
         where TSource : ITuple
     {
         return new CountClause<TSource>(query);

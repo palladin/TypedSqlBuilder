@@ -23,10 +23,7 @@ public interface ISqlNullValue
 /// <summary>
 /// Abstract base class for SQL boolean expressions.
 /// </summary>
-public abstract class SqlExprBool : SqlExpr,
-	ISqlEqualityOperators<SqlExprBool, SqlExprBool>,
-	ISqlLogicalOperators<SqlExprBool>,
-	ISqlImplicitConversion<SqlExprBool, bool>
+public abstract class SqlExprBool : SqlExpr
 {
 	public static implicit operator SqlExprBool(bool value) => new SqlBoolValue(value);
 
@@ -44,11 +41,7 @@ public abstract class SqlExprBool : SqlExpr,
 /// <summary>
 /// Abstract base class for SQL integer expressions.
 /// </summary>
-public abstract class SqlExprInt : SqlExpr,
-	ISqlEqualityOperators<SqlExprInt, SqlExprBool>,
-	ISqlComparisonOperators<SqlExprInt, SqlExprBool>,
-	ISqlArithmeticOperators<SqlExprInt>,
-	ISqlImplicitConversion<SqlExprInt, int>
+public abstract class SqlExprInt : SqlExpr
 {
 	public static implicit operator SqlExprInt(int x) => new SqlIntValue(x);
 
@@ -75,11 +68,7 @@ public abstract class SqlExprInt : SqlExpr,
 /// Abstract base class for SQL string expressions.
 /// </summary>
 #pragma warning disable CS0660, CS0661
-public abstract class SqlExprString : SqlExpr,
-	ISqlEqualityOperators<SqlExprString, SqlExprBool>,
-	ISqlComparisonOperators<SqlExprString, SqlExprBool>,
-	ISqlConcatenationOperators<SqlExprString>,
-	ISqlImplicitConversion<SqlExprString, string>
+public abstract class SqlExprString : SqlExpr
 {
 	public static implicit operator SqlExprString(string value) => new SqlStringValue(value);
 
@@ -112,7 +101,7 @@ public interface ISqlColumn<TCol> : ISqlColumn where TCol : ISqlColumn<TCol>
 /// Abstract base class for SQL equality comparisons (=).
 /// Handles NULL comparison logic and provides consistent equality semantics across all SQL types.
 /// </summary>
-public abstract class SqlEquals(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlEquals(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -120,7 +109,7 @@ public abstract class SqlEquals(SqlExpr left, SqlExpr right) : SqlExprBool
 /// <summary>
 /// Generic implementation of SQL equality comparisons (=).
 /// </summary>
-public class SqlEquals<T>(T left, T right) : SqlEquals(left, right) where T : SqlExpr
+internal class SqlEquals<T>(T left, T right) : SqlEquals(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -129,7 +118,7 @@ public class SqlEquals<T>(T left, T right) : SqlEquals(left, right) where T : Sq
 /// Abstract base class for SQL inequality comparisons (!=).
 /// Handles NULL comparison logic and provides consistent inequality semantics across all SQL types.
 /// </summary>
-public abstract class SqlNotEquals(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlNotEquals(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -137,7 +126,7 @@ public abstract class SqlNotEquals(SqlExpr left, SqlExpr right) : SqlExprBool
 /// <summary>
 /// Generic implementation of SQL inequality comparisons (!=).
 /// </summary>
-public class SqlNotEquals<T>(T left, T right) : SqlNotEquals(left, right) where T : SqlExpr
+internal class SqlNotEquals<T>(T left, T right) : SqlNotEquals(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -145,7 +134,7 @@ public class SqlNotEquals<T>(T left, T right) : SqlNotEquals(left, right) where 
 /// <summary>
 /// Abstract base class for SQL greater than comparisons (>).
 /// </summary>
-public abstract class SqlGreaterThan(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlGreaterThan(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -153,7 +142,7 @@ public abstract class SqlGreaterThan(SqlExpr left, SqlExpr right) : SqlExprBool
 /// <summary>
 /// Generic implementation of SQL greater than comparisons (>).
 /// </summary>
-public class SqlGreaterThan<T>(T left, T right) : SqlGreaterThan(left, right) where T : SqlExpr
+internal class SqlGreaterThan<T>(T left, T right) : SqlGreaterThan(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -161,7 +150,7 @@ public class SqlGreaterThan<T>(T left, T right) : SqlGreaterThan(left, right) wh
 /// <summary>
 /// Abstract base class for SQL less than comparisons (<).
 /// </summary>
-public abstract class SqlLessThan(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlLessThan(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -169,7 +158,7 @@ public abstract class SqlLessThan(SqlExpr left, SqlExpr right) : SqlExprBool
 /// <summary>
 /// Generic implementation of SQL less than comparisons (<).
 /// </summary>
-public class SqlLessThan<T>(T left, T right) : SqlLessThan(left, right) where T : SqlExpr
+internal class SqlLessThan<T>(T left, T right) : SqlLessThan(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -177,7 +166,7 @@ public class SqlLessThan<T>(T left, T right) : SqlLessThan(left, right) where T 
 /// <summary>
 /// Abstract base class for SQL greater than or equal comparisons (>=).
 /// </summary>
-public abstract class SqlGreaterThanOrEqualTo(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlGreaterThanOrEqualTo(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -185,7 +174,7 @@ public abstract class SqlGreaterThanOrEqualTo(SqlExpr left, SqlExpr right) : Sql
 /// <summary>
 /// Generic implementation of SQL greater than or equal comparisons (>=).
 /// </summary>
-public class SqlGreaterThanOrEqualTo<T>(T left, T right) : SqlGreaterThanOrEqualTo(left, right) where T : SqlExpr
+internal class SqlGreaterThanOrEqualTo<T>(T left, T right) : SqlGreaterThanOrEqualTo(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -193,7 +182,7 @@ public class SqlGreaterThanOrEqualTo<T>(T left, T right) : SqlGreaterThanOrEqual
 /// <summary>
 /// Abstract base class for SQL less than or equal comparisons (<=).
 /// </summary>
-public abstract class SqlLessThanOrEqualTo(SqlExpr left, SqlExpr right) : SqlExprBool
+internal abstract class SqlLessThanOrEqualTo(SqlExpr left, SqlExpr right) : SqlExprBool
 {
     public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -201,7 +190,7 @@ public abstract class SqlLessThanOrEqualTo(SqlExpr left, SqlExpr right) : SqlExp
 /// <summary>
 /// Generic implementation of SQL less than or equal comparisons (<=).
 /// </summary>
-public class SqlLessThanOrEqualTo<T>(T left, T right) : SqlLessThanOrEqualTo(left, right) where T : SqlExpr
+internal class SqlLessThanOrEqualTo<T>(T left, T right) : SqlLessThanOrEqualTo(left, right) where T : SqlExpr
 {
     public void Deconstruct(out T leftOut, out T rightOut) => (leftOut, rightOut) = (left, right);
 }

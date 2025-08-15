@@ -188,14 +188,14 @@ public abstract class SqlTable<TCol1, TCol2, TCol3> : ISqlTable
 /// Establishes the source table for a query.
 /// </summary>
 /// <param name="Table">The table being queried</param>
-public record FromTableClause(ISqlTable Table) : ISqlQuery;
+internal record FromTableClause(ISqlTable Table) : ISqlQuery;
 
 /// <summary>
 /// Base record representing a SQL FROM clause with a subquery.
 /// Establishes a subquery as the source for a query.
 /// </summary>
 /// <param name="Query">The subquery being used as the source</param>
-public record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
+internal record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed FROM clause that preserves column type information.
@@ -203,7 +203,7 @@ public record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 /// </summary>
 /// <typeparam name="TColumns">The tuple type representing the table's columns</typeparam>
 /// <param name="Table">The table being queried</param>
-public record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
+internal record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
     where TColumns : ITuple;
 
 /// <summary>
@@ -212,7 +212,7 @@ public record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table
 /// </summary>
 /// <typeparam name="TSource">The tuple type representing the subquery's columns</typeparam>
 /// <param name="query">The subquery being used as the source</param>
-public record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQueryClause(query), ISqlQuery<TSource>
+internal record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQueryClause(query), ISqlQuery<TSource>
     where TSource : ITuple;
 
 
@@ -222,7 +222,7 @@ public record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQue
 /// </summary>
 /// <param name="Query">The source query</param>
 /// <param name="Selector">Function that transforms input tuples to output tuples</param>
-public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases) : ISqlQuery;
+internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed SELECT clause for tuple projections.
@@ -232,30 +232,36 @@ public record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, Immut
 /// <typeparam name="TResult">The output tuple type after projection</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedSelector">Function that transforms source tuples to result tuples</param>
-public record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases) 
+internal record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases) 
     : SelectClause(TypedQuery, x => TypedSelector((TSource) x), Aliases), ISqlQuery<TResult>
     where TSource : ITuple
     where TResult : ITuple;
 
 
 /// <summary>
-/// Base record representing a SQL WHERE clause with filtering conditions.
-/// Applies boolean predicates to filter query results.
+/// Base record representing a SQL WHERE clause with filtering predicate.
+/// Applies boolean conditions to filter query results.
 /// </summary>
 /// <param name="Query">The source query to filter</param>
-/// <param name="Predicate">Function that evaluates filtering conditions on input tuples</param>
-public record WhereClause(ISqlQuery Query, Func<ITuple, SqlExprBool> Predicate) : ISqlQuery;
+/// <param name="Predicate">Function that produces a boolean expression for filtering</param>
+internal record WhereClause(ISqlQuery Query, Func<ITuple, SqlExprBool> Predicate) : ISqlQuery;
 
 /// <summary>
-/// Strongly-typed WHERE clause for filtering query results.
-/// Provides type-safe filtering based on boolean conditions.
+/// Strongly-typed WHERE clause for filtering with type-safe predicates.
+/// Provides compile-time safety for column references in filter conditions.
 /// </summary>
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
-/// <param name="TypedPredicate">Function that evaluates boolean conditions on source tuples</param>
-public record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, SqlExprBool> TypedPredicate) 
+/// <param name="TypedPredicate">Function that produces type-safe boolean expressions for filtering</param>
+internal record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, SqlExprBool> TypedPredicate) 
     : WhereClause(TypedQuery, x => TypedPredicate((TSource) x)), ISqlQuery<TSource>
     where TSource : ITuple;
+
+
+public abstract class SqlScalarQuery<TExpr> : SqlExprInt, ISqlScalarQuery<TExpr>
+    where TExpr : SqlExpr
+{
+}
 
 /// <summary>
 /// Represents a SQL SUM aggregate function applied to integer queries.
@@ -263,7 +269,7 @@ public record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, 
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
 /// <param name="Query">The query containing integer values to sum</param>
-public class SumSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+internal class SumSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the SUM clause to extract the underlying query.
@@ -278,7 +284,7 @@ public class SumSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprI
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
 /// <param name="Query">The query containing integer values to average</param>
-public class AvgSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+internal class AvgSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the AVG clause to extract the underlying query.
@@ -293,7 +299,7 @@ public class AvgSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprI
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
 /// <param name="Query">The query containing integer values to find minimum of</param>
-public class MinSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+internal class MinSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the MIN clause to extract the underlying query.
@@ -308,7 +314,7 @@ public class MinSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprI
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
 /// <param name="Query">The query containing integer values to find maximum of</param>
-public class MaxSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+internal class MaxSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the MAX clause to extract the underlying query.
@@ -322,7 +328,7 @@ public class MaxSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprI
 /// Provides the foundation for counting operations that return integer scalar values.
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.
 /// </summary>
-public abstract class CountClause(ISqlQuery Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+internal abstract class CountClause(ISqlQuery Query) : SqlScalarQuery<SqlExprInt>
 {
     /// <summary>
     /// Deconstructs the COUNT clause to extract the underlying query.
@@ -337,7 +343,7 @@ public abstract class CountClause(ISqlQuery Query) : SqlExprInt, ISqlScalarQuery
 /// </summary>
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="Query">The query whose rows will be counted</param>
-public class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause(Query)
+internal class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause(Query)
     where TSource : ITuple
 {
     /// <summary>
@@ -358,7 +364,7 @@ public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource
 /// </summary>
 /// <param name="Query">The source query to sort</param>
 /// <param name="KeySelectors">Function that extracts sorting keys with their directions from input tuples</param>
-public record OrderByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<(SqlExpr, Sort)>> KeySelectors) : ISqlOrderedQuery;
+internal record OrderByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<(SqlExpr, Sort)>> KeySelectors) : ISqlOrderedQuery;
 
 
 /// <summary>
@@ -368,7 +374,7 @@ public record OrderByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<(SqlExp
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys with directions from source tuples</param>
-public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<(SqlExpr, Sort)>> TypedKeySelector) 
+internal record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<(SqlExpr, Sort)>> TypedKeySelector) 
     : OrderByClause(TypedQuery, x => TypedKeySelector((TSource)x)), ISqlOrderedGroupByQuery<TSource>, ISqlQuery<TSource>
     where TSource : ITuple;
 
@@ -378,7 +384,7 @@ public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource
 /// </summary>
 /// <param name="Query">The source query to group</param>
 /// <param name="KeySelectors">Array of functions that extract grouping keys from input tuples</param>
-public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector, Func<ITuple, SqlAggregateFunc, SqlExprBool>? Predicate) : ISqlGroupByQuery;
+internal record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector, Func<ITuple, SqlAggregateFunc, SqlExprBool>? Predicate) : ISqlGroupByQuery;
 
 /// <summary>
 /// Strongly-typed GROUP BY clause for grouping query results.
@@ -387,7 +393,7 @@ public record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts an array of grouping keys from source tuples</param>
-public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector,
+internal record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector,
                                                                     Func<TSource, SqlAggregateFunc, SqlExprBool>? TypedPredicate = null) 
     : GroupByClause(TypedQuery, x => TypedKeySelector((TSource)x), TypedPredicate is { } ? ((x, agg) => TypedPredicate((TSource)x, agg)) : null), ISqlGroupByQuery<TSource>
     where TSource : ITuple;
@@ -398,7 +404,7 @@ public record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource
 /// </summary>
 /// <param name="GroupedQuery">The grouped query to filter</param>
 /// <param name="Predicate">Function that evaluates aggregate-based filtering conditions on input tuples</param>
-public record HavingClause(ISqlQuery GroupedQuery, Func<ITuple, SqlAggregateFunc, SqlExprBool> Predicate) 
+internal record HavingClause(ISqlQuery GroupedQuery, Func<ITuple, SqlAggregateFunc, SqlExprBool> Predicate) 
     : ISqlQuery;
 
 /// <summary>
@@ -408,7 +414,7 @@ public record HavingClause(ISqlQuery GroupedQuery, Func<ITuple, SqlAggregateFunc
 /// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
 /// <param name="TypedGroupedQuery">The grouped query to filter</param>
 /// <param name="TypedPredicate">Function that evaluates aggregate-based filtering conditions</param>
-public record HavingClause<TSource>(ISqlGroupByQuery<TSource> TypedGroupedQuery, Func<TSource, SqlAggregateFunc, SqlExprBool> TypedPredicate) 
+internal record HavingClause<TSource>(ISqlGroupByQuery<TSource> TypedGroupedQuery, Func<TSource, SqlAggregateFunc, SqlExprBool> TypedPredicate) 
     : HavingClause(TypedGroupedQuery, (x, agg) => TypedPredicate((TSource) x, agg)), ISqlGroupByHavingQuery<TSource>
     where TSource : ITuple;
 
@@ -419,9 +425,9 @@ public enum JoinType
     Left,    
 }
 
-public record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
+internal record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
 
-public record JoinClause<TOuter, TInner, TKey, TResult>(JoinType JoinType, ISqlQuery<TOuter> TypedOuter, TInner Inner, Func<TOuter, TKey> OuterKeySelector, Func<TInner, TKey> InnerKeySelector, Func<TOuter, TInner, TResult> ResultSelector, ImmutableArray<string?> Aliases) 
+internal record JoinClause<TOuter, TInner, TKey, TResult>(JoinType JoinType, ISqlQuery<TOuter> TypedOuter, TInner Inner, Func<TOuter, TKey> OuterKeySelector, Func<TInner, TKey> InnerKeySelector, Func<TOuter, TInner, TResult> ResultSelector, ImmutableArray<string?> Aliases) 
     : JoinClause(TypedOuter, [(JoinType, Inner, x => OuterKeySelector((TOuter)x), x => InnerKeySelector((TInner)x), (x, y) => ResultSelector((TOuter)x, (TInner)y), Aliases)]), ISqlQuery<TResult>
         where TOuter : ITuple
         where TInner : ISqlTable

@@ -25,7 +25,7 @@ namespace TypedSqlBuilder.Core;
 /// This class encapsulates a constant integer value that can be used in SQL queries.
 /// </summary>
 /// <param name="value">The integer value to be represented in the SQL expression</param>
-public class SqlIntValue(int value) : SqlExprInt
+internal class SqlIntValue(int value) : SqlExprInt
 {
 	public void Deconstruct(out int valueOut) => valueOut = value;
 }
@@ -35,7 +35,7 @@ public class SqlIntValue(int value) : SqlExprInt
 /// This class applies a unary minus operator to an integer expression, negating its value.
 /// </summary>
 /// <param name="value">The integer expression to apply the unary minus operator to</param>
-public class SqlIntMinus(SqlExprInt value) : SqlExprInt
+internal class SqlIntMinus(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut)
 	{
@@ -49,7 +49,7 @@ public class SqlIntMinus(SqlExprInt value) : SqlExprInt
 /// This class applies the SQL ABS function to an integer expression, returning its absolute value.
 /// </summary>
 /// <param name="value">The integer expression to apply the absolute value function to</param>
-public class SqlIntAbs(SqlExprInt value) : SqlExprInt
+internal class SqlIntAbs(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut)
 	{
@@ -62,7 +62,7 @@ public class SqlIntAbs(SqlExprInt value) : SqlExprInt
 /// Represents a SQL COUNT() aggregate function.
 /// This class applies the SQL COUNT function to count rows or non-null values.
 /// </summary>
-public class SqlIntCount() : SqlExprInt
+internal class SqlIntCount() : SqlExprInt
 {
 }
 
@@ -71,7 +71,7 @@ public class SqlIntCount() : SqlExprInt
 /// This class applies the SQL SUM function to an integer expression, summing all values.
 /// </summary>
 /// <param name="value">The integer expression to apply the sum function to</param>
-public class SqlIntSum(SqlExprInt value) : SqlExprInt
+internal class SqlIntSum(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
 }
@@ -81,7 +81,7 @@ public class SqlIntSum(SqlExprInt value) : SqlExprInt
 /// This class applies the SQL AVG function to an integer expression, calculating the average value.
 /// </summary>
 /// <param name="value">The integer expression to apply the average function to</param>
-public class SqlIntAvg(SqlExprInt value) : SqlExprInt
+internal class SqlIntAvg(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
 }
@@ -91,7 +91,7 @@ public class SqlIntAvg(SqlExprInt value) : SqlExprInt
 /// This class applies the SQL MIN function to an integer expression, finding the minimum value.
 /// </summary>
 /// <param name="value">The integer expression to apply the minimum function to</param>
-public class SqlIntMin(SqlExprInt value) : SqlExprInt
+internal class SqlIntMin(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
 }
@@ -101,7 +101,7 @@ public class SqlIntMin(SqlExprInt value) : SqlExprInt
 /// This class applies the SQL MAX function to an integer expression, finding the maximum value.
 /// </summary>
 /// <param name="value">The integer expression to apply the maximum function to</param>
-public class SqlIntMax(SqlExprInt value) : SqlExprInt
+internal class SqlIntMax(SqlExprInt value) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
 }
@@ -112,7 +112,7 @@ public class SqlIntMax(SqlExprInt value) : SqlExprInt
 /// </summary>
 /// <param name="left">The left operand of the addition</param>
 /// <param name="right">The right operand of the addition</param>
-public class SqlIntAdd(SqlExprInt left, SqlExprInt right) : SqlExprInt
+internal class SqlIntAdd(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
 	{
@@ -127,7 +127,7 @@ public class SqlIntAdd(SqlExprInt left, SqlExprInt right) : SqlExprInt
 /// </summary>
 /// <param name="left">The left operand of the subtraction</param>
 /// <param name="right">The right operand of the subtraction</param>
-public class SqlIntSub(SqlExprInt left, SqlExprInt right) : SqlExprInt
+internal class SqlIntSub(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
 	{
@@ -142,7 +142,7 @@ public class SqlIntSub(SqlExprInt left, SqlExprInt right) : SqlExprInt
 /// </summary>
 /// <param name="left">The left operand of the multiplication</param>
 /// <param name="right">The right operand of the multiplication</param>
-public class SqlIntMult(SqlExprInt left, SqlExprInt right) : SqlExprInt
+internal class SqlIntMult(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
 	{
@@ -158,7 +158,7 @@ public class SqlIntMult(SqlExprInt left, SqlExprInt right) : SqlExprInt
 /// </summary>
 /// <param name="left">The left operand (dividend) of the division</param>
 /// <param name="right">The right operand (divisor) of the division</param>
-public class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
+internal class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprInt leftOut, out SqlExprInt rightOut)
 	{
@@ -197,7 +197,7 @@ public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
 /// This class is used for parameterized queries where integer values need to be bound at execution time.
 /// </summary>
 /// <param name="name">The name of the parameter (e.g., "@userId", ":count")</param>
-public class SqlParameterInt(string name) : SqlExprInt
+internal class SqlParameterInt(string name) : SqlExprInt
 {
 	public void Deconstruct(out string nameOut) => nameOut = name;
 }
@@ -209,7 +209,7 @@ public class SqlParameterInt(string name) : SqlExprInt
 /// <param name="condition">The boolean condition to evaluate</param>
 /// <param name="trueValue">The integer expression returned when condition is true</param>
 /// <param name="falseValue">The integer expression returned when condition is false</param>
-public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt falseValue) : SqlExprInt
+internal class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt falseValue) : SqlExprInt
 {
 	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprInt trueValueOut, out SqlExprInt falseValueOut) => 
 		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
@@ -219,7 +219,7 @@ public class SqlIntCase(SqlExprBool condition, SqlExprInt trueValue, SqlExprInt 
 /// Represents a SQL NULL value for integer expressions.
 /// This class is used when setting integer columns to NULL in SQL statements.
 /// </summary>
-public class SqlIntNull : SqlExprInt, ISqlNullValue
+internal class SqlIntNull : SqlExprInt, ISqlNullValue
 {
     public static SqlIntNull Value => new();
 }

@@ -71,89 +71,89 @@ public interface ISqlUpdateWhereStatement<TSqlTable> : ISqlUpdateWhereStatement,
 /// <summary>
 /// Represents a SET clause in an UPDATE statement.
 /// </summary>
-public abstract record SetClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
+internal abstract record SetClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// SET clause for integer columns.
 /// </summary>
-public record SetIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : SetClause(table => IntColumnSelector(table), IntValue);
+internal record SetIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : SetClause(table => IntColumnSelector(table), IntValue);
 
 /// <summary>
 /// SET clause for string columns.
 /// </summary>
-public record SetStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : SetClause(table => StringColumnSelector(table), StringValue);
+internal record SetStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : SetClause(table => StringColumnSelector(table), StringValue);
 
 /// <summary>
 /// SET clause for boolean columns.
 /// </summary>
-public record SetBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : SetClause(table => BoolColumnSelector(table), BoolValue);
+internal record SetBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : SetClause(table => BoolColumnSelector(table), BoolValue);
 
 /// <summary>
 /// Represents a VALUE clause in an INSERT statement.
 /// </summary>
-public abstract record ValueClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
+internal abstract record ValueClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// VALUE clause for integer columns.
 /// </summary>
-public record InsertIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : ValueClause(table => IntColumnSelector(table), IntValue);
+internal record InsertIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : ValueClause(table => IntColumnSelector(table), IntValue);
 
 /// <summary>
 /// VALUE clause for string columns.
 /// </summary>
-public record InsertStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : ValueClause(table => StringColumnSelector(table), StringValue);
+internal record InsertStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : ValueClause(table => StringColumnSelector(table), StringValue);
 
 /// <summary>
 /// VALUE clause for boolean columns.
 /// </summary>
-public record InsertBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : ValueClause(table => BoolColumnSelector(table), BoolValue);
+internal record InsertBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : ValueClause(table => BoolColumnSelector(table), BoolValue);
 
 /// <summary>
 /// Base record representing a SQL DELETE statement.
 /// </summary>
 /// <param name="Table">The table being deleted from</param>
-public abstract record DeleteStatement(ISqlTable Table) : ISqlStatement;
+internal abstract record DeleteStatement(ISqlTable Table) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a SQL DELETE statement with WHERE clause.
 /// </summary>
 /// <param name="Statement">The DELETE statement being extended</param>
 /// <param name="Predicate">Function that evaluates filtering conditions</param>
-public abstract record DeleteWhereStatement(ISqlDeleteStatement Statement, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
+internal abstract record DeleteWhereStatement(ISqlDeleteStatement Statement, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a SET operation in an UPDATE statement.
 /// </summary>
 /// <param name="Statement">The UPDATE statement being extended</param>
 /// <param name="SetClause">The SET clause being added</param>
-public abstract record SetStatement(ISqlUpdateStatement Statement, SetClause SetClause) : ISqlStatement;
+internal abstract record SetStatement(ISqlUpdateStatement Statement, SetClause SetClause) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a VALUE operation in an INSERT statement.
 /// </summary>
 /// <param name="Statement">The INSERT statement being extended</param>
 /// <param name="ValueClause">The VALUE clause being added</param>
-public abstract record ValueStatement(ISqlInsertStatement Statement, ValueClause ValueClause) : ISqlStatement;
+internal abstract record ValueStatement(ISqlInsertStatement Statement, ValueClause ValueClause) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a WHERE operation in an UPDATE statement.
 /// </summary>
 /// <param name="Statement">The UPDATE statement being extended</param>
 /// <param name="Predicate">Function that evaluates filtering conditions</param>
-public abstract record UpdateWhereFromStatement(ISqlUpdateStatement Statement, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
+internal abstract record UpdateWhereFromStatement(ISqlUpdateStatement Statement, Func<ISqlTable, SqlExprBool> Predicate) : ISqlStatement;
 
 /// <summary>
 /// Base record representing a SQL UPDATE statement.
 /// </summary>
 /// <param name="Table">The table being updated</param>
-public abstract record UpdateStatement(ISqlTable Table) : ISqlStatement;
+internal abstract record UpdateStatement(ISqlTable Table) : ISqlStatement;
 
 
 /// <summary>
 /// Base record representing a SQL INSERT statement.
 /// </summary>
 /// <param name="Table">The table being inserted into</param>
-public abstract record InsertStatement(ISqlTable Table) : ISqlStatement;
+internal abstract record InsertStatement(ISqlTable Table) : ISqlStatement;
 
 // ========== INSERT INTERFACES AND IMPLEMENTATIONS ==========
 
@@ -173,47 +173,47 @@ public interface ISqlInsertStatement<TSqlTable> : ISqlInsertStatement, ISqlState
 /// Implementation of a SQL DELETE statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being deleted from</typeparam>
-public record DeleteStatement<TSqlTable>(TSqlTable table) : DeleteStatement(table), ISqlDeleteStatement<TSqlTable>
+internal record DeleteStatement<TSqlTable>(TSqlTable table) : DeleteStatement(table), ISqlDeleteStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a SQL DELETE statement with WHERE clause.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being deleted from</typeparam>
-public record DeleteWhereStatement<TSqlTable>(ISqlDeleteStatement<TSqlTable> statement, Func<TSqlTable, SqlExprBool> predicate) : DeleteWhereStatement(statement, t => predicate((TSqlTable)t)), ISqlDeleteWhereStatement<TSqlTable>
+internal record DeleteWhereStatement<TSqlTable>(ISqlDeleteStatement<TSqlTable> statement, Func<TSqlTable, SqlExprBool> predicate) : DeleteWhereStatement(statement, t => predicate((TSqlTable)t)), ISqlDeleteWhereStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a SET operation in an UPDATE statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being updated</typeparam>
-public record SetStatement<TSqlTable>(ISqlUpdateStatement<TSqlTable> statement, SetClause setClause) : SetStatement(statement, setClause), ISqlUpdateStatement<TSqlTable>
+internal record SetStatement<TSqlTable>(ISqlUpdateStatement<TSqlTable> statement, SetClause setClause) : SetStatement(statement, setClause), ISqlUpdateStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a VALUE operation in an INSERT statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being inserted into</typeparam>
-public record ValueStatement<TSqlTable>(ISqlInsertStatement<TSqlTable> statement, ValueClause valueClause) : ValueStatement(statement, valueClause), ISqlInsertStatement<TSqlTable>
+internal record ValueStatement<TSqlTable>(ISqlInsertStatement<TSqlTable> statement, ValueClause valueClause) : ValueStatement(statement, valueClause), ISqlInsertStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a WHERE operation in an UPDATE statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being updated</typeparam>
-public record UpdateWhereFromStatement<TSqlTable>(ISqlUpdateStatement<TSqlTable> statement, Func<TSqlTable, SqlExprBool> predicate) : UpdateWhereFromStatement(statement, t => predicate((TSqlTable)t)), ISqlUpdateWhereStatement<TSqlTable>
+internal record UpdateWhereFromStatement<TSqlTable>(ISqlUpdateStatement<TSqlTable> statement, Func<TSqlTable, SqlExprBool> predicate) : UpdateWhereFromStatement(statement, t => predicate((TSqlTable)t)), ISqlUpdateWhereStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a SQL UPDATE statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being updated</typeparam>
-public record UpdateStatement<TSqlTable>(TSqlTable table) : UpdateStatement(table), ISqlUpdateStatement<TSqlTable>
+internal record UpdateStatement<TSqlTable>(TSqlTable table) : UpdateStatement(table), ISqlUpdateStatement<TSqlTable>
     where TSqlTable : ISqlTable;
 
 /// <summary>
 /// Implementation of a SQL INSERT statement.
 /// </summary>
 /// <typeparam name="TSqlTable">The table type being inserted into</typeparam>
-public record InsertStatement<TSqlTable>(TSqlTable table) : InsertStatement(table), ISqlInsertStatement<TSqlTable>
+internal record InsertStatement<TSqlTable>(TSqlTable table) : InsertStatement(table), ISqlInsertStatement<TSqlTable>
     where TSqlTable : ISqlTable;

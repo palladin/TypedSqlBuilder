@@ -9,7 +9,7 @@ namespace TypedSqlBuilder.Core;
 /// SQL Compiler - Query compilation methods.
 /// This partial class contains all methods related to compiling SQL queries.
 /// </summary>
-public static partial class SqlCompiler
+internal static partial class SqlCompiler
 {
     /// <summary>
     /// Helper method to generate indentation strings for SQL formatting.
@@ -296,7 +296,7 @@ public static partial class SqlCompiler
         return (string.Join("\n", projectionLines), ctx);
     }
 
-    public static (string, ITuple, Context) Compile(ISqlQuery query, Context context, int scopeLevel)
+    internal static (string, ITuple, Context) Compile(ISqlQuery query, Context context, int scopeLevel)
     {
         // First normalize the query to apply all fusion rules
         var normalizedQuery = Normalize(query);

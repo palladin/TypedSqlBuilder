@@ -12,7 +12,7 @@ namespace TypedSqlBuilder.Core;
 /// <summary>
 /// Represents a literal boolean value in SQL (TRUE or FALSE).
 /// </summary>
-public class SqlBoolValue(bool value) : SqlExprBool
+internal class SqlBoolValue(bool value) : SqlExprBool
 {
 	public void Deconstruct(out bool valueOut) => valueOut = value;
 }
@@ -20,7 +20,7 @@ public class SqlBoolValue(bool value) : SqlExprBool
 /// <summary>
 /// Represents a SQL NOT operation (logical negation).
 /// </summary>
-public class SqlBoolNot(SqlExprBool value) : SqlExprBool
+internal class SqlBoolNot(SqlExprBool value) : SqlExprBool
 {
 	public void Deconstruct(out SqlExprBool valueOut) => valueOut = value;
 }
@@ -28,7 +28,7 @@ public class SqlBoolNot(SqlExprBool value) : SqlExprBool
 /// <summary>
 /// Represents a SQL AND operation (logical conjunction).
 /// </summary>
-public class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
+internal class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
 	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -36,7 +36,7 @@ public class SqlBoolAnd(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// <summary>
 /// Represents a SQL OR operation (logical disjunction).
 /// </summary>
-public class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
+internal class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 {
 	public void Deconstruct(out SqlExprBool leftOut, out SqlExprBool rightOut) => (leftOut, rightOut) = (left, right);
 }
@@ -71,7 +71,7 @@ public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
 /// This class is used for parameterized queries where boolean values need to be bound at execution time.
 /// </summary>
 /// <param name="name">The name of the parameter (e.g., "@isActive", ":enabled")</param>
-public class SqlParameterBool(string name) : SqlExprBool
+internal class SqlParameterBool(string name) : SqlExprBool
 {
 	public void Deconstruct(out string nameOut) => nameOut = name;
 }
@@ -83,7 +83,7 @@ public class SqlParameterBool(string name) : SqlExprBool
 /// <param name="condition">The boolean condition to evaluate</param>
 /// <param name="trueValue">The boolean expression returned when condition is true</param>
 /// <param name="falseValue">The boolean expression returned when condition is false</param>
-public class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBool falseValue) : SqlExprBool
+internal class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBool falseValue) : SqlExprBool
 {
 	public void Deconstruct(out SqlExprBool conditionOut, out SqlExprBool trueValueOut, out SqlExprBool falseValueOut) => 
 		(conditionOut, trueValueOut, falseValueOut) = (condition, trueValue, falseValue);
@@ -93,7 +93,7 @@ public class SqlBoolCase(SqlExprBool condition, SqlExprBool trueValue, SqlExprBo
 /// Represents a SQL NULL value for boolean expressions.
 /// This class is used when setting boolean columns to NULL in SQL statements.
 /// </summary>
-public class SqlBoolNull : SqlExprBool, ISqlNullValue
+internal class SqlBoolNull : SqlExprBool, ISqlNullValue
 {
 	public static SqlBoolNull Value => new();
 }
@@ -105,7 +105,7 @@ public class SqlBoolNull : SqlExprBool, ISqlNullValue
 /// </summary>
 /// <param name="expression">The expression to test against the list of values</param>
 /// <param name="values">The collection of values to test the expression against</param>
-public abstract class SqlInValues(SqlExpr expression, ImmutableArray<SqlExpr> values) : SqlExprBool
+internal abstract class SqlInValues(SqlExpr expression, ImmutableArray<SqlExpr> values) : SqlExprBool
 {
 	public void Deconstruct(out SqlExpr expressionOut, out ImmutableArray<SqlExpr> valuesOut)
 	{
@@ -122,7 +122,7 @@ public abstract class SqlInValues(SqlExpr expression, ImmutableArray<SqlExpr> va
 /// <typeparam name="TExpr">The type of SQL expression being tested and the values in the list</typeparam>
 /// <param name="expression">The expression to test against the list of values</param>
 /// <param name="values">The strongly-typed collection of values to test the expression against</param>
-public class SqlInValues<TExpr>(TExpr expression, ImmutableArray<TExpr> values) : SqlInValues(expression, values.Cast<SqlExpr>().ToImmutableArray())
+internal class SqlInValues<TExpr>(TExpr expression, ImmutableArray<TExpr> values) : SqlInValues(expression, values.Cast<SqlExpr>().ToImmutableArray())
 	where TExpr : SqlExpr
 {
 
@@ -134,7 +134,7 @@ public class SqlInValues<TExpr>(TExpr expression, ImmutableArray<TExpr> values) 
 /// </summary>
 /// <param name="expression">The expression to test against the subquery results</param>
 /// <param name="subQuery">The subquery that provides the values to test against</param>
-public abstract class SqlInSubQuery(SqlExpr expression, ISqlQuery subQuery) : SqlExprBool
+internal abstract class SqlInSubQuery(SqlExpr expression, ISqlQuery subQuery) : SqlExprBool
 {
 	public void Deconstruct(out SqlExpr expressionOut, out ISqlQuery subQueryOut)
 	{
@@ -151,7 +151,7 @@ public abstract class SqlInSubQuery(SqlExpr expression, ISqlQuery subQuery) : Sq
 /// <typeparam name="TExpr">The type of SQL expression being tested</typeparam>
 /// <param name="expression">The expression to test against the subquery results</param>
 /// <param name="subQuery">The strongly-typed subquery that returns values of type TExpr to test against</param>
-public class SqlInSubQuery<TExpr>(TExpr expression, ISqlQuery<ValueTuple<TExpr>> subQuery) : SqlInSubQuery(expression, subQuery)
+internal class SqlInSubQuery<TExpr>(TExpr expression, ISqlQuery<ValueTuple<TExpr>> subQuery) : SqlInSubQuery(expression, subQuery)
 	where TExpr : SqlExpr
 {
 

@@ -85,7 +85,7 @@ public static class SqlFunc
     /// </summary>
     /// <param name="name">The parameter name (e.g., "@userId", ":count")</param>
     /// <returns>A SQL integer parameter expression</returns>
-    public static SqlParameterInt AsIntParam(this string name)
+    public static SqlExprInt AsIntParam(this string name)
     {
         return new SqlParameterInt(name);
     }
@@ -96,7 +96,7 @@ public static class SqlFunc
     /// </summary>
     /// <param name="name">The parameter name (e.g., "@userName", ":email")</param>
     /// <returns>A SQL string parameter expression</returns>
-    public static SqlParameterString AsStringParam(this string name)
+    public static SqlExprString AsStringParam(this string name)
     {
         return new SqlParameterString(name);
     }
@@ -107,11 +107,11 @@ public static class SqlFunc
     /// </summary>
     /// <param name="name">The parameter name (e.g., "@isActive", ":enabled")</param>
     /// <returns>A SQL boolean parameter expression</returns>
-    public static SqlParameterBool AsBoolParam(this string name)
+    public static SqlExprBool AsBoolParam(this string name)
     {
         return new SqlParameterBool(name);
     }
-    
+
     /// <summary>
     /// Creates a SQL ABS() function expression for the given integer expression.
     /// Returns the absolute (non-negative) value of the input.
