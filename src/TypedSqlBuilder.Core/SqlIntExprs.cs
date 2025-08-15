@@ -87,6 +87,26 @@ public class SqlIntAvg(SqlExprInt value) : SqlExprInt
 }
 
 /// <summary>
+/// Represents a SQL MIN() aggregate function in SQL expressions.
+/// This class applies the SQL MIN function to an integer expression, finding the minimum value.
+/// </summary>
+/// <param name="value">The integer expression to apply the minimum function to</param>
+public class SqlIntMin(SqlExprInt value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL MAX() aggregate function in SQL expressions.
+/// This class applies the SQL MAX function to an integer expression, finding the maximum value.
+/// </summary>
+/// <param name="value">The integer expression to apply the maximum function to</param>
+public class SqlIntMax(SqlExprInt value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprInt valueOut) => valueOut = value;
+}
+
+/// <summary>
 /// Represents an addition operation in SQL expressions (left + right).
 /// This class performs binary addition between two integer expressions.
 /// </summary>

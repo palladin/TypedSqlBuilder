@@ -1971,4 +1971,133 @@ public class SqliteQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters[":p0"]);
     }
+
+    [Fact]
+    public void FromGroupByMinMaxSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByMinMaxSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            MIN(a0.Amount) AS MinAmount,
+            MAX(a0.Amount) AS MaxAmount,
+            COUNT(*) AS OrderCount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByAvgSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByAvgSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            AVG(a0.Amount) AS AvgAmount,
+            COUNT(*) AS OrderCount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromSelectSum_GeneratesCorrectSql()
+    {
+        // Arrange
+        var scalarQuery = TestQueries.FromSelectSum();
+        
+        // Act
+        var (sql, parameters) = scalarQuery.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            SUM(a0.Amount) AS prj0
+        FROM 
+            orders a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromSelectAvg_GeneratesCorrectSql()
+    {
+        // Arrange
+        var scalarQuery = TestQueries.FromSelectAvg();
+        
+        // Act
+        var (sql, parameters) = scalarQuery.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            AVG(a0.Amount) AS prj0
+        FROM 
+            orders a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromSelectMin_GeneratesCorrectSql()
+    {
+        // Arrange
+        var scalarQuery = TestQueries.FromSelectMin();
+        
+        // Act
+        var (sql, parameters) = scalarQuery.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            MIN(a0.Amount) AS prj0
+        FROM 
+            orders a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromSelectMax_GeneratesCorrectSql()
+    {
+        // Arrange
+        var scalarQuery = TestQueries.FromSelectMax();
+        
+        // Act
+        var (sql, parameters) = scalarQuery.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            MAX(a0.Amount) AS prj0
+        FROM 
+            orders a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
 }

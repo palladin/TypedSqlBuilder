@@ -10,6 +10,14 @@ namespace TypedSqlBuilder.Core;
 public class SqlAggregateFunc
 {
     /// <summary>
+    /// Internal constructor to prevent external instantiation.
+    /// This class should only be instantiated by the TypedSqlBuilder framework.
+    /// </summary>
+    internal SqlAggregateFunc()
+    {
+    }
+
+    /// <summary>
     /// Applies the COUNT aggregate function.
     /// Counts the number of rows in the current group.
     /// </summary>
@@ -39,6 +47,28 @@ public class SqlAggregateFunc
     public SqlExprInt Avg(SqlExprInt value)
     {
         return new SqlIntAvg(value);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to an integer expression.
+    /// Finds the minimum value in the current group.
+    /// </summary>
+    /// <param name="value">The integer expression to find the minimum of</param>
+    /// <returns>A SQL integer expression representing the minimum</returns>
+    public SqlExprInt Min(SqlExprInt value)
+    {
+        return new SqlIntMin(value);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to an integer expression.
+    /// Finds the maximum value in the current group.
+    /// </summary>
+    /// <param name="value">The integer expression to find the maximum of</param>
+    /// <returns>A SQL integer expression representing the maximum</returns>
+    public SqlExprInt Max(SqlExprInt value)
+    {
+        return new SqlIntMax(value);
     }
 }
 
@@ -81,36 +111,7 @@ public static class SqlFunc
     {
         return new SqlParameterBool(name);
     }
-
-    /// <summary>
-    /// Creates a SQL COUNT(*) aggregate function expression.
-    /// </summary>
-    /// <returns>A SQL integer expression representing COUNT(*)</returns>
-    public static SqlExprInt Count()
-    {
-        return new SqlIntCount();
-    }
-
-    /// <summary>
-    /// Creates a SQL SUM() aggregate function expression for the given integer expression.
-    /// </summary>
-    /// <param name="value">The integer expression to sum</param>
-    /// <returns>A SQL integer expression representing SUM(value)</returns>
-    public static SqlExprInt Sum(this SqlExprInt value)
-    {
-        return new SqlIntSum(value);
-    }
-
-    /// <summary>
-    /// Creates a SQL AVG() aggregate function expression for the given integer expression.
-    /// </summary>
-    /// <param name="value">The integer expression to calculate the average of</param>
-    /// <returns>A SQL integer expression representing AVG(value)</returns>
-    public static SqlExprInt Avg(this SqlExprInt value)
-    {
-        return new SqlIntAvg(value);
-    }
-
+    
     /// <summary>
     /// Creates a SQL ABS() function expression for the given integer expression.
     /// Returns the absolute (non-negative) value of the input.

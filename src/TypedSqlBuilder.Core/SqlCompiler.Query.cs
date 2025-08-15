@@ -948,6 +948,27 @@ public static partial class SqlCompiler
                 var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)), []);
                 var (sql, _, ctx) = Compile(sumQuery, context, scopeLevel);
                 return (sql, ctx);
+            }
+
+            case AvgSqlIntClause(var query):
+            {
+                var avgQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntAvg((SqlExprInt)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(avgQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MinSqlIntClause(var query):
+            {
+                var minQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntMin((SqlExprInt)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(minQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MaxSqlIntClause(var query):
+            {
+                var maxQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntMax((SqlExprInt)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(maxQuery, context, scopeLevel);
+                return (sql, ctx);
             }        
 
             case CountClause(var query):

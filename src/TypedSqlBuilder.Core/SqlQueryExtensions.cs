@@ -118,6 +118,54 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
+    /// Applies the AVG aggregate function to a query of integer expressions.
+    /// Computes the average of all integer values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL integer expressions</param>
+    /// <returns>A SQL scalar query representing the average of all values</returns>
+    /// <example>
+    /// <code>
+    /// var avgAge = userQuery.Select(user => user.Age).Avg();
+    /// </code>
+    /// </example>
+    public static AvgSqlIntClause Avg(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    {
+        return new AvgSqlIntClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to a query of integer expressions.
+    /// Finds the minimum value among all integer values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL integer expressions</param>
+    /// <returns>A SQL scalar query representing the minimum value</returns>
+    /// <example>
+    /// <code>
+    /// var minAge = userQuery.Select(user => user.Age).Min();
+    /// </code>
+    /// </example>
+    public static MinSqlIntClause Min(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    {
+        return new MinSqlIntClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to a query of integer expressions.
+    /// Finds the maximum value among all integer values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL integer expressions</param>
+    /// <returns>A SQL scalar query representing the maximum value</returns>
+    /// <example>
+    /// <code>
+    /// var maxAge = userQuery.Select(user => user.Age).Max();
+    /// </code>
+    /// </example>
+    public static MaxSqlIntClause Max(this ISqlQuery<ValueTuple<SqlExprInt>> query)
+    {
+        return new MaxSqlIntClause(query);
+    }
+
+    /// <summary>
     /// Applies the COUNT aggregate function to count rows in the query result.
     /// </summary>
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>

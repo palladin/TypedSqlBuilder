@@ -273,6 +273,51 @@ public class SumSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprI
 }
 
 /// <summary>
+/// Represents a SQL AVG aggregate function applied to integer queries.
+/// Inherits from SqlExprInt to be used as an integer expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing integer values to average</param>
+public class AvgSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+{
+    /// <summary>
+    /// Deconstructs the AVG clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being averaged</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprInt>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MIN aggregate function applied to integer queries.
+/// Inherits from SqlExprInt to be used as an integer expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing integer values to find minimum of</param>
+public class MinSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+{
+    /// <summary>
+    /// Deconstructs the MIN clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for minimum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprInt>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MAX aggregate function applied to integer queries.
+/// Inherits from SqlExprInt to be used as an integer expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing integer values to find maximum of</param>
+public class MaxSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlExprInt, ISqlScalarQuery<SqlExprInt>
+{
+    /// <summary>
+    /// Deconstructs the MAX clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for maximum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprInt>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
 /// Base class for SQL COUNT aggregate functions.
 /// Provides the foundation for counting operations that return integer scalar values.
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.

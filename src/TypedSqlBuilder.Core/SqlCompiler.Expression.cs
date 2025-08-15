@@ -256,11 +256,44 @@ public static partial class SqlCompiler
                 return ($"AVG({compiled})", ctx);
             }
 
+            case SqlIntMin(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MIN({compiled})", ctx);
+            }
+
+            case SqlIntMax(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MAX({compiled})", ctx);
+            }
+
             // Aggregate functions that are also queries (need special handling)
             case SumSqlIntClause(var query):
             {
                 var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntSum((SqlExprInt)tuple[0]!)), ImmutableArray<string?>.Empty);
                 var (sql, _, ctx) = Compile(sumQuery, context, scopeLevel);
+                return ($"({sql})", ctx);
+            }
+
+            case AvgSqlIntClause(var query):
+            {
+                var avgQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntAvg((SqlExprInt)tuple[0]!)), ImmutableArray<string?>.Empty);
+                var (sql, _, ctx) = Compile(avgQuery, context, scopeLevel);
+                return ($"({sql})", ctx);
+            }
+
+            case MinSqlIntClause(var query):
+            {
+                var minQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntMin((SqlExprInt)tuple[0]!)), ImmutableArray<string?>.Empty);
+                var (sql, _, ctx) = Compile(minQuery, context, scopeLevel);
+                return ($"({sql})", ctx);
+            }
+
+            case MaxSqlIntClause(var query):
+            {
+                var maxQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlIntMax((SqlExprInt)tuple[0]!)), ImmutableArray<string?>.Empty);
+                var (sql, _, ctx) = Compile(maxQuery, context, scopeLevel);
                 return ($"({sql})", ctx);
             }
 

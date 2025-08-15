@@ -493,4 +493,37 @@ public static class TestQueries
                 TotalSpent: agg.Sum(result.Order.Amount)
             ));
 
+    // Test for new MIN/MAX aggregate functions
+    public static ISqlQuery FromGroupByMinMaxSelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .Select((result, agg) => (
+                CustomerId: result.CustomerId,
+                MinAmount: agg.Min(result.Amount),
+                MaxAmount: agg.Max(result.Amount),
+                OrderCount: agg.Count()
+            ));
+
+    // Test for AVG aggregate function
+    public static ISqlQuery FromGroupByAvgSelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .Select((result, agg) => (
+                CustomerId: result.CustomerId,
+                AvgAmount: agg.Avg(result.Amount),
+                OrderCount: agg.Count()
+            ));
+
+    // Test extension methods for scalar aggregate queries
+    public static ISqlScalarQuery FromSelectSum()
+        => Db.Orders.From().Select(o => o.Amount).Sum();
+
+    public static ISqlScalarQuery FromSelectAvg()
+        => Db.Orders.From().Select(o => o.Amount).Avg();
+
+    public static ISqlScalarQuery FromSelectMin()
+        => Db.Orders.From().Select(o => o.Amount).Min();
+
+    public static ISqlScalarQuery FromSelectMax()
+        => Db.Orders.From().Select(o => o.Amount).Max();
 }
