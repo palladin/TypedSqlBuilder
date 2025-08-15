@@ -4,6 +4,22 @@ using System.Runtime.CompilerServices;
 namespace TypedSqlBuilder.Core;
 
 /// <summary>
+/// Represents the sort direction for ORDER BY clauses.
+/// </summary>
+public enum Sort
+{
+    /// <summary>
+    /// Sort in ascending order (smallest to largest).
+    /// </summary>
+    Asc,
+    
+    /// <summary>
+    /// Sort in descending order (largest to smallest).
+    /// </summary>
+    Desc
+}
+
+/// <summary>
 /// Base interface for all SQL query representations.
 /// Provides the foundation for building type-safe SQL queries.
 /// </summary>
@@ -293,33 +309,20 @@ public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource
 /// Defines the ordering criteria and direction for query results.
 /// </summary>
 /// <param name="Query">The source query to sort</param>
-/// <param name="KeySelector">Function that extracts the sorting key from input tuples</param>
-/// <param name="Descending">Whether to sort in descending order</param>
-public record OrderByClause(ISqlQuery Query, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) : ISqlOrderedQuery;
+/// <param name="KeySelectors">Function that extracts sorting keys with their directions from input tuples</param>
+public record OrderByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<(SqlExpr, Sort)>> KeySelectors) : ISqlOrderedQuery;
 
-/// <summary>
-/// Concrete implementation of ORDER BY clause for multiple sorting criteria.
-/// </summary>
-/// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-/// <param name="TypedQuery">The strongly-typed source query</param>
-/// <param name="KeySelectors">Array of key selectors and their sort directions</param>
-public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> KeySelectors) 
-    : OrderByClause(TypedQuery, KeySelectors), ISqlOrderedQuery<TSource>
-    where TSource : ITuple;
 
 /// <summary>
 /// Strongly-typed ORDER BY clause for sorting query results.
-/// Provides type-safe sorting based on extracted key values.
+/// Provides type-safe sorting based on extracted key values and directions.
 /// </summary>
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-/// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
-/// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys from source tuples</param>
-/// <param name="Descending">Whether to sort in descending order</param>
-public record OrderByClause<TSource, TKey>(ISqlQuery<TSource> TypedQuery, Func<TSource, TKey> TypedKeySelector, bool Descending) 
-    : OrderByClause<TSource>(TypedQuery, [(x => TypedKeySelector((TSource) x), Descending)])
-    where TSource : ITuple
-    where TKey : SqlExpr;
+/// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys with directions from source tuples</param>
+public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<(SqlExpr, Sort)>> TypedKeySelector) 
+    : OrderByClause(TypedQuery, x => TypedKeySelector((TSource)x)), ISqlQuery<TSource>
+    where TSource : ITuple;
 
 /// <summary>
 /// Base record representing a SQL GROUP BY clause for result grouping.

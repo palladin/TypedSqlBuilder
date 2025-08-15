@@ -154,84 +154,67 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
-    /// Sorts the query result in ascending order based on the specified key.
+    /// Sorts the query result based on the specified key and direction.
     /// </summary>
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
     /// <param name="query">The source query to sort</param>
-    /// <param name="keySelector">Function that extracts the sorting key from source tuples</param>
-    /// <returns>A new query with the specified ascending sort order</returns>
+    /// <param name="keySelector">Function that extracts the sorting key and direction from source tuples</param>
+    /// <returns>A new query with the specified sort order</returns>
     /// <example>
     /// <code>
-    /// var sortedUsers = userQuery.OrderBy(user => user.Name);
+    /// var sortedUsers = userQuery.OrderBy(user => (user.Name, Sort.Asc));
+    /// var sortedUsersDesc = userQuery.OrderBy(user => (user.Age, Sort.Desc));
     /// </code>
     /// </example>
-    public static ISqlOrderedQuery<TSource> OrderBy<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+    public static ISqlQuery<TSource> OrderBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, (SqlExpr Key, Sort Direction)> keySelector)
         where TSource : ITuple
-        where TKey : SqlExpr
     {
-        return new OrderByClause<TSource, TKey>(query, keySelector, false);
-    }
+        return new OrderByClause<TSource>(query, x => [keySelector(x)]);
+    }    
 
     /// <summary>
-    /// Sorts the query result in descending order based on the specified key.
+    /// Sorts the query result by multiple keys with their respective directions.
     /// </summary>
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
     /// <param name="query">The source query to sort</param>
-    /// <param name="keySelector">Function that extracts the sorting key from source tuples</param>
-    /// <returns>A new query with the specified descending sort order</returns>
+    /// <param name="keySelector">Function that extracts two sorting keys with their directions from source tuples</param>
+    /// <returns>A new query with the specified multi-key sort order</returns>
     /// <example>
     /// <code>
-    /// var usersByAgeDesc = userQuery.OrderByDescending(user => user.Age);
+    /// var sortedUsers = userQuery.OrderBy(user => ((user.Name, Sort.Asc), (user.Age, Sort.Desc)));
     /// </code>
     /// </example>
-    public static ISqlOrderedQuery<TSource> OrderByDescending<TSource, TKey>(this ISqlQuery<TSource> query, Func<TSource, TKey> keySelector)
+    public static ISqlQuery<TSource> OrderBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
         where TSource : ITuple
-        where TKey : SqlExpr
     {
-        return new OrderByClause<TSource, TKey>(query, keySelector, true);
-    }
+        return new OrderByClause<TSource>(query, x =>
+        {
+            var (key1, key2) = keySelector(x);
+            return [key1, key2];
+        });
+    }    
 
     /// <summary>
-    /// Adds a secondary ascending sort to an existing ORDER BY clause.
+    /// Sorts the query result by three keys with their respective directions.
     /// </summary>
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
-    /// <param name="query">The source query with existing ORDER BY</param>
-    /// <param name="keySelector">Function that extracts the secondary sorting key from source tuples</param>
-    /// <returns>A new query with the additional ascending sort order</returns>
+    /// <param name="query">The source query to sort</param>
+    /// <param name="keySelector">Function that extracts three sorting keys with their directions from source tuples</param>
+    /// <returns>A new query with the specified three-key sort order</returns>
     /// <example>
     /// <code>
-    /// var sortedUsers = userQuery.OrderBy(user => user.Name).ThenBy(user => user.Age);
+    /// var sortedUsers = userQuery.OrderBy(user => ((user.Name, Sort.Asc), (user.Age, Sort.Desc), (user.Id, Sort.Asc)));
     /// </code>
     /// </example>
-    public static ISqlOrderedQuery<TSource> ThenBy<TSource, TKey>(this ISqlOrderedQuery<TSource> query, Func<TSource, TKey> keySelector)
+    public static ISqlQuery<TSource> OrderBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
         where TSource : ITuple
-        where TKey : SqlExpr
     {
-        return new OrderByClause<TSource, TKey>(query, keySelector, false);
-    }
-
-    /// <summary>
-    /// Adds a secondary descending sort to an existing ORDER BY clause.
-    /// </summary>
-    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
-    /// <typeparam name="TKey">The type of the sorting key, must be a SQL expression</typeparam>
-    /// <param name="query">The source query with existing ORDER BY</param>
-    /// <param name="keySelector">Function that extracts the secondary sorting key from source tuples</param>
-    /// <returns>A new query with the additional descending sort order</returns>
-    /// <example>
-    /// <code>
-    /// var sortedUsers = userQuery.OrderBy(user => user.Name).ThenByDescending(user => user.Age);
-    /// </code>
-    /// </example>
-    public static ISqlOrderedQuery<TSource> ThenByDescending<TSource, TKey>(this ISqlOrderedQuery<TSource> query, Func<TSource, TKey> keySelector)
-        where TSource : ITuple
-        where TKey : SqlExpr
-    {
-        return new OrderByClause<TSource, TKey>(query, keySelector, true);
-    }
+        return new OrderByClause<TSource>(query, x =>
+        {
+            var (key1, key2, key3) = keySelector(x);
+            return [key1, key2, key3];
+        });
+    }    
 
     /// <summary>
     /// Groups query results by a single key expression.
@@ -273,8 +256,6 @@ public static class SqlQueryExtensions
             return [key1, key2];
         });
     }
-
-
 
     /// <summary>
     /// Adds a HAVING clause to filter grouped query results.

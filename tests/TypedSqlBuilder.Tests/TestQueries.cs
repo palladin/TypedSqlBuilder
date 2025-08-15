@@ -44,10 +44,10 @@ public static class TestQueries
 
     // ORDER BY only
     public static ISqlQuery FromOrderByAsc()
-        => Db.Customers.From().OrderBy(c => c.Name);
+        => Db.Customers.From().OrderBy(c => (c.Name, Sort.Asc));
 
     public static ISqlQuery FromOrderByDesc()
-        => Db.Customers.From().OrderByDescending(c => c.Age);
+        => Db.Customers.From().OrderBy(c => (c.Age, Sort.Desc));
 
     // WHERE + SELECT
     public static ISqlQuery FromWhereSelect()
@@ -64,31 +64,31 @@ public static class TestQueries
     public static ISqlQuery FromWhereOrderBy()
         => Db.Customers.From()
             .Where(c => c.Age > 21 && c.Name != "")
-            .OrderBy(c => c.Age);
+            .OrderBy(c => (c.Age, Sort.Asc));
 
     // SELECT + ORDER BY
     public static ISqlQuery FromSelectOrderBy()
         => Db.Customers.From()
-            .OrderBy(c => c.Name)
+            .OrderBy(c => (c.Name, Sort.Asc))
             .Select(c => (c.Id, c.Name, c.Age + 5));
 
     // WHERE + SELECT + ORDER BY (all clauses)
     public static ISqlQuery FromWhereSelectOrderBy()
         => Db.Customers.From()
             .Where(c => c.Age > 18)
-            .OrderBy(c => c.Name)
+            .OrderBy(c => (c.Name, Sort.Asc))
             .Select(c => (c.Id + 1, c.Name + "!"));
 
     public static ISqlQuery FromWhereOrderBySelect()
         => Db.Customers.From()
             .Where(c => c.Age > 21 && c.Name != "")
-            .OrderBy(c => c.Age)
+            .OrderBy(c => (c.Age, Sort.Asc))
             .Select(c => (c.Id, c.Name, c.Age + 10));
 
     public static ISqlQuery FromWhereOrderBySelectNamed()
         => Db.Customers.From()
             .Where(c => c.Age >= 21 && c.Name != "")
-            .OrderBy(c => c.Name)
+            .OrderBy(c => (c.Name, Sort.Asc))
             .Select(c => (
                 CustomerId: c.Id,
                 CustomerInfo: c.Name + " (Customer)",
@@ -138,40 +138,33 @@ public static class TestQueries
         => Db.Customers.From()
             .Where(c => c.Age > 18)
             .Where(c => c.Name != "Admin")
-            .OrderBy(c => c.Name);
+            .OrderBy(c => (c.Name, Sort.Asc));
 
     // Multiple ORDER BY tests - ThenBy functionality
     public static ISqlQuery FromOrderByThenBy()
         => Db.Customers.From()
-            .OrderBy(c => c.Name)
-            .ThenBy(c => c.Age);
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Asc)));
 
     public static ISqlQuery FromOrderByThenByDescending()
         => Db.Customers.From()
-            .OrderBy(c => c.Name)
-            .ThenByDescending(c => c.Age);
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Desc)));
 
     public static ISqlQuery FromOrderByDescendingThenBy()
         => Db.Customers.From()
-            .OrderByDescending(c => c.Age)
-            .ThenBy(c => c.Name);
+            .OrderBy(c => ((c.Age, Sort.Desc), (c.Name, Sort.Asc)));
 
     public static ISqlQuery FromOrderByMultiple()
         => Db.Customers.From()
-            .OrderBy(c => c.Name)
-            .ThenByDescending(c => c.Age)
-            .ThenBy(c => c.Id);
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Desc), (c.Id, Sort.Asc)));
 
     public static ISqlQuery FromWhereOrderByThenBy()
         => Db.Customers.From()
             .Where(c => c.Age > 18)
-            .OrderBy(c => c.Name)
-            .ThenByDescending(c => c.Age);
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Desc)));
 
     public static ISqlQuery FromOrderByThenBySelect()
         => Db.Customers.From()
-            .OrderBy(c => c.Name)
-            .ThenBy(c => c.Age)
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Asc)))
             .Select(c => (c.Id, c.Name));
 
         // NULL tests
@@ -323,7 +316,7 @@ public static class TestQueries
                 c => c.Id,
                 o => o.CustomerId,
                 (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
-            .OrderBy(result => result.Name);
+            .OrderBy(result => (result.Name, Sort.Asc));
 
     // JOIN test cases - LEFT JOIN
     public static ISqlQuery LeftJoinBasic()
@@ -359,8 +352,7 @@ public static class TestQueries
                 c => c.Id,
                 o => o.CustomerId,
                 (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
-            .OrderBy(result => result.Name)
-            .ThenByDescending(result => result.Amount);
+            .OrderBy(result => ((result.Name, Sort.Asc), (result.Amount, Sort.Desc)));
 
     // Complex JOIN scenarios
     public static ISqlQuery InnerJoinWithGroupBy()

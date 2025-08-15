@@ -62,7 +62,7 @@ public static partial class SqlCompiler
             
             // ORDER BY fusion: OrderBy(OrderBy(q, keys1), keys2) → OrderBy(q, keys1 + keys2)  
             case OrderByClause(OrderByClause(var innerQuery, var innerKeys), var outerKeys):
-                return (new OrderByClause(innerQuery, innerKeys.AddRange(outerKeys)), true);
+                return (new OrderByClause(innerQuery, tuple => innerKeys(tuple).AddRange(outerKeys(tuple))), true);
             
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
             // Preserve outer Select's Aliases (projection names)
@@ -723,22 +723,23 @@ public static partial class SqlCompiler
     }
 
     /// <summary>
-    /// Compiles ORDER BY clauses with multiple key selectors.
+    /// Compiles ORDER BY clauses with key selector function.
     /// </summary>
-    /// <param name="keySelectors">The key selectors and their sort directions</param>
+    /// <param name="keySelector">Function that returns array of SQL expressions with sort direction</param>
     /// <param name="table">The table being queried</param>
     /// <param name="context">The compilation context</param>
     /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
     /// <returns>The compiled ORDER BY clause and updated context</returns>
-    private static (string, Context) CompileOrderBy(ImmutableArray<(Func<ITuple, SqlExpr> KeySelector, bool Descending)> keySelectors, ITuple table, Context context, int scopeLevel)
+    private static (string, Context) CompileOrderBy(Func<ITuple, ImmutableArray<(SqlExpr, Sort)>> keySelector, ITuple table, Context context, int scopeLevel)
     {
         var orderItems = new List<string>();
         var ctx = context;
 
-        foreach (var (keySelector, descending) in keySelectors)
+        var keys = keySelector(table);
+        foreach (var (expr, direction) in keys)
         {
-            var (orderByClause, orderCtx) = Compile(keySelector(table), ctx, scopeLevel);
-            orderItems.Add($"{orderByClause} {(descending ? "DESC" : "ASC")}");
+            var (orderByClause, orderCtx) = Compile(expr, ctx, scopeLevel);
+            orderItems.Add($"{orderByClause} {(direction == Sort.Desc ? "DESC" : "ASC")}");
             ctx = orderCtx;
         }
 

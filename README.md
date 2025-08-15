@@ -20,7 +20,7 @@ public class Customer()
 var (query, params)  =
     TypedSql.From<Customer>()
             .Where(c => c.Age > 18)
-            .OrderBy(c => c.Name)
+            .OrderBy(c => (c.Name, Sort.Asc))
             .Select(c => (c.Id + 1, c.Name + "!"))
             .ToSqlServerRaw();
 ```
