@@ -1775,4 +1775,200 @@ public class SqliteQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
     }
+
+    [Fact]
+    public void FromGroupByOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByOrderBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            SUM(a0.Amount) AS TotalAmount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        ORDER BY 
+            SUM(a0.Amount) DESC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByOrderByMultipleSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            SUM(a0.Amount) AS TotalAmount,
+            COUNT(*) AS OrderCount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        ORDER BY 
+            SUM(a0.Amount) DESC, COUNT(*) ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByOrderByThreeKeysSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            SUM(a0.Amount) AS TotalAmount,
+            COUNT(*) AS OrderCount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        ORDER BY 
+            SUM(a0.Amount) DESC, COUNT(*) ASC, a0.CustomerId ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByMultipleOrderBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Age AS Age,
+            a0.Name AS Name,
+            COUNT(*) AS Count
+        FROM 
+            customers a0
+        GROUP BY 
+            a0.Age, a0.Name
+        ORDER BY 
+            COUNT(*) DESC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByHavingOrderBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.CustomerId AS CustomerId,
+            SUM(a0.Amount) AS TotalAmount
+        FROM 
+            orders a0
+        GROUP BY 
+            a0.CustomerId
+        HAVING 
+            COUNT(*) > :p0
+        ORDER BY 
+            SUM(a0.Amount) DESC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(1, parameters[":p0"]);
+    }
+
+    [Fact]
+    public void ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ComplexJoinWhereGroupByHavingOrderBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - This complex query combines JOIN, WHERE, GROUP BY, HAVING, ORDER BY
+        var expectedSql = """
+        SELECT 
+            a0.Id AS CustomerId,
+            a0.Name AS CustomerName,
+            COUNT(*) AS TotalOrders,
+            SUM(a1.Amount) AS TotalSpent,
+            (SUM(a1.Amount) / COUNT(*)) AS AvgOrderValue
+        FROM 
+            customers a0
+        INNER JOIN orders a1 ON a0.Id = a1.CustomerId
+        WHERE 
+            (a0.Age >= :p0) AND (a1.Amount > :p1)
+        GROUP BY 
+            a0.Id, a0.Name
+        HAVING 
+            (COUNT(*) > :p2) AND (SUM(a1.Amount) > :p3)
+        ORDER BY 
+            SUM(a1.Amount) DESC, COUNT(*) ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal(50, parameters[":p1"]);
+        Assert.Equal(2, parameters[":p2"]);
+        Assert.Equal(500, parameters[":p3"]);
+    }
+
+    [Fact]
+    public void ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ComplexLeftJoinWhereGroupByOrderBySelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - This complex query combines LEFT JOIN, WHERE, GROUP BY, ORDER BY
+        var expectedSql = """
+        SELECT 
+            a0.Id AS CustomerId,
+            a0.Name AS CustomerName,
+            COUNT(*) AS OrderCount,
+            SUM(a1.Amount) AS TotalSpent
+        FROM 
+            customers a0
+        LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
+        WHERE 
+            a0.Age >= :p0
+        GROUP BY 
+            a0.Id, a0.Name
+        ORDER BY 
+            SUM(a1.Amount) DESC, a0.Name ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(21, parameters[":p0"]);
+    }
 }

@@ -276,6 +276,32 @@ public static class SqlQueryExtensions
         return new HavingClause<TSource>(query, predicate);
     }
 
+    public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, (SqlExpr Key, Sort Direction)> keySelector)
+        where TSource : ITuple
+    {
+        return new OrderByClause<TSource>(query, x => [keySelector(x, new SqlAggregateFunc())]);
+    }
+
+    public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
+        where TSource : ITuple
+    {
+        return new OrderByClause<TSource>(query, x =>
+        {
+            var (key1, key2) = keySelector(x, new SqlAggregateFunc());
+            return [key1, key2];
+        });
+    }
+
+    public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
+        where TSource : ITuple
+    {
+        return new OrderByClause<TSource>(query, x =>
+        {
+            var (key1, key2, key3) = keySelector(x, new SqlAggregateFunc());
+            return [key1, key2, key3];
+        });
+    }
+
     /// <summary>
     /// Applies a SELECT clause to a grouped query with aggregate functions.
     /// Transforms grouped results using aggregate operations.
@@ -298,30 +324,6 @@ public static class SqlQueryExtensions
         var names = GetTupleElementNames(selector);
         return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc()), names);
     }
-
-    /// <summary>
-    /// Applies a SELECT clause to a grouped query with HAVING clause and aggregate functions.
-    /// Transforms filtered grouped results using aggregate operations.
-    /// </summary>
-    /// <typeparam name="TSource">The input tuple type from the source grouped query</typeparam>
-    /// <typeparam name="TResult">The output tuple type after projection with aggregates</typeparam>
-    /// <param name="query">The grouped query with HAVING clause to project from</param>
-    /// <param name="selector">Function that transforms source tuples using aggregate functions</param>
-    /// <returns>A query that produces the projected result with aggregates</returns>
-    /// <example>
-    /// <code>
-    /// var results = groupedHavingQuery.Select((row, agg) => (row.Category, Total: agg.Sum(row.Amount)));
-    /// </code>
-    /// </example>
-    public static ISqlQuery<TResult> Select<TSource, TResult>(this ISqlGroupByHavingQuery<TSource> query, Func<TSource, SqlAggregateFunc, TResult> selector)
-        where TSource : ITuple
-        where TResult : ITuple
-    {
-        // Capture tuple element names from the original selector that constructs the tuple
-        var names = GetTupleElementNames(selector);    
-        return new SelectClause<TSource, TResult>(query, t => selector(t, new SqlAggregateFunc()), names);
-    }
-
 
     /// <summary>
     /// Performs an INNER JOIN between the outer query and an inner table.

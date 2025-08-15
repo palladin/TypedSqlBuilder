@@ -60,6 +60,9 @@ public interface ISqlGroupByQuery : ISqlQuery;
 public interface ISqlGroupByQuery<TSource> : ISqlGroupByQuery, ISqlQuery<TSource>
     where TSource : ITuple;
 
+public interface ISqlOrderedGroupByQuery<TSource> : ISqlGroupByQuery<TSource>
+    where TSource : ITuple;
+
 /// <summary>
 /// Interface for SQL queries that include both GROUP BY and HAVING clauses.
 /// Represents grouped queries with additional filtering on grouped results.
@@ -321,7 +324,7 @@ public record OrderByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<(SqlExp
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts strongly-typed sorting keys with directions from source tuples</param>
 public record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<(SqlExpr, Sort)>> TypedKeySelector) 
-    : OrderByClause(TypedQuery, x => TypedKeySelector((TSource)x)), ISqlQuery<TSource>
+    : OrderByClause(TypedQuery, x => TypedKeySelector((TSource)x)), ISqlOrderedGroupByQuery<TSource>, ISqlQuery<TSource>
     where TSource : ITuple;
 
 /// <summary>

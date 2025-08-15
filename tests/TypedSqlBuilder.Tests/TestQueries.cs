@@ -423,4 +423,74 @@ public static class TestQueries
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Amount, p.ProductName))
             .Where(result => result.Amount > 100);
 
+    // GROUP BY with ORDER BY test cases
+    public static ISqlQuery FromGroupByOrderBySelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .OrderBy((o, agg) => (agg.Sum(o.Amount), Sort.Desc))
+            .Select((o, agg) => (CustomerId: o.CustomerId, TotalAmount: agg.Sum(o.Amount)));
+
+    public static ISqlQuery FromGroupByOrderByMultipleSelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .OrderBy((o, agg) => ((agg.Sum(o.Amount), Sort.Desc), (agg.Count(), Sort.Asc)))
+            .Select((o, agg) => (CustomerId: o.CustomerId, TotalAmount: agg.Sum(o.Amount), OrderCount: agg.Count()));
+
+    public static ISqlQuery FromGroupByOrderByThreeKeysSelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .OrderBy((o, agg) => ((agg.Sum(o.Amount), Sort.Desc), (agg.Count(), Sort.Asc), (o.CustomerId, Sort.Asc)))
+            .Select((o, agg) => (CustomerId: o.CustomerId, TotalAmount: agg.Sum(o.Amount), OrderCount: agg.Count()));
+
+    public static ISqlQuery FromGroupByMultipleOrderBySelect()
+        => Db.Customers.From()
+            .GroupBy(c => (c.Age, c.Name))
+            .OrderBy((c, agg) => (agg.Count(), Sort.Desc))
+            .Select((c, agg) => (c.Age, c.Name, Count: agg.Count()));
+
+    public static ISqlQuery FromGroupByHavingOrderBySelect()
+        => Db.Orders.From()
+            .GroupBy(o => o.CustomerId)
+            .Having((o, agg) => agg.Count() > 1)
+            .OrderBy((o, agg) => (agg.Sum(o.Amount), Sort.Desc))
+            .Select((o, agg) => (CustomerId: o.CustomerId, TotalAmount: agg.Sum(o.Amount)));
+
+    // Complex case: JOIN -> WHERE -> GROUP BY -> HAVING -> ORDER BY -> SELECT
+    public static ISqlQuery ComplexJoinWhereGroupByHavingOrderBySelect()
+        => Db.Customers.From()
+            .InnerJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (Customer: c, Order: o))
+            .Where(result => result.Customer.Age >= 18 && result.Order.Amount > 50)
+            .GroupBy(result => (result.Customer.Id, result.Customer.Name))
+            .Having((result, agg) => agg.Count() > 2 && agg.Sum(result.Order.Amount) > 500)
+            .OrderBy((result, agg) => ((agg.Sum(result.Order.Amount), Sort.Desc), (agg.Count(), Sort.Asc)))
+            .Select((result, agg) => (
+                CustomerId: result.Customer.Id,
+                CustomerName: result.Customer.Name,
+                TotalOrders: agg.Count(),
+                TotalSpent: agg.Sum(result.Order.Amount),
+                AvgOrderValue: agg.Sum(result.Order.Amount) / agg.Count()
+            ));
+
+    // Another complex case with LEFT JOIN
+    public static ISqlQuery ComplexLeftJoinWhereGroupByOrderBySelect()
+        => Db.Customers.From()
+            .LeftJoin(
+                Db.Orders,
+                c => c.Id,
+                o => o.CustomerId,
+                (c, o) => (Customer: c, Order: o))
+            .Where(result => result.Customer.Age >= 21)
+            .GroupBy(result => (result.Customer.Id, result.Customer.Name))
+            .OrderBy((result, agg) => ((agg.Sum(result.Order.Amount), Sort.Desc), (result.Customer.Name, Sort.Asc)))
+            .Select((result, agg) => (
+                CustomerId: result.Customer.Id,
+                CustomerName: result.Customer.Name,
+                OrderCount: agg.Count(),
+                TotalSpent: agg.Sum(result.Order.Amount)
+            ));
+
 }
