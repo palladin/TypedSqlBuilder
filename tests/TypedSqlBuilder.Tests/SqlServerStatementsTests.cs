@@ -273,7 +273,7 @@ public class SqlServerStatementsTests
         
         // Assert
         Assert.Equal("DELETE FROM customers WHERE customers.Id = @p0", sql);
-        Assert.Equal(1, parameters.Count);
+        Assert.Single(parameters);
         Assert.Equal(100, parameters["@p0"]);
     }
 
