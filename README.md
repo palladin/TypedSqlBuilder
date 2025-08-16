@@ -5,6 +5,7 @@ A type-safe SQL expression builder DSL for C# that provides fluent syntax for co
 ## Usage
 
 ```csharp
+using Dapper;
 using TypedSqlBuilder.Core;
 
 // Define table schema 
@@ -21,8 +22,10 @@ var (query, params)  =
     TypedSql.From<Customer>()
             .Where(c => c.Age > 18)
             .OrderBy(c => (c.Name, Sort.Asc))
-            .Select(c => (c.Id + 1, c.Name + "!"))
+            .Select(c => (c.Id, c.Name))
             .ToSqlServerRaw();
+
+var customers = connection.Query<(int Id, string Name)>(sql, params.ToDapperParameters());
 ```
 
 ## Motivation

@@ -1,4 +1,6 @@
-namespace TypedSqlBuilder.Tests;
+using TypedSqlBuilder.Core;
+
+namespace TypedSqlBuilder.TestModels;
 
 /// <summary>
 /// Sample table definition for testing

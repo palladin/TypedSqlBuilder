@@ -9,7 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypedSqlBuilder.Core", "src
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypedSqlBuilder.TestModels", "tests\TypedSqlBuilder.TestModels\TypedSqlBuilder.TestModels.csproj", "{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypedSqlBuilder.Tests", "tests\TypedSqlBuilder.Tests\TypedSqlBuilder.Tests.csproj", "{39D4D802-E176-4A5F-92A7-2A2D23332D32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypedSqlBuilder.IntegrationTests", "tests\TypedSqlBuilder.IntegrationTests\TypedSqlBuilder.IntegrationTests.csproj", "{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,18 @@ Global
 		{416608D6-E3E9-4890-9059-68B8CAD59B3D}.Release|x64.Build.0 = Release|Any CPU
 		{416608D6-E3E9-4890-9059-68B8CAD59B3D}.Release|x86.ActiveCfg = Release|Any CPU
 		{416608D6-E3E9-4890-9059-68B8CAD59B3D}.Release|x86.Build.0 = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|x64.Build.0 = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Debug|x86.Build.0 = Debug|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|x64.Build.0 = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|x86.ActiveCfg = Release|Any CPU
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B}.Release|x86.Build.0 = Release|Any CPU
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -45,12 +61,26 @@ Global
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Release|x64.Build.0 = Release|Any CPU
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Release|x86.ActiveCfg = Release|Any CPU
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32}.Release|x86.Build.0 = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|x64.Build.0 = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Debug|x86.Build.0 = Debug|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|x64.ActiveCfg = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|x64.Build.0 = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|x86.ActiveCfg = Release|Any CPU
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{416608D6-E3E9-4890-9059-68B8CAD59B3D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{E8F7A9B3-C2D4-4E5F-8A6B-9C7D1E2F3A4B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{39D4D802-E176-4A5F-92A7-2A2D23332D32} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{F9E8A7B2-D3C4-5E6F-9A8B-0C1D2E3F4A5B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

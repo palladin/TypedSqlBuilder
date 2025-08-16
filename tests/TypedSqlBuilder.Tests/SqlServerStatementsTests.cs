@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using TypedSqlBuilder.Core;
+using TypedSqlBuilder.TestModels;
 
 namespace TypedSqlBuilder.Tests;
 

@@ -1,6 +1,7 @@
 using TypedSqlBuilder.Core;
+using TypedSqlBuilder.TestModels;
 
-namespace TypedSqlBuilder.Tests;
+namespace TypedSqlBuilder.TestModels;
 
 /// <summary>
 /// Database-agnostic test queries organized by SQL clause structure.
