@@ -13,11 +13,11 @@ public static class TestStatements
     
     /// <summary>
     /// Basic INSERT with explicit values using Value method
-    /// INSERT INTO customers (Id, Age, Name) VALUES (1, 25, 'John Doe')
+    /// INSERT INTO customers (Id, Age, Name) VALUES (200, 25, 'John Doe')
     /// </summary>
     public static ISqlStatement InsertBasic() 
         => TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 1)
+            .Value(c => c.Id, 200) // Use ID 200 to avoid conflicts
             .Value(c => c.Age, 25)
             .Value(c => c.Name, "John Doe");
 
@@ -27,6 +27,7 @@ public static class TestStatements
     /// </summary>
     public static ISqlStatement InsertPartial() 
         => TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 201) // Add explicit ID to avoid conflicts
             .Value(c => c.Age, 30)
             .Value(c => c.Name, "Jane Smith");
 
@@ -34,22 +35,22 @@ public static class TestStatements
     
     /// <summary>
     /// Basic UPDATE with SET clause for one column
-    /// UPDATE customers SET Age = 26 WHERE Id = 1
+    /// UPDATE customers SET Age = 26 WHERE Id = 200
     /// </summary>
     public static ISqlStatement UpdateBasic() 
         => TypedSql.Update<Customer>()
             .Set(c => c.Age, 26)
-            .Where(c => c.Id == 1);
+            .Where(c => c.Id == 200);
 
     /// <summary>
     /// UPDATE with multiple SET clauses  
-    /// UPDATE customers SET Age = 27, Name = 'John Smith' WHERE Id = 1
+    /// UPDATE customers SET Age = 27, Name = 'John Smith' WHERE Id = 200
     /// </summary>
     public static ISqlStatement UpdateMultiple() 
         => TypedSql.Update<Customer>()
             .Set(c => c.Age, 27)
             .Set(c => c.Name, "John Smith")
-            .Where(c => c.Id == 1);
+            .Where(c => c.Id == 200);
 
     /// <summary>
     /// UPDATE with complex WHERE condition and expression-based SET
@@ -64,11 +65,11 @@ public static class TestStatements
     
     /// <summary>
     /// Basic DELETE with WHERE clause
-    /// DELETE FROM customers WHERE Id = 1
+    /// DELETE FROM customers WHERE Id = 200
     /// </summary>
     public static ISqlStatement DeleteBasic() 
         => TypedSql.Delete<Customer>()
-            .Where(c => c.Id == 1);
+            .Where(c => c.Id == 200);
 
     /// <summary>
     /// DELETE with complex WHERE condition
@@ -102,18 +103,18 @@ public static class TestStatements
     public static ISqlStatement UpdateSetNullWhere() 
         => TypedSql.Update<Customer>()
             .Set(c => c.Name, SqlNull.Value)
-            .Where(c => c.Id == 1);
+            .Where(c => c.Id == 200);
 
     // Insert with NULL values
     public static ISqlStatement InsertWithNull() 
         => TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 1)
+            .Value(c => c.Id, 202)
             .Value(c => c.Name, SqlNull.Value)
             .Value(c => c.Age, 25);
 
     public static ISqlStatement InsertWithNullInt() 
         => TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 1)
+            .Value(c => c.Id, 203)
             .Value(c => c.Name, "John")
             .Value(c => c.Age, SqlNull.Value);
 

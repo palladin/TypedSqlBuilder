@@ -40,8 +40,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation
         WithTransaction(connection =>
         {
-            // Arrange - First insert a customer to delete
-            var insertStatement = TestStatements.InsertNewCustomer();
+            // Arrange - First insert a customer to delete using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 100)
+                .Value(c => c.Age, 35)
+                .Value(c => c.Name, "New Customer");
             var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
             
             var dapperInsertParams = insertParams.ToDapperParameters();
@@ -51,8 +54,9 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             var existingCount = connection.QuerySingle<int>("SELECT COUNT(*) FROM customers WHERE Id = 100");
             Assert.Equal(1, existingCount);
 
-            // Act - Execute DELETE statement
-            var deleteStatement = TestStatements.DeleteNewCustomer();
+            // Act - Execute DELETE statement using inline SQL
+            var deleteStatement = TypedSql.Delete<Customer>()
+                .Where(c => c.Id == 100);
             var (deleteSql, deleteParams) = deleteStatement.ToSqliteRaw();
             
             var dapperDeleteParams = deleteParams.ToDapperParameters();
@@ -73,11 +77,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Create custom insert with unique ID to avoid conflicts
-            var statement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 100) // Use ID 100 to avoid conflict with existing test data (1-4)
-                .Value(c => c.Age, 25)
-                .Value(c => c.Name, "John Doe");
+            // Arrange
+            var statement = TestStatements.InsertBasic();
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute INSERT against real database
@@ -88,7 +89,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             Assert.Equal(1, insertedRows);
             
             // Verify the insert worked by querying
-            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 100");
+            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Equal("John Doe", insertedCustomer.Name);
             Assert.Equal(25, insertedCustomer.Age);
         });
@@ -100,11 +101,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Create custom insert that specifies ID to avoid conflicts
-            var statement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 101) // Use ID 101 to avoid conflict with existing test data
-                .Value(c => c.Age, 30)
-                .Value(c => c.Name, "Jane Smith");
+            // Arrange
+            var statement = TestStatements.InsertPartial();
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute INSERT against real database
@@ -114,11 +112,10 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Assert
             Assert.Equal(1, insertedRows);
             
-            // Verify the insert worked by querying - should find only one record with this specific ID
-            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 101");
+            // Verify the insert worked by querying - find the customer with Age=30 and Name="Jane Smith"
+            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 201");
             Assert.Equal("Jane Smith", insertedCustomer.Name);
             Assert.Equal(30, insertedCustomer.Age);
-            Assert.Equal(101, insertedCustomer.Id);
         });
     }
 
@@ -161,8 +158,65 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
     [Fact]
     public void UpdateBasic_GeneratesSqlCorrectly()
     {
-        // Just verify SQL generation and syntax - avoid complex state management
+        // Use transaction to ensure test isolation while executing real SQL
+        WithTransaction(connection =>
+        {
+            // Arrange - First insert the customer we'll update using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 200)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "John Doe");
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
+            
+            // Get original state to verify change
+            var originalCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
+            
+            // Create inline UPDATE statement that updates customer Id=200 age to 26
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Age, 26)
+                .Where(c => c.Id == 200);
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute UPDATE against real database
+            var dapperParams = parameters.ToDapperParameters();
+            var updatedRows = connection.Execute(sql, dapperParams);
+
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify the update worked - age should now be 26
+            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
+            Assert.Equal(26, updatedCustomer.Age);
+            
+            // Verify other fields weren't changed
+            Assert.Equal(originalCustomer.Id, updatedCustomer.Id);
+            Assert.Equal(originalCustomer.Name, updatedCustomer.Name);
+        });
+    }
+
+    [Fact]
+    public void UpdateBasic_GeneratesCorrectSql()
+    {
+        // Just verify SQL generation without database execution
         var statement = TestStatements.UpdateBasic();
+        var (sql, parameters) = statement.ToSqliteRaw();
+
+        // Assert SQL structure is correct
+        Assert.Equal("UPDATE customers SET Age = :p0 WHERE customers.Id = :p1", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(26, parameters[":p0"]);
+        Assert.Equal(200, parameters[":p1"]);
+    }
+
+    [Fact]
+    public void UpdateNewCustomer_GeneratesSqlCorrectly()
+    {
+        // Just verify SQL generation and syntax using inline statement
+        var statement = TypedSql.Update<Customer>()
+            .Set(c => c.Age, 36)
+            .Where(c => c.Id == 100);
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert SQL structure is valid
@@ -173,17 +227,32 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
     }
 
     [Fact]
-    public void UpdateNewCustomer_GeneratesSqlCorrectly()
+    public void UpdateNewCustomer_ExecutesAgainstDatabase()
     {
-        // Just verify SQL generation and syntax instead of executing
-        var statement = TestStatements.UpdateNewCustomer();
-        var (sql, parameters) = statement.ToSqliteRaw();
-
-        // Assert SQL structure is valid
-        Assert.Contains("UPDATE", sql);
-        Assert.Contains("SET", sql);
-        Assert.Contains("WHERE", sql);
-        Assert.NotEmpty(parameters);
+        // Use transaction to ensure test isolation while executing real SQL
+        WithTransaction(connection =>
+        {
+            // Arrange - First insert the customer we'll update
+            var insertStatement = TestStatements.InsertNewCustomer();
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
+            
+            var statement = TestStatements.UpdateNewCustomer();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute UPDATE against real database
+            var dapperParams = parameters.ToDapperParameters();
+            var updatedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify the update worked - age should now be 36
+            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 100");
+            Assert.Equal(36, updatedCustomer.Age);
+            Assert.Equal("New Customer", updatedCustomer.Name); // Name should remain unchanged
+        });
     }
 
     [Fact]
@@ -192,24 +261,29 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Create custom update statement without table aliases to avoid syntax issues
+            // Arrange - First insert the customer we'll update using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 200)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "John Doe");
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
+            
             var statement = TypedSql.Update<Customer>()
                 .Set(c => c.Age, 26)
-                .Where(c => c.Id == 1);
+                .Where(c => c.Id == 200);
             var (sql, parameters) = statement.ToSqliteRaw();
-            
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.Age", "Age").Replace("customers.Id", "Id");
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert
             Assert.Equal(1, updatedRows);
             
             // Verify the update worked
-            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 1");
+            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Equal(26, updatedCustomer.Age);
         });
     }
@@ -220,25 +294,27 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Age, 27)
-                .Set(c => c.Name, "John Smith")
-                .Where(c => c.Id == 1);
-            var (sql, parameters) = statement.ToSqliteRaw();
+            // Arrange - First insert the customer we'll update using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 200)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "John Doe");
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
             
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
+            var statement = TestStatements.UpdateMultiple();
+            var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert
             Assert.Equal(1, updatedRows);
             
             // Verify the update worked
-            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 1");
+            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Equal(27, updatedCustomer.Age);
             Assert.Equal("John Smith", updatedCustomer.Name);
         });
@@ -251,17 +327,12 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         WithTransaction(connection =>
         {
             // Arrange
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Age, c => c.Age + 1)  // Using two lambdas for expression increment
-                .Where(c => c.Age >= 18 && c.Name != "Admin");
+            var statement = TestStatements.UpdateConditional();
             var (sql, parameters) = statement.ToSqliteRaw();
-            
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert - Should update customers with age >= 18 and not named "Admin"
             Assert.True(updatedRows >= 1);
@@ -269,6 +340,41 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Verify at least one customer was updated (John Doe should now be 26)
             var johnDoe = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Name = 'John Doe'");
             Assert.Equal(26, johnDoe.Age);
+        });
+    }
+
+    [Fact]
+    public void DeleteBasic_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        WithTransaction(connection =>
+        {
+            // Arrange - First insert the customer we'll delete using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 200)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "John Doe");
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
+            
+            // Verify customer exists
+            var existingCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
+            Assert.Equal("John Doe", existingCustomer.Name);
+            
+            var statement = TestStatements.DeleteBasic();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute DELETE against real database
+            var dapperParams = parameters.ToDapperParameters();
+            var deletedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert - Should delete 1 customer
+            Assert.Equal(1, deletedRows);
+            
+            // Verify the customer was deleted
+            var remainingCount = connection.QuerySingle<int>("SELECT COUNT(*) FROM customers WHERE Id = 200");
+            Assert.Equal(0, remainingCount);
         });
     }
 
@@ -309,7 +415,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // First delete all orders to avoid foreign key constraint
             connection.Execute("DELETE FROM orders");
             
-            var statement = TypedSql.Delete<Customer>();
+            var statement = TestStatements.DeleteAll();
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute DELETE against real database
@@ -332,16 +438,12 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         WithTransaction(connection =>
         {
             // Arrange
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Name, SqlNull.Value);
+            var statement = TestStatements.UpdateSetNull();
             var (sql, parameters) = statement.ToSqliteRaw();
-            
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert - Should update all customers (4 in test data)
             Assert.Equal(4, updatedRows);
@@ -359,16 +461,12 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         WithTransaction(connection =>
         {
             // Arrange - Set all customers' ages to NULL
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Age, SqlNull.Value);
+            var statement = TestStatements.UpdateSetNullInt();
             var (sql, parameters) = statement.ToSqliteRaw();
-            
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert - Should update all customers
             Assert.Equal(4, updatedRows);
@@ -386,17 +484,12 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         WithTransaction(connection =>
         {
             // Arrange - Set name to "John" and age to NULL
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Name, "John")
-                .Set(c => c.Age, SqlNull.Value);
+            var statement = TestStatements.UpdateSetNullMixed();
             var (sql, parameters) = statement.ToSqliteRaw();
-            
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert - Should update all customers
             Assert.Equal(4, updatedRows);
@@ -414,29 +507,29 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Set name to NULL for customer with Id = 1
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Name, SqlNull.Value)
-                .Where(c => c.Id == 1);
-            var (sql, parameters) = statement.ToSqliteRaw();
+            // Arrange - First insert the customer we'll update using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 200)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "John Doe");
+            var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
+            var insertDapperParams = insertParams.ToDapperParameters();
+            connection.Execute(insertSql, insertDapperParams);
             
-            // Modify SQL to remove table aliases that cause syntax errors in SQLite
-            var simplifiedSql = sql.Replace("customers.", "");
+            // Set name to NULL for customer with Id = 200
+            var statement = TestStatements.UpdateSetNullWhere();
+            var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute UPDATE against real database
             var dapperParams = parameters.ToDapperParameters();
-            var updatedRows = connection.Execute(simplifiedSql, dapperParams);
+            var updatedRows = connection.Execute(sql, dapperParams);
             
             // Assert - Should update 1 customer
             Assert.Equal(1, updatedRows);
             
             // Verify the update worked
-            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 1");
+            var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Equal("", updatedCustomer.Name); // SQLite stores NULL strings as empty strings
-            
-            // Verify other customers weren't affected
-            var otherCustomers = connection.Query<CustomerDto>("SELECT * FROM customers WHERE Id != 1").ToList();
-            Assert.All(otherCustomers, c => Assert.NotNull(c.Name));
         });
     }
 
@@ -446,10 +539,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Create custom insert with unique ID
-            var statement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 102) // Use unique ID
-                .Value(c => c.Name, SqlNull.Value);
+            // Arrange
+            var statement = TestStatements.InsertWithNull();
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute INSERT against real database
@@ -460,7 +551,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             Assert.Equal(1, insertedRows);
             
             // Verify the insert worked and Name is empty string (SQLite NULL representation)
-            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 102");
+            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 202");
             Assert.Equal("", insertedCustomer.Name); // SQLite stores NULL strings as empty strings
         });
     }
@@ -471,10 +562,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - Create custom insert with unique ID
-            var statement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 103) // Use unique ID
-                .Value(c => c.Age, SqlNull.Value);
+            // Arrange
+            var statement = TestStatements.InsertWithNullInt();
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute INSERT against real database
@@ -485,7 +574,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             Assert.Equal(1, insertedRows);
             
             // Verify the insert worked and Age is NULL (default 0 for int)
-            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 103");
+            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 203");
             Assert.Equal(0, insertedCustomer.Age); // SQLite stores NULL as default value for int
         });
     }

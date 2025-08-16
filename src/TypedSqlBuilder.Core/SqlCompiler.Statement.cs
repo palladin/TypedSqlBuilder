@@ -91,8 +91,12 @@ internal static partial class SqlCompiler
         foreach (var setClause in setClauses)
         {
             var column = setClause.ColumnSelector(table);
-            var (columnSql, columnCtx) = Compile(column, ctx, scopeLevel);
-            var (valueSql, valueCtx) = Compile(setClause.Value, columnCtx, scopeLevel);
+            var columnSql = 
+                column is ISqlColumn sqlColumn ?
+                    sqlColumn.ColumnName :
+                    throw new NotSupportedException($"Column must implement ISqlColumn");
+
+            var (valueSql, valueCtx) = Compile(setClause.Value, ctx, scopeLevel);
             items.Add($"{columnSql} = {valueSql}");
             ctx = valueCtx;
         }

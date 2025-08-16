@@ -21,7 +21,7 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
         Assert.Equal(3, parameters.Count);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(200, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
         Assert.Equal("John Doe", parameters[":p2"]);
     }
@@ -36,10 +36,10 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Age = :p0 WHERE customers.Id = :p1", sql);
+        Assert.Equal("UPDATE customers SET Age = :p0 WHERE customers.Id = :p1", sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(26, parameters[":p0"]);
-        Assert.Equal(1, parameters[":p1"]);
+        Assert.Equal(200, parameters[":p1"]);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("DELETE FROM customers WHERE customers.Id = :p0", sql);
         Assert.Single(parameters);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(200, parameters[":p0"]);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Age = (customers.Age + :p0) WHERE (customers.Age >= :p1) AND (customers.Name != :p2)", sql);
+        Assert.Equal("UPDATE customers SET Age = (customers.Age + :p0) WHERE (customers.Age >= :p1) AND (customers.Name != :p2)", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(1, parameters[":p0"]);
         Assert.Equal(18, parameters[":p1"]);
@@ -98,10 +98,11 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("INSERT INTO customers (Age, Name) VALUES (:p0, :p1)", sql);
-        Assert.Equal(2, parameters.Count);
-        Assert.Equal(30, parameters[":p0"]);
-        Assert.Equal("Jane Smith", parameters[":p1"]);
+        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(201, parameters[":p0"]);
+        Assert.Equal(30, parameters[":p1"]);
+        Assert.Equal("Jane Smith", parameters[":p2"]);
     }
 
     [Fact]
@@ -114,11 +115,11 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Age = :p0, customers.Name = :p1 WHERE customers.Id = :p2", sql);
+        Assert.Equal("UPDATE customers SET Age = :p0, Name = :p1 WHERE customers.Id = :p2", sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(27, parameters[":p0"]);
         Assert.Equal("John Smith", parameters[":p1"]);
-        Assert.Equal(1, parameters[":p2"]);
+        Assert.Equal(200, parameters[":p2"]);
     }
 
     [Fact]
@@ -149,7 +150,7 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
         Assert.Equal(3, parameters.Count);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(200, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
         Assert.Equal("John Doe", parameters[":p2"]);
     }
@@ -164,7 +165,7 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Name = NULL", sql);
+        Assert.Equal("UPDATE customers SET Name = NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -178,7 +179,7 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Age = NULL", sql);
+        Assert.Equal("UPDATE customers SET Age = NULL", sql);
         Assert.Empty(parameters);
     }
 
@@ -192,7 +193,7 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Name = :p0, customers.Age = NULL", sql);
+        Assert.Equal("UPDATE customers SET Name = :p0, Age = NULL", sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters[":p0"]);
     }
@@ -207,9 +208,9 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET customers.Name = NULL WHERE customers.Id = :p0", sql);
+        Assert.Equal("UPDATE customers SET Name = NULL WHERE customers.Id = :p0", sql);
         Assert.Single(parameters);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(200, parameters[":p0"]);
     }
 
     [Fact]
@@ -224,7 +225,7 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (:p0, NULL, :p1)", sql);
         Assert.Equal(2, parameters.Count);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(202, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
     }
 
@@ -240,7 +241,7 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (:p0, :p1, NULL)", sql);
         Assert.Equal(2, parameters.Count);
-        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(203, parameters[":p0"]);
         Assert.Equal("John", parameters[":p1"]);
     }
 }
