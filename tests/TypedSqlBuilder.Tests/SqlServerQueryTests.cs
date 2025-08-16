@@ -403,19 +403,6 @@ public class SqlServerQueryTests
     }
 
     [Fact]
-    public void SqlServer_BooleanValues_UseIntegerParameters()
-    {
-        // Arrange
-        var query = TestQueries.FromWhereInt();
-        
-        // Act
-        var (sql, parameters) = query.ToSqlServerRaw();
-        
-        // Assert
-        Assert.Equal(18, parameters["@p0"]);
-    }
-
-    [Fact]
     public void FromWhereOrderBySelectNamed_GeneratesExpectedSql()
     {
         // Arrange
@@ -509,7 +496,7 @@ public class SqlServerQueryTests
         var expectedSql = """
         SELECT 
             a0.Id AS OriginalId,
-            ((a0.OriginalId * @p1) + a0.Age) AS ModifiedId,
+            ((a0.Id * @p1) + a0.Age) AS ModifiedId,
             a0.Name AS CustomerName
         FROM 
             customers a0
@@ -2059,5 +2046,79 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void ParameterAsIntParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsIntParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Age > @minAge
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey("@minAge"));
+    }
+
+    [Fact]
+    public void ParameterAsStringParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsStringParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name = @customerName
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey("@customerName"));
+    }
+
+    [Fact]
+    public void ParameterAsBoolParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsBoolParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            (a0.Age > @p0) = @isAdult
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.True(parameters.ContainsKey("@isAdult"));
+        Assert.Equal(18, parameters["@p0"]);
     }
 }

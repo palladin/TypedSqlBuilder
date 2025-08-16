@@ -67,7 +67,21 @@ internal static partial class SqlCompiler
             {
                 var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
                 var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"{leftSql} = {rightSql}", rightCtx);
+                
+                // Add parentheses around comparison operations to ensure correct precedence
+                var leftWithParens = left switch
+                {
+                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({leftSql})",
+                    _ => leftSql
+                };
+                
+                var rightWithParens = right switch
+                {
+                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({rightSql})",
+                    _ => rightSql
+                };
+                
+                return ($"{leftWithParens} = {rightWithParens}", rightCtx);
             }
 
             case SqlNotEquals(var leftExpr, ISqlNullValue _):
@@ -86,7 +100,21 @@ internal static partial class SqlCompiler
             {
                 var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
                 var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"{leftSql} != {rightSql}", rightCtx);
+                
+                // Add parentheses around comparison operations to ensure correct precedence
+                var leftWithParens = left switch
+                {
+                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({leftSql})",
+                    _ => leftSql
+                };
+                
+                var rightWithParens = right switch
+                {
+                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({rightSql})",
+                    _ => rightSql
+                };
+                
+                return ($"{leftWithParens} != {rightWithParens}", rightCtx);
             }
 
             case SqlGreaterThan(var left, var right):
@@ -127,7 +155,13 @@ internal static partial class SqlCompiler
 
             // Parameters
             case SqlParameterBool(var name):
-                return (name, context);
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
 
             // CASE expressions
             case SqlBoolCase(var condition, var trueValue, var falseValue):
@@ -238,7 +272,13 @@ internal static partial class SqlCompiler
 
             // Parameters
             case SqlParameterInt(var name):
-                return (name, context);
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
 
             // Aggregate functions
             case SqlIntCount:
@@ -353,7 +393,13 @@ internal static partial class SqlCompiler
 
             // Parameters
             case SqlParameterString(var name):
-                return (name, context);
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
 
             // CASE expressions
             case SqlStringCase(var condition, var trueValue, var falseValue):

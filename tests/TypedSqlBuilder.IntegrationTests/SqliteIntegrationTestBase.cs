@@ -28,18 +28,45 @@ public class OrderDto
 }
 
 /// <summary>
-/// Base class for SQLite integration tests with shared database setup
+/// Base class for SQLite integration tests with isolated database per test
 /// </summary>
 public abstract class SqliteIntegrationTestBase : IDisposable
 {
-    protected readonly SqliteConnection _connection;
+    protected SqliteConnection _connection = null!; // Will be initialized in ResetDatabase()
     
     protected SqliteIntegrationTestBase()
     {
+        // Each test gets a fresh database connection
+        ResetDatabase();
+    }
+    
+    /// <summary>
+    /// Reset the database to a clean state - called before each test
+    /// </summary>
+    protected void ResetDatabase()
+    {
+        _connection?.Dispose();
         _connection = new SqliteConnection("Data Source=:memory:");
         _connection.Open();
         CreateTestTables();
         SeedTestData();
+    }
+
+    /// <summary>
+    /// Execute a test within a transaction that gets rolled back
+    /// Use this for tests that modify data to ensure isolation
+    /// </summary>
+    protected void WithTransaction(Action<SqliteConnection> testAction)
+    {
+        using var transaction = _connection.BeginTransaction();
+        try
+        {
+            testAction(_connection);
+        }
+        finally
+        {
+            transaction.Rollback(); // Always rollback to keep data clean
+        }
     }
 
     private void CreateTestTables()
@@ -76,7 +103,7 @@ public abstract class SqliteIntegrationTestBase : IDisposable
             INSERT INTO customers (Id, Age, Name) VALUES 
             (1, 25, 'John Doe'),
             (2, 30, 'Jane Smith'),
-            (3, 17, 'Minor User'),
+            (3, 16, 'Minor User'),
             (4, 65, 'Senior User')";
 
         var insertProducts = @"

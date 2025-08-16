@@ -527,4 +527,20 @@ public static class TestQueries
 
     public static ISqlScalarQuery FromSelectMax()
         => Db.Orders.From().Select(o => o.Amount).Max();
+
+    // Test parameter creation extension methods
+    public static ISqlQuery ParameterAsIntParam()
+        => Db.Customers.From()
+            .Where(c => c.Age > "minAge".AsIntParam())
+            .Select(c => (c.Id, c.Name));
+
+    public static ISqlQuery ParameterAsStringParam()
+        => Db.Customers.From()
+            .Where(c => c.Name == "customerName".AsStringParam())
+            .Select(c => (c.Id, c.Age));
+
+    public static ISqlQuery ParameterAsBoolParam()
+        => Db.Customers.From()
+            .Where(c => (c.Age > 18) == "isAdult".AsBoolParam())
+            .Select(c => (c.Id, c.Name, c.Age));
 }

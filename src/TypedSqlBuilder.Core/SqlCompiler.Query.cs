@@ -262,6 +262,7 @@ internal static partial class SqlCompiler
         // Only use provided aliases if the count matches exactly
         bool useProvidedAliases = !aliases.IsDefault && aliases.Length == flattenedExprs.Length;
 
+        // First pass: compile all expressions without updating projection aliases
         for (int i = 0; i < flattenedExprs.Length; i++)
         {
             var expr = flattenedExprs[i];
@@ -281,6 +282,11 @@ internal static partial class SqlCompiler
             }
             
             items.Add((compiled, fieldAlias));
+        }
+
+        // Second pass: update projection aliases after all expressions are compiled
+        foreach (var (expr, (_, fieldAlias)) in flattenedExprs.Zip(items))
+        {
             ctx = ctx with { ProjectionAliases = ctx.ProjectionAliases.SetItem(expr, new SqlExprAlias($"a{ctx.AliasIndex}", fieldAlias)) };
         }
 

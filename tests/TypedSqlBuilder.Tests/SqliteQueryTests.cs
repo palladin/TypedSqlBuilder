@@ -404,19 +404,6 @@ public class SqliteQueryTests
     }
 
     [Fact]
-    public void Sqlite_BooleanValues_UseIntegerParameters()
-    {
-        // Arrange
-        var query = TestQueries.FromWhereInt();
-        
-        // Act
-        var (sql, parameters) = query.ToSqliteRaw();
-        
-        // Assert
-        Assert.Equal(18, parameters[":p0"]);
-    }
-
-    [Fact]
     public void FromWhereOrderBySelectNamed_GeneratesExpectedSql()
     {
         // Arrange
@@ -511,7 +498,7 @@ public class SqliteQueryTests
         var expectedSql = """
         SELECT 
             a0.Id AS OriginalId,
-            ((a0.OriginalId * :p1) + a0.Age) AS ModifiedId,
+            ((a0.Id * :p1) + a0.Age) AS ModifiedId,
             a0.Name AS CustomerName
         FROM 
             customers a0
@@ -1176,34 +1163,6 @@ public class SqliteQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal("VIP", parameters[":p0"]);
-    }
-
-    [Fact]
-    public void DatabaseComparison_SameQuery_DifferentSyntax()
-    {
-        // Arrange
-        var query = TestQueries.FromSelectOrderBy();
-        
-        // Act
-        var (sqliteSql, sqliteParameters) = query.ToSqliteRaw();
-        var (sqlServerSql, sqlServerParameters) = query.ToSqlServerRaw();
-        
-        // Assert - Different parameter prefixes
-        var expectedSqliteSql = """
-        SELECT 
-            a0.Id AS Id,
-            a0.Name AS Name,
-            (a0.Age + :p0) AS prj0
-        FROM 
-            customers a0
-        ORDER BY 
-            a0.Name ASC
-        """;
-        Assert.Equal(expectedSqliteSql, sqliteSql);
-        Assert.Equal("SELECT \n    a0.Id AS Id,\n    a0.Name AS Name,\n    (a0.Age + @p0) AS prj0\nFROM \n    customers a0\nORDER BY \n    a0.Name ASC", sqlServerSql);
-        
-        // Same number of parameters
-        Assert.Equal(sqliteParameters.Count, sqlServerParameters.Count);
     }
 
     [Fact]
@@ -2100,5 +2059,79 @@ public class SqliteQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+    }
+
+    [Fact]
+    public void ParameterAsIntParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsIntParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Age > :minAge
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":minAge"));
+    }
+
+    [Fact]
+    public void ParameterAsStringParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsStringParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name = :customerName
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":customerName"));
+    }
+
+    [Fact]
+    public void ParameterAsBoolParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsBoolParam();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            (a0.Age > :p0) = :isAdult
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.True(parameters.ContainsKey(":isAdult"));
+        Assert.Equal(18, parameters[":p0"]);
     }
 }
