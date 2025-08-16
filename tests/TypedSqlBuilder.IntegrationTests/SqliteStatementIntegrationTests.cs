@@ -16,7 +16,10 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         WithTransaction(connection =>
         {
             // Arrange
-            var insertStatement = TestStatements.InsertNewCustomer();
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 100)
+                .Value(c => c.Age, 35)
+                .Value(c => c.Name, "New Customer");
             var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
             
             // Act - Execute INSERT with Dapper
@@ -112,10 +115,10 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Assert
             Assert.Equal(1, insertedRows);
             
-            // Verify the insert worked by querying - find the customer with Age=30 and Name="Jane Smith"
-            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 201");
-            Assert.Equal("Jane Smith", insertedCustomer.Name);
-            Assert.Equal(30, insertedCustomer.Age);
+            // Verify the insert worked by querying - find the customer with Age=28 and Name="Partial Customer"
+            var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Age = 28 AND Name = 'Partial Customer'");
+            Assert.Equal("Partial Customer", insertedCustomer.Name);
+            Assert.Equal(28, insertedCustomer.Age);
         });
     }
 
@@ -125,7 +128,10 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Test a sequence of INSERT -> verify -> DELETE -> verify
         
         // 1. INSERT
-        var insertStatement = TestStatements.InsertNewCustomer();
+        var insertStatement = TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 100)
+            .Value(c => c.Age, 35)
+            .Value(c => c.Name, "New Customer");
         var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
         
         var dapperInsertParams = insertParams.ToDapperParameters();
@@ -139,7 +145,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         Assert.Equal(35, customerAfterInsert.Age);
 
         // 3. DELETE
-        var deleteStatement = TestStatements.DeleteNewCustomer();
+        var deleteStatement = TypedSql.Delete<Customer>()
+            .Where(c => c.Id == 100);
         var (deleteSql, deleteParams) = deleteStatement.ToSqliteRaw();
         
         var dapperDeleteParams = deleteParams.ToDapperParameters();
@@ -232,13 +239,18 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
         {
-            // Arrange - First insert the customer we'll update
-            var insertStatement = TestStatements.InsertNewCustomer();
+            // Arrange - First insert the customer we'll update using inline statement
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 100)
+                .Value(c => c.Age, 35)
+                .Value(c => c.Name, "New Customer");
             var (insertSql, insertParams) = insertStatement.ToSqliteRaw();
             var insertDapperParams = insertParams.ToDapperParameters();
             connection.Execute(insertSql, insertDapperParams);
             
-            var statement = TestStatements.UpdateNewCustomer();
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Age, 36)
+                .Where(c => c.Id == 100);
             var (sql, parameters) = statement.ToSqliteRaw();
             
             // Act - Execute UPDATE against real database

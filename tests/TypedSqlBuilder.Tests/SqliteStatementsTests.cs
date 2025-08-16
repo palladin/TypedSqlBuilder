@@ -98,11 +98,10 @@ public class SqliteStatementsTests
         var (sql, parameters) = statement.ToSqliteRaw();
 
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
-        Assert.Equal(3, parameters.Count);
-        Assert.Equal(201, parameters[":p0"]);
-        Assert.Equal(30, parameters[":p1"]);
-        Assert.Equal("Jane Smith", parameters[":p2"]);
+        Assert.Equal("INSERT INTO customers (Age, Name) VALUES (:p0, :p1)", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(28, parameters[":p0"]);
+        Assert.Equal("Partial Customer", parameters[":p1"]);
     }
 
     [Fact]
@@ -141,8 +140,11 @@ public class SqliteStatementsTests
     [Fact]
     public void Sqlite_UsesColonPrefix()
     {
-        // Arrange
-        var statement = TestStatements.InsertBasic();
+        // Arrange - using inline statement to verify colon prefix behavior
+        var statement = TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 200)
+            .Value(c => c.Age, 25)
+            .Value(c => c.Name, "John Doe");
 
         // Act
         var (sql, parameters) = statement.ToSqliteRaw();
@@ -243,5 +245,25 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(203, parameters[":p0"]);
         Assert.Equal("John", parameters[":p1"]);
+    }
+
+    [Fact]
+    public void InsertNewCustomer_GeneratesSqlCorrectly()
+    {
+        // Arrange
+        var statement = TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 100)
+            .Value(c => c.Age, 35)
+            .Value(c => c.Name, "New Customer");
+        
+        // Act
+        var (sql, parameters) = statement.ToSqliteRaw();
+        
+        // Assert
+        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(100, parameters[":p0"]);
+        Assert.Equal(35, parameters[":p1"]);
+        Assert.Equal("New Customer", parameters[":p2"]);
     }
 }

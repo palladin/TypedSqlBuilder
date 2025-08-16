@@ -23,13 +23,12 @@ public static class TestStatements
 
     /// <summary>
     /// INSERT with only some columns specified
-    /// INSERT INTO customers (Age, Name) VALUES (30, 'Jane Smith')
+    /// INSERT INTO customers (Age, Name) VALUES (28, 'Partial Customer')
     /// </summary>
     public static ISqlStatement InsertPartial() 
         => TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 201) // Add explicit ID to avoid conflicts
-            .Value(c => c.Age, 30)
-            .Value(c => c.Name, "Jane Smith");
+            .Value(c => c.Age, 28)
+            .Value(c => c.Name, "Partial Customer");
 
     // ========== UPDATE EXAMPLES ==========
     
@@ -117,20 +116,4 @@ public static class TestStatements
             .Value(c => c.Id, 203)
             .Value(c => c.Name, "John")
             .Value(c => c.Age, SqlNull.Value);
-
-    // Test-specific statements that don't conflict with seed data
-    public static ISqlStatement InsertNewCustomer() 
-        => TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 100)
-            .Value(c => c.Age, 35)
-            .Value(c => c.Name, "New Customer");
-
-    public static ISqlStatement UpdateNewCustomer() 
-        => TypedSql.Update<Customer>()
-            .Set(c => c.Age, 36)
-            .Where(c => c.Id == 100);
-
-    public static ISqlStatement DeleteNewCustomer() 
-        => TypedSql.Delete<Customer>()
-            .Where(c => c.Id == 100);
 }

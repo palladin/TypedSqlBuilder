@@ -98,11 +98,10 @@ public class SqlServerStatementsTests
         var (sql, parameters) = statement.ToSqlServerRaw();
 
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (@p0, @p1, @p2)", sql);
-        Assert.Equal(3, parameters.Count);
-        Assert.Equal(201, parameters["@p0"]);
-        Assert.Equal(30, parameters["@p1"]);
-        Assert.Equal("Jane Smith", parameters["@p2"]);
+        Assert.Equal("INSERT INTO customers (Age, Name) VALUES (@p0, @p1)", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(28, parameters["@p0"]);
+        Assert.Equal("Partial Customer", parameters["@p1"]);
     }
 
     [Fact]
@@ -248,7 +247,9 @@ public class SqlServerStatementsTests
     public void UpdateNewCustomer_GeneratesSqlCorrectly()
     {
         // Arrange
-        var statement = TestStatements.UpdateNewCustomer();
+        var statement = TypedSql.Update<Customer>()
+            .Set(c => c.Age, 36)
+            .Where(c => c.Id == 100);
         
         // Act
         var (sql, parameters) = statement.ToSqlServerRaw();
@@ -264,7 +265,8 @@ public class SqlServerStatementsTests
     public void DeleteNewCustomer_GeneratesSqlCorrectly()
     {
         // Arrange
-        var statement = TestStatements.DeleteNewCustomer();
+        var statement = TypedSql.Delete<Customer>()
+            .Where(c => c.Id == 100);
         
         // Act
         var (sql, parameters) = statement.ToSqlServerRaw();
@@ -273,5 +275,25 @@ public class SqlServerStatementsTests
         Assert.Equal("DELETE FROM customers WHERE customers.Id = @p0", sql);
         Assert.Equal(1, parameters.Count);
         Assert.Equal(100, parameters["@p0"]);
+    }
+
+    [Fact]
+    public void InsertNewCustomer_GeneratesSqlCorrectly()
+    {
+        // Arrange
+        var statement = TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 100)
+            .Value(c => c.Age, 35)
+            .Value(c => c.Name, "New Customer");
+        
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (@p0, @p1, @p2)", sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(100, parameters["@p0"]);
+        Assert.Equal(35, parameters["@p1"]);
+        Assert.Equal("New Customer", parameters["@p2"]);
     }
 }
