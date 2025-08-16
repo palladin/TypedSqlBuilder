@@ -59,10 +59,10 @@ public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
     
     public static SqlBoolColumn Create(string tableName, string columnName) => new SqlBoolColumn(tableName, columnName);
     
-    public void Deconstruct(out string tableNameOut, out string nameOut)
+    public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {
         tableNameOut = TableName;
-        nameOut = ColumnName;
+        columnNameOut = ColumnName;
     }
 }
 

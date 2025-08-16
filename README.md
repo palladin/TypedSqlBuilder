@@ -18,7 +18,7 @@ public class Customer()
 }
 
 // Build complex queries with fluent syntax
-var (query, params)  =
+var (sql, params)  =
     TypedSql.From<Customer>()
             .Where(c => c.Age > 18)
             .OrderBy(c => (c.Name, Sort.Asc))
@@ -47,10 +47,10 @@ TypedSqlBuilder takes a different approach to SQL generation that avoids the com
 - **No Expression Tree Analysis**: Unlike LINQ providers that parse and translate complex expression trees, TypedSqlBuilder uses direct operator overloading on custom SQL types
 - **Composable SQL Expressions**: Each SQL operation returns a typed expression object that can be further composed, following functional programming principles
 - **Compile-time Type Safety**: Types are preserved throughout the expression building process, ensuring SQL operations are valid for their operand types
-- **Minimal Runtime Overhead**: No reflection, no runtime code generation - just simple object composition that translates directly to SQL strings
+- **Minimal Runtime Overhead**: Minimal use of reflection, no runtime code generation - just simple object composition that translates directly to SQL strings
 
 **How It Works:**
 
-Instead of analyzing `Expression<Func<T, bool>>` trees, TypedSqlBuilder evaluates lambdas like `Func<SqlExpr, SqlExpr>` to compose and collect the SQL expression tree in a similar way that staging-capable languages like MetaOCaml compose their expression trees. The library defines SQL-specific types like `SqlIntColumn`, `SqlStringColumn`, etc., each with overloaded operators (`+`, `>`, `==`, etc.) that return appropriate SQL expression objects. This approach provides LINQ-like syntax while maintaining a direct, predictable mapping to SQL.
+Instead of analyzing `Expression<Func<T, bool>>` trees or Roslyn trees, TypedSqlBuilder evaluates lambdas like `Func<SqlExpr, SqlExpr>` to compose and collect the SQL expression tree in a similar way that staging-capable languages like MetaOCaml compose their expression trees. The library defines SQL-specific types like `SqlIntColumn`, `SqlStringColumn`, etc., each with overloaded operators (`+`, `>`, `==`, etc.) that return appropriate SQL expression objects. This approach provides LINQ-like syntax while maintaining a direct, predictable mapping to SQL.
 
 The design stays as close as possible to the fundamental principle of relational algebra: operations are performed on homogeneous sets of tuples. Each table is represented as a strongly-typed tuple structure through `SqlTable<T1, T2, ...>`, where each column type (`SqlIntColumn`, `SqlStringColumn`, etc.) corresponds to a specific position and data type within the tuple. Operations like filtering, projection, and joining maintain this homogeneous structure, ensuring that the type system enforces the relational model's constraints at compile time, catching type mismatches that would otherwise result in runtime SQL errors.

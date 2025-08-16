@@ -185,10 +185,10 @@ public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
     
     public static SqlIntColumn Create(string tableName, string columnName) => new SqlIntColumn(tableName, columnName);
     
-    public void Deconstruct(out string tableNameOut, out string nameOut)
+    public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {
         tableNameOut = TableName;
-        nameOut = ColumnName;
+        columnNameOut = ColumnName;
     }
 }
 

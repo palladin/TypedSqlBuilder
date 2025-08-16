@@ -17,7 +17,7 @@ public static class TypedSql
     /// <returns>A typed SQL query that can be further composed</returns>
     /// <example>
     /// <code>
-    /// var query = SqlQuery.From&lt;UsersTable&gt;();
+    /// var query = TypedSql.From&lt;UsersTable&gt;();
     /// </code>
     /// </example>
     public static ISqlQuery<TSqlTable> From<TSqlTable>()
