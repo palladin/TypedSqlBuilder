@@ -97,6 +97,18 @@ public interface IQueryTestContract
     Task FromWhereAnd_GeneratesCorrectSql();
     Task FromWhereAndSelect_GeneratesCorrectSql();
     Task FromWhereSelectParameterized_GeneratesCorrectSql();
+    Task CaseStringExpression_GeneratesCorrectSql();
+    Task CaseIntExpression_GeneratesCorrectSql();
+    Task CaseBoolExpression_GeneratesCorrectSql();
+    Task CaseInWhere_GeneratesCorrectSql();
+    Task LikeWildcard_GeneratesCorrectSql();
+    Task LikeSingleChar_GeneratesCorrectSql();
+    Task LikeBothWildcards_GeneratesCorrectSql();
+    Task LikeExact_GeneratesCorrectSql();
+    Task AbsColumn_GeneratesCorrectSql();
+    Task AbsInWhere_GeneratesCorrectSql();
+    Task AbsExpression_GeneratesCorrectSql();
+    Task AbsParameter_GeneratesCorrectSql();
 }
 
 /// <summary>

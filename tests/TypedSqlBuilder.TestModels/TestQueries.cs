@@ -561,4 +561,71 @@ public static class TestQueries
         => Db.Customers.From()
             .Where(c => c.IsActive == false)
             .Select(c => (c.Id, c.Name, c.IsActive));
+
+    // Test Case function with string values
+    public static ISqlQuery CaseStringExpression()
+        => Db.Customers.From()
+            .Select(c => (c.Id, SqlFunc.Case(c.Age > 18, "Adult", "Minor")));
+
+    // Test Case function with integer values
+    public static ISqlQuery CaseIntExpression()
+        => Db.Customers.From()
+            .Select(c => (c.Id, SqlFunc.Case(c.Age > 65, 1, 0)));
+
+    // Test Case function with boolean values
+    public static ISqlQuery CaseBoolExpression()
+        => Db.Customers.From()
+            .Select(c => (c.Id, SqlFunc.Case(c.Age > 18, c.IsActive, false)));
+
+    // Test Case function in WHERE clause
+    public static ISqlQuery CaseInWhere()
+        => Db.Customers.From()
+            .Where(c => SqlFunc.Case(c.Age > 18, "Adult", "Minor") == "Adult")
+            .Select(c => (c.Id, c.Name));
+
+    // Test Like function with wildcard patterns
+    public static ISqlQuery LikeWildcard()
+        => Db.Customers.From()
+            .Where(c => c.Name.Like("Jo%"))
+            .Select(c => (c.Id, c.Name));
+
+    // Test Like function with single character wildcard
+    public static ISqlQuery LikeSingleChar()
+        => Db.Customers.From()
+            .Where(c => c.Name.Like("J_n"))
+            .Select(c => (c.Id, c.Name));
+
+    // Test Like function with both wildcards
+    public static ISqlQuery LikeBothWildcards()
+        => Db.Customers.From()
+            .Where(c => c.Name.Like("%o_n%"))
+            .Select(c => (c.Id, c.Name));
+
+    // Test Like function with exact pattern
+    public static ISqlQuery LikeExact()
+        => Db.Customers.From()
+            .Where(c => c.Name.Like("John"))
+            .Select(c => (c.Id, c.Name));
+
+    // Test Abs function on column
+    public static ISqlQuery AbsColumn()
+        => Db.Customers.From()
+            .Select(c => (c.Id, c.Age.Abs()));
+
+    // Test Abs function in WHERE clause
+    public static ISqlQuery AbsInWhere()
+        => Db.Customers.From()
+            .Where(c => c.Age.Abs() > 30)
+            .Select(c => (c.Id, c.Name, c.Age));
+
+    // Test Abs function with expression
+    public static ISqlQuery AbsExpression()
+        => Db.Customers.From()
+            .Select(c => (c.Id, (c.Age - 50).Abs()));
+
+    // Test Abs function with parameter
+    public static ISqlQuery AbsParameter()
+        => Db.Customers.From()
+            .Where(c => c.Age.Abs() > "minAge".AsIntParam().Abs())
+            .Select(c => (c.Id, c.Name, c.Age));
 }

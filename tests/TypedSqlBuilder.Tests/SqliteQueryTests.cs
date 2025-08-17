@@ -2484,4 +2484,293 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         Assert.Equal(65, parameters[":p1"]);
         return Task.CompletedTask;
     }
+
+    [Fact]
+    public Task CaseStringExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseStringExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS prj0
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("Adult", parameters[":p1"]);
+        Assert.Equal("Minor", parameters[":p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseIntExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseIntExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS prj0
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(65, parameters[":p0"]);
+        Assert.Equal(1, parameters[":p1"]);
+        Assert.Equal(0, parameters[":p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseBoolExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseBoolExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            CASE WHEN a0.Age > :p0 THEN a0.IsActive ELSE :p1 END AS prj0
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal(0, parameters[":p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END = :p3
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("Adult", parameters[":p1"]);
+        Assert.Equal("Minor", parameters[":p2"]);
+        Assert.Equal("Adult", parameters[":p3"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LikeWildcard_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeWildcard();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name LIKE :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal("Jo%", parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LikeSingleChar_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeSingleChar();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name LIKE :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal("J_n", parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LikeBothWildcards_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeBothWildcards();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name LIKE :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal("%o_n%", parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LikeExact_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeExact();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            a0.Name LIKE :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal("John", parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AbsColumn_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsColumn();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            ABS(a0.Age) AS prj0
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AbsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            ABS(a0.Age) > :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(30, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AbsExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            ABS((a0.Age - :p0)) AS prj0
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(50, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AbsParameter_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsParameter();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.Age AS Age
+        FROM 
+            customers a0
+        WHERE 
+            ABS(a0.Age) > ABS(:minAge)
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Null(parameters[":minAge"]);
+        return Task.CompletedTask;
+    }
 }

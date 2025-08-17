@@ -1346,6 +1346,246 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
+    public async Task CaseStringExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseStringExpression();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Item2)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return all customers with age classification
+        Assert.Equal(4, results.Count);
+        Assert.Contains(results, r => r.Id == 1 && r.Item2 == "Adult"); // John Doe, age 25
+        Assert.Contains(results, r => r.Id == 2 && r.Item2 == "Adult"); // Jane Smith, age 30  
+        Assert.Contains(results, r => r.Id == 3 && r.Item2 == "Minor"); // Minor User, age 16
+        Assert.Contains(results, r => r.Id == 4 && r.Item2 == "Adult"); // Senior User, age 65
+    }
+
+    [Fact]
+    public async Task CaseIntExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseIntExpression();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, int Item2)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return all customers with senior flag (1 for >65, 0 for <=65)
+        Assert.Equal(4, results.Count);
+        Assert.Contains(results, r => r.Id == 1 && r.Item2 == 0); // John Doe, age 25
+        Assert.Contains(results, r => r.Id == 2 && r.Item2 == 0); // Jane Smith, age 30
+        Assert.Contains(results, r => r.Id == 3 && r.Item2 == 0); // Minor User, age 16
+        Assert.Contains(results, r => r.Id == 4 && r.Item2 == 0); // Senior User, age 65 (65 is NOT > 65)
+    }
+
+    [Fact]
+    public async Task CaseBoolExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseBoolExpression();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, bool Item2)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return active status for adults, false for minors
+        Assert.Equal(4, results.Count);
+        Assert.Contains(results, r => r.Id == 1 && r.Item2 == true);  // John Doe, adult and active
+        Assert.Contains(results, r => r.Id == 2 && r.Item2 == true);  // Jane Smith, adult and active
+        Assert.Contains(results, r => r.Id == 3 && r.Item2 == false); // Minor User, minor so false
+        Assert.Contains(results, r => r.Id == 4 && r.Item2 == true);  // Senior User, adult and active
+    }
+
+    [Fact]
+    public async Task CaseInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseInWhere();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return only adults (Case returns "Adult" for age > 18)
+        Assert.Equal(3, results.Count);
+        Assert.Contains(results, r => r.Name == "John Doe");
+        Assert.Contains(results, r => r.Name == "Jane Smith");
+        Assert.Contains(results, r => r.Name == "Senior User");
+        Assert.DoesNotContain(results, r => r.Name == "Minor User");
+    }
+
+    [Fact]
+    public async Task LikeWildcard_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeWildcard();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return customers whose names start with "Jo" (John Doe)
+        Assert.Single(results);
+        Assert.Contains(results, r => r.Name == "John Doe");
+    }
+
+    [Fact]
+    public async Task LikeSingleChar_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeSingleChar();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return no customers (no names match "J_n" pattern)
+        Assert.Empty(results);
+    }
+
+    [Fact]
+    public async Task LikeBothWildcards_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeBothWildcards();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return customers whose names contain "o_n" pattern (John)
+        Assert.Single(results);
+        Assert.Contains(results, r => r.Name == "John Doe");
+    }
+
+    [Fact]
+    public async Task LikeExact_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.LikeExact();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return no customers (no exact match for "John")
+        Assert.Empty(results);
+    }
+
+    [Fact]
+    public async Task AbsColumn_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsColumn();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, int Item2)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return all customers with absolute values of their ages
+        Assert.Equal(4, results.Count);
+        Assert.Contains(results, r => r.Id == 1 && r.Item2 == 25); // John Doe
+        Assert.Contains(results, r => r.Id == 2 && r.Item2 == 30); // Jane Smith
+        Assert.Contains(results, r => r.Id == 3 && r.Item2 == 16); // Minor User
+        Assert.Contains(results, r => r.Id == 4 && r.Item2 == 65); // Senior User
+    }
+
+    [Fact]
+    public async Task AbsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsInWhere();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name, int Age)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return customers whose absolute age > 30
+        Assert.Single(results); // Only Senior User has age > 30
+        Assert.Contains(results, r => r.Name == "Senior User" && r.Age == 65);
+    }
+
+    [Fact]
+    public async Task AbsExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AbsExpression();
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Act
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, int Item2)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return absolute value of (age - 50)
+        Assert.Equal(4, results.Count);
+        Assert.Contains(results, r => r.Id == 1 && r.Item2 == 25); // |25 - 50| = 25
+        Assert.Contains(results, r => r.Id == 2 && r.Item2 == 20); // |30 - 50| = 20
+        Assert.Contains(results, r => r.Id == 3 && r.Item2 == 34); // |16 - 50| = 34
+        Assert.Contains(results, r => r.Id == 4 && r.Item2 == 15); // |65 - 50| = 15
+    }
+
+    [Fact]
+    public async Task AbsParameter_GeneratesCorrectSql()
+    {
+        // Arrange - Create a parameterized query with ABS function
+        var minAgeParam = 20;  // Set parameter value
+        var query = TestQueries.AbsParameter();
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Set the parameter value for actual execution
+        var updatedParams = parameters.SetItem("@minAge", minAgeParam);
+
+        // Act - Execute query with Dapper against SQL Server
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = updatedParams.ToDapperParameters();
+        var results = (await connection.QueryAsync<(int Id, string Name, int Age)>(sql, dapperParams)).ToList();
+
+        // Assert - Should return customers where ABS(age) > ABS(20)
+        // All customers have positive ages, so this becomes age > 20
+        Assert.Equal(3, results.Count); // John Doe (25), Jane Smith (30), Senior User (65)
+        Assert.Contains(results, r => r.Name == "John Doe" && r.Age == 25);
+        Assert.Contains(results, r => r.Name == "Jane Smith" && r.Age == 30);
+        Assert.Contains(results, r => r.Name == "Senior User" && r.Age == 65);
+        Assert.DoesNotContain(results, r => r.Name == "Minor User"); // Age 16 < 20
+    }
+
+    [Fact]
     public async Task SqlServer_UsesAtSymbolPrefix()
     {
         // Integration test for SQL Server @ parameter prefix

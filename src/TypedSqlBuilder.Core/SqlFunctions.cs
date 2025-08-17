@@ -175,45 +175,6 @@ public static class SqlFunc
     }
 
     /// <summary>
-    /// Creates a SQL CASE expression for conditional string values using string literals.
-    /// Equivalent to: CASE WHEN condition THEN trueValue ELSE falseValue END
-    /// </summary>
-    /// <param name="condition">The boolean condition to evaluate</param>
-    /// <param name="trueValue">The string literal returned when condition is true</param>
-    /// <param name="falseValue">The string literal returned when condition is false</param>
-    /// <returns>A SQL string expression representing the CASE statement</returns>
-    public static SqlExprString Case(SqlExprBool condition, string trueValue, string falseValue)
-    {
-        return new SqlStringCase(condition, trueValue, falseValue);
-    }
-
-    /// <summary>
-    /// Creates a SQL CASE expression for conditional integer values using integer literals.
-    /// Equivalent to: CASE WHEN condition THEN trueValue ELSE falseValue END
-    /// </summary>
-    /// <param name="condition">The boolean condition to evaluate</param>
-    /// <param name="trueValue">The integer literal returned when condition is true</param>
-    /// <param name="falseValue">The integer literal returned when condition is false</param>
-    /// <returns>A SQL integer expression representing the CASE statement</returns>
-    public static SqlExprInt Case(SqlExprBool condition, int trueValue, int falseValue)
-    {
-        return new SqlIntCase(condition, trueValue, falseValue);
-    }
-
-    /// <summary>
-    /// Creates a SQL CASE expression for conditional boolean values using boolean literals.
-    /// Equivalent to: CASE WHEN condition THEN trueValue ELSE falseValue END
-    /// </summary>
-    /// <param name="condition">The boolean condition to evaluate</param>
-    /// <param name="trueValue">The boolean literal returned when condition is true</param>
-    /// <param name="falseValue">The boolean literal returned when condition is false</param>
-    /// <returns>A SQL boolean expression representing the CASE statement</returns>
-    public static SqlExprBool Case(SqlExprBool condition, bool trueValue, bool falseValue)
-    {
-        return new SqlBoolCase(condition, trueValue, falseValue);
-    }
-
-    /// <summary>
     /// Creates a SQL IN expression for integer values.
     /// Equivalent to: expr IN (value1, value2, value3, ...)
     /// </summary>
