@@ -52,7 +52,8 @@ public abstract class SqliteIntegrationTestBase : IDisposable
             CREATE TABLE customers (
                 Id INTEGER PRIMARY KEY,
                 Age INTEGER,
-                Name TEXT
+                Name TEXT,
+                IsActive INTEGER DEFAULT 1
             )";
         
         var createProducts = @"
@@ -77,11 +78,11 @@ public abstract class SqliteIntegrationTestBase : IDisposable
     private void SeedTestData()
     {
         var insertCustomers = @"
-            INSERT INTO customers (Id, Age, Name) VALUES 
-            (1, 25, 'John Doe'),
-            (2, 30, 'Jane Smith'),
-            (3, 16, 'Minor User'),
-            (4, 65, 'Senior User')";
+            INSERT INTO customers (Id, Age, Name, IsActive) VALUES 
+            (1, 25, 'John Doe', 1),
+            (2, 30, 'Jane Smith', 1),
+            (3, 16, 'Minor User', 0),
+            (4, 65, 'Senior User', 1)";
 
         var insertProducts = @"
             INSERT INTO products (ProductId, ProductName) VALUES

@@ -543,4 +543,22 @@ public static class TestQueries
         => Db.Customers.From()
             .Where(c => (c.Age > 18) == "isAdult".AsBoolParam())
             .Select(c => (c.Id, c.Name, c.Age));
+
+    // Test direct boolean column comparison (should work better than boolean expression comparison)
+    public static ISqlQuery BoolColumnDirectComparison()
+        => Db.Customers.From()
+            .Where(c => c.IsActive == "isActive".AsBoolParam())
+            .Select(c => (c.Id, c.Name, c.Age, c.IsActive));
+
+    // Test boolean column with literal value
+    public static ISqlQuery BoolColumnLiteralTrue()
+        => Db.Customers.From()
+            .Where(c => c.IsActive == true)
+            .Select(c => (c.Id, c.Name, c.IsActive));
+
+    // Test boolean column with literal false
+    public static ISqlQuery BoolColumnLiteralFalse()
+        => Db.Customers.From()
+            .Where(c => c.IsActive == false)
+            .Select(c => (c.Id, c.Name, c.IsActive));
 }

@@ -73,7 +73,8 @@ public class SqlServerFixture : IAsyncLifetime
             CREATE TABLE customers (
                 Id INT IDENTITY(1,1) PRIMARY KEY,
                 Age INT,
-                Name NVARCHAR(255)
+                Name NVARCHAR(255),
+                IsActive BIT DEFAULT 1
             )";
 
         var createProducts = @"
@@ -103,11 +104,11 @@ public class SqlServerFixture : IAsyncLifetime
         // Note: Using SET IDENTITY_INSERT to specify exact IDs for consistent testing
         var insertCustomers = @"
             SET IDENTITY_INSERT customers ON;
-            INSERT INTO customers (Id, Age, Name) VALUES 
-            (1, 25, N'John Doe'),
-            (2, 30, N'Jane Smith'),
-            (3, 16, N'Minor User'),
-            (4, 65, N'Senior User');
+            INSERT INTO customers (Id, Age, Name, IsActive) VALUES 
+            (1, 25, N'John Doe', 1),
+            (2, 30, N'Jane Smith', 1),
+            (3, 16, N'Minor User', 0),
+            (4, 65, N'Senior User', 1);
             SET IDENTITY_INSERT customers OFF;";
 
         var insertProducts = @"

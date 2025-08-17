@@ -460,9 +460,9 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Assert - Should update all customers (4 in test data)
             Assert.Equal(4, updatedRows);
             
-            // Verify all customer names are now empty string (SQLite NULL representation)
+            // Verify all customer names are now null
             var customers = connection.Query<CustomerDto>("SELECT * FROM customers");
-            Assert.All(customers, c => Assert.Equal("", c.Name)); // SQLite stores NULL strings as empty strings
+            Assert.All(customers, c => Assert.Null(c.Name)); // SQLite also stores NULL as null now
         });
     }
 
@@ -485,7 +485,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             
             // Verify the update worked - all ages should be NULL
             var customers = connection.Query<CustomerDto>("SELECT * FROM customers").ToList();
-            Assert.All(customers, c => Assert.Equal(0, c.Age)); // Age is int, so NULL becomes 0
+            Assert.All(customers, c => Assert.Null(c.Age)); // Age is now int?, so NULL remains null
         });
     }
 
@@ -509,7 +509,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Verify the update worked
             var customers = connection.Query<CustomerDto>("SELECT * FROM customers").ToList();
             Assert.All(customers, c => Assert.Equal("John", c.Name));
-            Assert.All(customers, c => Assert.Equal(0, c.Age)); // Age is NULL -> 0
+            Assert.All(customers, c => Assert.Null(c.Age)); // Age is now int?, so NULL remains null
         });
     }
 
@@ -541,7 +541,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             
             // Verify the update worked
             var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
-            Assert.Equal("", updatedCustomer.Name); // SQLite stores NULL strings as empty strings
+            Assert.Null(updatedCustomer.Name); // SQLite also stores NULL as null now
         });
     }
 
@@ -562,9 +562,9 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             // Assert
             Assert.Equal(1, insertedRows);
             
-            // Verify the insert worked and Name is empty string (SQLite NULL representation)
+            // Verify the insert worked and Name is NULL
             var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 202");
-            Assert.Equal("", insertedCustomer.Name); // SQLite stores NULL strings as empty strings
+            Assert.Null(insertedCustomer.Name); // SQLite also stores NULL as null now
         });
     }
 
@@ -587,7 +587,8 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             
             // Verify the insert worked and Age is NULL (default 0 for int)
             var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 203");
-            Assert.Equal(0, insertedCustomer.Age); // SQLite stores NULL as default value for int
+            Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
+            Assert.Null(insertedCustomer.Age); // Age should be NULL
         });
     }
 }

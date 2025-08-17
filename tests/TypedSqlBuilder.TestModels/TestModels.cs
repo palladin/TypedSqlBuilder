@@ -5,11 +5,12 @@ namespace TypedSqlBuilder.TestModels;
 /// <summary>
 /// Sample table definition for testing
 /// </summary>
-public class Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers")
+public class Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn, SqlBoolColumn>("customers")
 {
     public SqlIntColumn Id => Column1("Id");
     public SqlIntColumn Age => Column2("Age");
     public SqlStringColumn Name => Column3("Name");
+    public SqlBoolColumn IsActive => Column4("IsActive");
 }
 
 /// <summary>
@@ -36,7 +37,7 @@ public class Order() : SqlTable<SqlIntColumn, SqlIntColumn, SqlIntColumn>("order
 /// </summary>
 public static class Db
 {
-    public static readonly Customer Customers = new();
-    public static readonly Product Products = new();
-    public static readonly Order Orders = new();
+    public static Customer Customers { get; } = new();
+    public static Product Products { get; } = new();
+    public static Order Orders { get; } = new();
 }

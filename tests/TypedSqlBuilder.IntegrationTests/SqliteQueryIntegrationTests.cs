@@ -1389,4 +1389,61 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase
         Assert.Contains(results, r => r.Name == "Senior User" && r.Age == 65);
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
     }
+
+    [Fact]
+    public void BoolColumnDirectComparison_ExecutesCorrectly()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnDirectComparison();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Set the parameter value
+        var updatedParams = parameters.SetItem(":isActive", 1); // SQLite uses 1 for true
+
+        // Act - Execute query with Dapper
+        var dapperParams = updatedParams.ToDapperParameters();
+        var results = _connection.Query<(int Id, string Name, int Age, bool IsActive)>(sql, dapperParams).ToList();
+
+        // Assert - Should return active customers
+        Assert.Equal(3, results.Count);
+        Assert.Contains(results, r => r.Name == "John Doe" && r.IsActive);
+        Assert.Contains(results, r => r.Name == "Jane Smith" && r.IsActive);
+        Assert.Contains(results, r => r.Name == "Senior User" && r.IsActive);
+        Assert.DoesNotContain(results, r => r.Name == "Minor User");
+    }
+
+    [Fact]
+    public void BoolColumnLiteralTrue_ExecutesCorrectly()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnLiteralTrue();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<(int Id, string Name, bool IsActive)>(sql, dapperParams).ToList();
+
+        // Assert - Should return active customers  
+        Assert.Equal(3, results.Count);
+        Assert.Contains(results, r => r.Name == "John Doe" && r.IsActive);
+        Assert.Contains(results, r => r.Name == "Jane Smith" && r.IsActive);
+        Assert.Contains(results, r => r.Name == "Senior User" && r.IsActive);
+        Assert.DoesNotContain(results, r => r.Name == "Minor User");
+    }
+
+    [Fact]
+    public void BoolColumnLiteralFalse_ExecutesCorrectly()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnLiteralFalse();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<(int Id, string Name, bool IsActive)>(sql, dapperParams).ToList();
+
+        // Assert - Should return inactive customers (only Minor User)
+        Assert.Single(results);
+        Assert.Contains(results, r => r.Name == "Minor User" && !r.IsActive);
+    }
 }

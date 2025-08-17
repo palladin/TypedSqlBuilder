@@ -23,7 +23,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         """;
@@ -45,7 +46,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         """;
@@ -108,7 +110,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -133,7 +136,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -158,7 +162,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -184,7 +189,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -208,7 +214,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -284,7 +291,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -334,7 +342,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -391,7 +400,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -574,7 +584,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -599,7 +610,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -649,7 +661,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -676,7 +689,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -700,7 +714,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -724,7 +739,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -748,7 +764,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         ORDER BY 
@@ -772,7 +789,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -821,7 +839,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -845,7 +864,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -869,7 +889,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -893,7 +914,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -917,7 +939,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1067,7 +1090,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1094,7 +1118,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1121,7 +1146,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1149,7 +1175,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1179,7 +1206,8 @@ public class SqliteQueryTests
         SELECT 
             a0.Id AS Id,
             a0.Age AS Age,
-            a0.Name AS Name
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
         FROM 
             customers a0
         WHERE 
@@ -1452,7 +1480,8 @@ public class SqliteQueryTests
             (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
-                a0.Name AS Name
+                a0.Name AS Name,
+                a0.IsActive AS IsActive
             FROM 
                 customers a0
             WHERE 
@@ -1535,7 +1564,8 @@ public class SqliteQueryTests
             (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
-                a0.Name AS Name
+                a0.Name AS Name,
+                a0.IsActive AS IsActive
             FROM 
                 customers a0
             WHERE 
@@ -1643,7 +1673,8 @@ public class SqliteQueryTests
             (SELECT 
                 a0.Id AS Id,
                 a0.Age AS Age,
-                a0.Name AS Name
+                a0.Name AS Name,
+                a0.IsActive AS IsActive
             FROM 
                 customers a0
             WHERE 
@@ -2133,5 +2164,81 @@ public class SqliteQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.True(parameters.ContainsKey(":isAdult"));
         Assert.Equal(18, parameters[":p0"]);
+    }
+
+    [Fact]
+    public void BoolColumnDirectComparison_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnDirectComparison();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.Age AS Age,
+            a0.IsActive AS IsActive
+        FROM 
+            customers a0
+        WHERE 
+            a0.IsActive = :isActive
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":isActive"));
+    }
+
+    [Fact]
+    public void BoolColumnLiteralTrue_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnLiteralTrue();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
+        FROM 
+            customers a0
+        WHERE 
+            a0.IsActive = :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(1, parameters[":p0"]);
+    }
+
+    [Fact]
+    public void BoolColumnLiteralFalse_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.BoolColumnLiteralFalse();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
+        FROM 
+            customers a0
+        WHERE 
+            a0.IsActive = :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(0, parameters[":p0"]);
     }
 }

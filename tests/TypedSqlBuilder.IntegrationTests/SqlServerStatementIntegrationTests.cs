@@ -17,210 +17,435 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
         _fixture = fixture;
     }
 
-    [Fact]
-    public async Task InsertStatement_ExecutesCorrectly()
+    /// <summary>
+    /// Helper method to execute a statement with proper IDENTITY_INSERT handling
+    /// </summary>
+    private async Task<int> ExecuteStatementAsync(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction, ISqlStatement statement, bool hasExplicitId = true)
     {
-        // Use transaction to ensure test isolation
+        var (sql, parameters) = statement.ToSqlServerRaw();
+        var dapperParams = parameters.ToDapperParameters();
+
+        if (hasExplicitId)
+        {
+            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+        }
+
+        try
+        {
+            return await connection.ExecuteAsync(sql, dapperParams, transaction);
+        }
+        finally
+        {
+            if (hasExplicitId)
+            {
+                await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task InsertBasic_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - Enable IDENTITY_INSERT for explicit ID insertion
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+            // Arrange
+            var statement = TestStatements.InsertBasic();
             
-            var insertStatement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 100)
-                .Value(c => c.Age, 35)
-                .Value(c => c.Name, "New Customer");
-            var (insertSql, insertParams) = insertStatement.ToSqlServerRaw();
+            // Act - Execute INSERT against real database
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: true);
             
-            // Act - Execute INSERT with Dapper
-            var dapperInsertParams = insertParams.ToDapperParameters();
-            var insertedRows = await connection.ExecuteAsync(insertSql, dapperInsertParams, transaction);
-            
-            // Turn off IDENTITY_INSERT
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
-
             // Assert
             Assert.Equal(1, insertedRows);
-
-            // Verify the insert worked by querying
+            
+            // Verify the insert worked
             var insertedCustomer = await connection.QuerySingleAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 100", 
-                transaction: transaction);
-            Assert.Equal("New Customer", insertedCustomer.Name);
-            Assert.Equal(35, insertedCustomer.Age);
+                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+            Assert.Equal("John Doe", insertedCustomer.Name);
+            Assert.Equal(25, insertedCustomer.Age);
         });
     }
 
     [Fact]
-    public async Task DeleteStatement_ExecutesCorrectly()
+    public async Task InsertPartial_ExecutesAgainstDatabase()
     {
-        // Use transaction to ensure test isolation
+        // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - Enable IDENTITY_INSERT for explicit ID insertion
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+            // Arrange
+            var statement = TestStatements.InsertPartial();
             
-            // First insert a customer to delete using inline statement
+            // Act - Execute INSERT against real database (no explicit ID, so auto-generated)
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Verify the insert worked (ID will be auto-generated)
+            var insertedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT TOP 1 * FROM customers WHERE Name = 'Partial Customer' ORDER BY Id DESC", 
+                transaction: transaction);
+            Assert.Equal("Partial Customer", insertedCustomer.Name);
+            Assert.Equal(28, insertedCustomer.Age);
+        });
+    }
+
+    [Fact]
+    public async Task UpdateNewCustomer_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert the customer we'll update using inline statement
             var insertStatement = TypedSql.Insert<Customer>()
                 .Value(c => c.Id, 100)
                 .Value(c => c.Age, 35)
                 .Value(c => c.Name, "New Customer");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
             
-            var (insertSql, insertParams) = insertStatement.ToSqlServerRaw();
-            var dapperInsertParams = insertParams.ToDapperParameters();
-            await connection.ExecuteAsync(insertSql, dapperInsertParams, transaction);
-            
-            // Turn off IDENTITY_INSERT
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
-
-            // Create delete statement
-            var deleteStatement = TypedSql.Delete<Customer>()
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Age, 36)
                 .Where(c => c.Id == 100);
-            var (deleteSql, deleteParams) = deleteStatement.ToSqlServerRaw();
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify the update worked - age should now be 36
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 100", transaction: transaction);
+            Assert.Equal(36, updatedCustomer.Age);
+            Assert.Equal("New Customer", updatedCustomer.Name); // Name should remain unchanged
+        });
+    }
 
-            // Act - Execute DELETE with Dapper
-            var dapperDeleteParams = deleteParams.ToDapperParameters();
-            var deletedRows = await connection.ExecuteAsync(deleteSql, dapperDeleteParams, transaction);
+    [Fact]
+    public async Task UpdateBasic_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a customer to update
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 201)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "Update Basic Test");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
+            
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Age, 26)
+                .Where(c => c.Id == 201);
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify the update worked
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 201", transaction: transaction);
+            Assert.Equal("Update Basic Test", updatedCustomer.Name); // Name should be unchanged
+            Assert.Equal(26, updatedCustomer.Age); // Age should be updated to 26
+        });
+    }
 
+    [Fact]
+    public async Task UpdateMultiple_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a customer to update
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 202)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "Update Multiple Test");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
+            
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Age, 27)
+                .Set(c => c.Name, "John Smith")
+                .Where(c => c.Id == 202);
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify the update worked
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 202", transaction: transaction);
+            Assert.Equal("John Smith", updatedCustomer.Name); // Name updated
+            Assert.Equal(27, updatedCustomer.Age); // Age updated
+        });
+    }
+
+    [Fact]
+    public async Task UpdateConditional_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a customer to update
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 203)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "Update Conditional Test");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
+            
+            var statement = TestStatements.UpdateConditional();
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert - Should update multiple rows (existing test data + our inserted customer)
+            Assert.True(updatedRows > 0); // At least our customer should be updated
+            
+            // Verify our inserted customer was updated (25 + 1 = 26)
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 203", transaction: transaction);
+            Assert.Equal("Update Conditional Test", updatedCustomer.Name);
+            Assert.Equal(26, updatedCustomer.Age); // 25 + 1
+        });
+    }
+
+    [Fact]
+    public async Task DeleteBasic_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a customer to delete
+            var insertStatement = TypedSql.Insert<Customer>()
+                .Value(c => c.Id, 204)
+                .Value(c => c.Age, 25)
+                .Value(c => c.Name, "Delete Basic Test");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
+            
+            var statement = TypedSql.Delete<Customer>()
+                .Where(c => c.Id == 204);
+            
+            // Act - Execute DELETE against real database
+            var deletedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
             // Assert
             Assert.Equal(1, deletedRows);
-
-            // Verify the delete worked by querying
+            
+            // Verify the delete worked
             var remainingCustomers = await connection.QueryAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 100", 
-                transaction: transaction);
+                "SELECT * FROM customers WHERE Id = 204", transaction: transaction);
             Assert.Empty(remainingCustomers);
         });
     }
 
     [Fact]
-    public async Task UpdateStatement_ExecutesCorrectly()
+    public async Task DeleteConditional_ExecutesAgainstDatabase()
     {
-        // Use transaction to ensure test isolation
+        // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - Enable IDENTITY_INSERT for explicit ID insertion
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+            // Arrange - Insert a customer that will match the delete condition (Age < 18 OR Name = 'Temp')
+            await ExecuteStatementAsync(connection, transaction, 
+                TypedSql.Insert<Customer>()
+                    .Value(c => c.Id, 300)
+                    .Value(c => c.Age, 15) // < 18
+                    .Value(c => c.Name, "Young Customer"), 
+                hasExplicitId: true);
             
-            // First insert a customer to update
-            var insertStatement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 100)
-                .Value(c => c.Age, 25)
-                .Value(c => c.Name, "Original Name");
+            var statement = TestStatements.DeleteConditional();
             
-            var (insertSql, insertParams) = insertStatement.ToSqlServerRaw();
-            var dapperInsertParams = insertParams.ToDapperParameters();
-            await connection.ExecuteAsync(insertSql, dapperInsertParams, transaction);
+            // Act - Execute DELETE against real database
+            var deletedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
             
-            // Turn off IDENTITY_INSERT
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
-
-            // Create update statement
-            var updateStatement = TypedSql.Update<Customer>()
-                .Set(c => c.Name, "Updated Name")
-                .Set(c => c.Age, 30)
-                .Where(c => c.Id == 100);
-            var (updateSql, updateParams) = updateStatement.ToSqlServerRaw();
-
-            // Act - Execute UPDATE with Dapper
-            var dapperUpdateParams = updateParams.ToDapperParameters();
-            var updatedRows = await connection.ExecuteAsync(updateSql, dapperUpdateParams, transaction);
-
-            // Assert
-            Assert.Equal(1, updatedRows);
-
-            // Verify the update worked by querying
-            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 100", 
-                transaction: transaction);
-            Assert.Equal("Updated Name", updatedCustomer.Name);
-            Assert.Equal(30, updatedCustomer.Age);
+            // Assert - Should delete the customer we just added (Age < 18) plus Minor User from test data (Age = 16)
+            Assert.True(deletedRows >= 1);
+            
+            // Verify our inserted customer was deleted
+            var remainingCustomers = await connection.QueryAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 300", transaction: transaction);
+            Assert.Empty(remainingCustomers);
         });
     }
 
     [Fact]
-    public async Task InsertMultipleValues_ExecutesCorrectly()
+    public async Task DeleteAll_ExecutesAgainstDatabase()
     {
-        // Use transaction to ensure test isolation
+        // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - Enable IDENTITY_INSERT for explicit ID insertion
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+            // Arrange - Delete all customers (need to delete orders first due to foreign key)
+            // First delete all orders to avoid foreign key constraint
+            await connection.ExecuteAsync("DELETE FROM orders", transaction: transaction);
             
-            // Create insert statement for Customer 1
-            var insertStatement1 = TypedSql.Insert<Customer>()
+            var statement = TestStatements.DeleteAll();
+            
+            // Act - Execute DELETE ALL against real database
+            var deletedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert - Should delete all customers (however many exist)
+            Assert.True(deletedRows > 0); // At least some customers should be deleted
+            
+            // Verify all customers were deleted
+            var remainingCustomers = await connection.QueryAsync<CustomerDto>(
+                "SELECT * FROM customers", transaction: transaction);
+            Assert.Empty(remainingCustomers);
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSetNull_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - This test updates ALL customers (no WHERE clause)
+            var statement = TestStatements.UpdateSetNull();
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert - Should update all customers in test data (however many exist)
+            Assert.True(updatedRows > 0); // At least some customers should be updated
+            
+            // Verify all customers had their names set to NULL
+            var customers = await connection.QueryAsync<CustomerDto>("SELECT * FROM customers", transaction: transaction);
+            Assert.All(customers, c => Assert.Null(c.Name)); // All names should be null
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSetNullInt_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - This test updates ALL customers (no WHERE clause) 
+            var statement = TestStatements.UpdateSetNullInt();
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert - Should update all customers
+            Assert.True(updatedRows > 0); // At least some customers should be updated
+            
+            // Verify all customers had their ages set to NULL
+            var customers = await connection.QueryAsync<CustomerDto>("SELECT * FROM customers", transaction: transaction);
+            Assert.All(customers, c => Assert.Null(c.Age)); // All ages should be null
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSetNullMixed_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - This test updates ALL customers (no WHERE clause)
+            var statement = TestStatements.UpdateSetNullMixed();
+            
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert - Should update all customers
+            Assert.True(updatedRows > 0); // At least some customers should be updated
+            
+            // Verify the update worked
+            var customers = await connection.QueryAsync<CustomerDto>("SELECT * FROM customers", transaction: transaction);
+            Assert.All(customers, c => Assert.Equal("John", c.Name)); // All names should be "John"
+            Assert.All(customers, c => Assert.Null(c.Age)); // All ages should be null
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSetNullWhere_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - Insert a customer that matches the WHERE condition (Id = 200)
+            var insertStatement = TypedSql.Insert<Customer>()
                 .Value(c => c.Id, 200)
                 .Value(c => c.Age, 25)
-                .Value(c => c.Name, "Customer 1");
+                .Value(c => c.Name, "John Doe");
+            await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
             
-            var (insertSql1, insertParams1) = insertStatement1.ToSqlServerRaw();
+            // Insert another customer that doesn't match (Id = 206)
+            await ExecuteStatementAsync(connection, transaction,
+                TypedSql.Insert<Customer>()
+                    .Value(c => c.Id, 206)
+                    .Value(c => c.Age, 40)
+                    .Value(c => c.Name, "Will Not Change"),
+                hasExplicitId: true);
             
-            // Create insert statement for Customer 2
-            var insertStatement2 = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 201)
-                .Value(c => c.Age, 30)
-                .Value(c => c.Name, "Customer 2");
+            var statement = TestStatements.UpdateSetNullWhere();
             
-            var (insertSql2, insertParams2) = insertStatement2.ToSqlServerRaw();
-
-            // Act - Execute multiple INSERTs with Dapper
-            var dapperInsertParams1 = insertParams1.ToDapperParameters();
-            var dapperInsertParams2 = insertParams2.ToDapperParameters();
-            var insertedRows1 = await connection.ExecuteAsync(insertSql1, dapperInsertParams1, transaction);
-            var insertedRows2 = await connection.ExecuteAsync(insertSql2, dapperInsertParams2, transaction);
+            // Act - Execute UPDATE against real database
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
             
-            // Turn off IDENTITY_INSERT
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
-
-            // Assert
-            Assert.Equal(1, insertedRows1);
-            Assert.Equal(1, insertedRows2);
-
-            // Verify the inserts worked by querying
-            var insertedCustomers = await connection.QueryAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id IN (200, 201) ORDER BY Id", 
-                transaction: transaction);
-            var customerList = insertedCustomers.ToList();
+            // Assert - Should only update the customer with Id = 200
+            Assert.Equal(1, updatedRows);
             
-            Assert.Equal(2, customerList.Count);
-            Assert.Equal("Customer 1", customerList[0].Name);
-            Assert.Equal(25, customerList[0].Age);
-            Assert.Equal("Customer 2", customerList[1].Name);
-            Assert.Equal(30, customerList[1].Age);
+            // Verify the correct customer was updated
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+            Assert.Null(updatedCustomer.Name); // Name should be set to null
+            Assert.Equal(25, updatedCustomer.Age); // Age should remain unchanged
+            
+            // Verify the other customer was not affected
+            var unchangedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 206", transaction: transaction);
+            Assert.Equal("Will Not Change", unchangedCustomer.Name); // Should remain unchanged
+            Assert.Equal(40, unchangedCustomer.Age);
         });
     }
 
     [Fact]
-    public async Task DeleteAllStatement_ExecutesCorrectly()
+    public async Task InsertWithNull_ExecutesAgainstDatabase()
     {
-        // Use transaction to ensure test isolation
+        // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - Count existing customers
-            var initialCount = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers", 
-                transaction: transaction);
-            Assert.True(initialCount > 0); // Should have test data
+            // Arrange
+            var statement = TestStatements.InsertWithNull();
             
-            // Delete all orders first to avoid foreign key constraint issues
-            await connection.ExecuteAsync("DELETE FROM orders", transaction: transaction);
-
-            // Create delete all statement
-            var deleteStatement = TypedSql.Delete<Customer>();
-            var (deleteSql, deleteParams) = deleteStatement.ToSqlServerRaw();
-
-            // Act - Execute DELETE ALL with Dapper
-            var dapperDeleteParams = deleteParams.ToDapperParameters();
-            var deletedRows = await connection.ExecuteAsync(deleteSql, dapperDeleteParams, transaction);
-
+            // Act - Execute INSERT against real database
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: true);
+            
             // Assert
-            Assert.Equal(initialCount, deletedRows);
+            Assert.Equal(1, insertedRows);
+            
+            // Verify the insert worked and Name is NULL (SQL Server stores NULL as NULL)
+            var insertedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 202", transaction: transaction);
+            Assert.Null(insertedCustomer.Name); // SQL Server stores NULL as NULL
+            Assert.Equal(25, insertedCustomer.Age);
+        });
+    }
 
-            // Verify all customers were deleted
-            var remainingCount = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers", 
-                transaction: transaction);
-            Assert.Equal(0, remainingCount);
+    [Fact]
+    public async Task InsertWithNullInt_ExecutesAgainstDatabase()
+    {
+        // Use transaction to ensure test isolation while executing real SQL
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange
+            var statement = TestStatements.InsertWithNullInt();
+            
+            // Act - Execute INSERT against real database
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: true);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Verify the insert worked and Age is NULL (the 203 reference!)
+            var insertedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 203", transaction: transaction);
+            Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
+            Assert.Null(insertedCustomer.Age); // Age should be NULL
         });
     }
 }

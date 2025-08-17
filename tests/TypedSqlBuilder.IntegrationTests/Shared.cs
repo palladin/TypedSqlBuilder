@@ -8,14 +8,15 @@ namespace TypedSqlBuilder.IntegrationTests;
 public class CustomerDto
 {
     public int Id { get; set; }
-    public int Age { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public int? Age { get; set; }
+    public string? Name { get; set; }
+    public bool? IsActive { get; set; }
 }
 
 public class ProductDto
 {
     public int ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
+    public string? ProductName { get; set; }
 }
 
 public class OrderDto
