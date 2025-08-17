@@ -102,30 +102,28 @@ public class SqlServerFixture : IAsyncLifetime
     private async Task SeedTestData(IDbConnection connection)
     {
         // Note: Using SET IDENTITY_INSERT to specify exact IDs for consistent testing
-        var insertCustomers = @"
+        var customerTuples = TestDataConstants.Customers
+            .Select(c => $"({c.Id}, {c.Age}, N'{c.Name}', {(c.IsActive ? 1 : 0)})");
+
+        var productTuples = TestDataConstants.Products
+            .Select(p => $"({p.ProductId}, N'{p.ProductName}')");
+
+        var insertCustomers = $@"
             SET IDENTITY_INSERT customers ON;
             INSERT INTO customers (Id, Age, Name, IsActive) VALUES 
-            (1, 25, N'John Doe', 1),
-            (2, 30, N'Jane Smith', 1),
-            (3, 16, N'Minor User', 0),
-            (4, 65, N'Senior User', 1);
+            {string.Join(",\n            ", customerTuples)};
             SET IDENTITY_INSERT customers OFF;";
 
-        var insertProducts = @"
+        var insertProducts = $@"
             SET IDENTITY_INSERT products ON;
             INSERT INTO products (ProductId, ProductName) VALUES
-            (1, N'Laptop'),
-            (2, N'Mouse'),
-            (3, N'Discontinued');
+            {string.Join(",\n            ", productTuples)};
             SET IDENTITY_INSERT products OFF;";
 
-        var insertOrders = @"
+        var insertOrders = $@"
             SET IDENTITY_INSERT orders ON;
             INSERT INTO orders (OrderId, CustomerId, Amount) VALUES
-            (1, 1, 500),
-            (2, 1, 150),
-            (3, 2, 300),
-            (4, 4, 75);
+            {string.Join(",\n            ", TestDataConstants.OrderTuples)};
             SET IDENTITY_INSERT orders OFF;";
 
         await connection.ExecuteAsync(insertCustomers);

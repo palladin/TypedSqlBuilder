@@ -18,7 +18,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereInt_ExecutesCorrectly()
+    public async Task FromWhereInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereInt();
@@ -39,7 +39,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelect_ExecutesCorrectly()
+    public async Task FromWhereSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelect();
@@ -60,7 +60,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task From_ExecutesCorrectly()
+    public async Task From_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.From();
@@ -81,7 +81,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromStatic_ExecutesCorrectly()
+    public async Task FromStatic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromStatic();
@@ -102,7 +102,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereMultiple_ExecutesCorrectly()
+    public async Task FromWhereMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereMultiple();
@@ -120,7 +120,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereString_ExecutesCorrectly()
+    public async Task FromWhereString_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereString();
@@ -138,7 +138,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelect_ExecutesCorrectly()
+    public async Task FromSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -154,7 +154,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectSingle_ExecutesCorrectly()
+    public async Task FromSelectSingle_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectSingle();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -172,7 +172,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectExpression_ExecutesCorrectly()
+    public async Task FromSelectExpression_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectExpression();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -188,7 +188,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereOr_ExecutesCorrectly()
+    public async Task FromWhereOr_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereOr();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -202,7 +202,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAnd_ExecutesCorrectly()
+    public async Task FromWhereAnd_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAnd();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -216,7 +216,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByAsc_ExecutesCorrectly()
+    public async Task FromOrderByAsc_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByAsc();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -234,7 +234,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByDesc_ExecutesCorrectly()
+    public async Task FromOrderByDesc_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByDesc();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -252,7 +252,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAgeIn_ExecutesCorrectly()
+    public async Task FromWhereAgeIn_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAgeIn();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -269,7 +269,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task InnerJoinBasic_ExecutesCorrectly()
+    public async Task InnerJoinBasic_GeneratesCorrectSql()
     {
         var query = TestQueries.InnerJoinBasic();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -287,7 +287,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromProductWhereSelect_ExecutesCorrectly()
+    public async Task FromProductWhereSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromProductWhereSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -301,7 +301,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAndSelect_ExecutesCorrectly()
+    public async Task FromWhereAndSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAndSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -315,7 +315,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereOrderBy_ExecutesCorrectly()
+    public async Task FromWhereOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -329,7 +329,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectOrderBy_ExecutesCorrectly()
+    public async Task FromSelectOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -343,7 +343,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelectOrderBy_ExecutesCorrectly()
+    public async Task FromWhereSelectOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereSelectOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -357,7 +357,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereOrderBySelect_ExecutesCorrectly()
+    public async Task FromWhereOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -371,7 +371,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereOrderBySelectNamed_ExecutesCorrectly()
+    public async Task FromWhereOrderBySelectNamed_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereOrderBySelectNamed();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -385,7 +385,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelectNamed_ExecutesCorrectly()
+    public async Task FromWhereSelectNamed_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereSelectNamed();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -399,7 +399,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelectParameterized_ExecutesCorrectly()
+    public async Task FromWhereSelectParameterized_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereSelectParameterized(20, 35);
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -413,7 +413,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereFusionTwo_ExecutesCorrectly()
+    public async Task FromWhereFusionTwo_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereFusionTwo();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -427,7 +427,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereFusionThree_ExecutesCorrectly()
+    public async Task FromWhereFusionThree_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereFusionThree();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -441,7 +441,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereFusionWithSelect_ExecutesCorrectly()
+    public async Task FromWhereFusionWithSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereFusionWithSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -455,7 +455,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereFusionWithOrderBy_ExecutesCorrectly()
+    public async Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereFusionWithOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -469,7 +469,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByThenBy_ExecutesCorrectly()
+    public async Task FromOrderByThenBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByThenBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -483,7 +483,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByThenByDescending_ExecutesCorrectly()
+    public async Task FromOrderByThenByDescending_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByThenByDescending();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -497,7 +497,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByDescendingThenBy_ExecutesCorrectly()
+    public async Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByDescendingThenBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -511,7 +511,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByMultiple_ExecutesCorrectly()
+    public async Task FromOrderByMultiple_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByMultiple();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -525,7 +525,14 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereOrderByThenBy_ExecutesCorrectly()
+    public async Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        // This method delegates to FromOrderByMultiple since the test query is the same
+        await FromOrderByMultiple_GeneratesCorrectSql();
+    }
+
+    [Fact]
+    public async Task FromWhereOrderByThenBy_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereOrderByThenBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -539,7 +546,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromOrderByThenBySelect_ExecutesCorrectly()
+    public async Task FromOrderByThenBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromOrderByThenBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -553,7 +560,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereIsNull_ExecutesCorrectly()
+    public async Task FromWhereIsNull_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereIsNull();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -567,7 +574,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereIsNotNull_ExecutesCorrectly()
+    public async Task FromWhereIsNotNull_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereIsNotNull();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -581,7 +588,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereIsNullInt_ExecutesCorrectly()
+    public async Task FromWhereIsNullInt_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereIsNullInt();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -595,7 +602,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereIsNotNullInt_ExecutesCorrectly()
+    public async Task FromWhereIsNotNullInt_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereIsNotNullInt();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -609,7 +616,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereIsNullCombined_ExecutesCorrectly()
+    public async Task FromWhereIsNullCombined_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereIsNullCombined();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -623,7 +630,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task SumAgesWithDb_ExecutesCorrectly()
+    public async Task SumAgesWithDb_GeneratesCorrectSql()
     {
         var query = TestQueries.SumAgesWithDb();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -637,7 +644,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task CountCustomersWithDb_ExecutesCorrectly()
+    public async Task CountCustomersWithDb_GeneratesCorrectSql()
     {
         var query = TestQueries.CountCustomersWithDb();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -651,7 +658,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task CountActiveCustomersWithDb_ExecutesCorrectly()
+    public async Task CountActiveCustomersWithDb_GeneratesCorrectSql()
     {
         var query = TestQueries.CountActiveCustomersWithDb();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -665,7 +672,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAgeGreaterThanSum_ExecutesCorrectly()
+    public async Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAgeGreaterThanSum();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -679,7 +686,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task SumAges_ExecutesCorrectly()
+    public async Task SumAges_GeneratesCorrectSql()
     {
         var query = TestQueries.SumAges();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -693,7 +700,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task CountCustomers_ExecutesCorrectly()
+    public async Task CountCustomers_GeneratesCorrectSql()
     {
         var query = TestQueries.CountCustomers();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -707,7 +714,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task CountActiveCustomers_ExecutesCorrectly()
+    public async Task CountActiveCustomers_GeneratesCorrectSql()
     {
         var query = TestQueries.CountActiveCustomers();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -721,7 +728,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAgeGreaterThanAverageAge_ExecutesCorrectly()
+    public async Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAgeGreaterThanAverageAge();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -735,7 +742,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAgeInSubquery_ExecutesCorrectly()
+    public async Task FromWhereAgeInSubquery_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAgeInSubquery();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -749,7 +756,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereAgeInSubqueryWithClosure_ExecutesCorrectly()
+    public async Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereAgeInSubqueryWithClosure();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -763,7 +770,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSubquery_ExecutesCorrectly()
+    public async Task FromSubquery_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSubquery();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -777,7 +784,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelectWhereFromNested_ExecutesCorrectly()
+    public async Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereSelectWhereFromNested();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -791,7 +798,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereSelectWhereNested_ExecutesCorrectly()
+    public async Task FromWhereSelectWhereNested_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereSelectWhereNested();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -805,7 +812,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupBySelect_ExecutesCorrectly()
+    public async Task FromGroupBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -819,7 +826,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByMultipleSelect_ExecutesCorrectly()
+    public async Task FromGroupByMultipleSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByMultipleSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -833,7 +840,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByHavingSelect_ExecutesCorrectly()
+    public async Task FromGroupByHavingSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByHavingSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -847,7 +854,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromWhereGroupBySelect_ExecutesCorrectly()
+    public async Task FromWhereGroupBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromWhereGroupBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -861,7 +868,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task LeftJoinBasic_ExecutesCorrectly()
+    public async Task LeftJoinBasic_GeneratesCorrectSql()
     {
         var query = TestQueries.LeftJoinBasic();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -875,7 +882,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task LeftJoinWithSelect_ExecutesCorrectly()
+    public async Task LeftJoinWithSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.LeftJoinWithSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -889,7 +896,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task LeftJoinWithWhere_ExecutesCorrectly()
+    public async Task LeftJoinWithWhere_GeneratesCorrectSql()
     {
         var query = TestQueries.LeftJoinWithWhere();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -903,7 +910,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task LeftJoinWithOrderBy_ExecutesCorrectly()
+    public async Task LeftJoinWithOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.LeftJoinWithOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -917,7 +924,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task InnerJoinWithSelect_ExecutesCorrectly()
+    public async Task InnerJoinWithSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.InnerJoinWithSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -931,7 +938,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task InnerJoinWithWhere_ExecutesCorrectly()
+    public async Task InnerJoinWithWhere_GeneratesCorrectSql()
     {
         var query = TestQueries.InnerJoinWithWhere();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -945,7 +952,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task InnerJoinWithOrderBy_ExecutesCorrectly()
+    public async Task InnerJoinWithOrderBy_GeneratesCorrectSql()
     {
         var query = TestQueries.InnerJoinWithOrderBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -959,7 +966,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task InnerJoinWithGroupBy_ExecutesCorrectly()
+    public async Task InnerJoinWithGroupBy_GeneratesCorrectSql()
     {
         var query = TestQueries.InnerJoinWithGroupBy();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -973,7 +980,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task LeftJoinWithAggregates_ExecutesCorrectly()
+    public async Task LeftJoinWithAggregates_GeneratesCorrectSql()
     {
         var query = TestQueries.LeftJoinWithAggregates();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -997,7 +1004,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task MultipleInnerJoinsFusion_ExecutesCorrectly()
+    public async Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
     {
         var query = TestQueries.MultipleInnerJoinsFusion();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1011,7 +1018,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task MixedJoinTypesFusion_ExecutesCorrectly()
+    public async Task MixedJoinTypesFusion_GeneratesCorrectSql()
     {
         var query = TestQueries.MixedJoinTypesFusion();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1025,7 +1032,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task JoinFusionWithWhere_ExecutesCorrectly()
+    public async Task JoinFusionWithWhere_GeneratesCorrectSql()
     {
         var query = TestQueries.JoinFusionWithWhere();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1039,7 +1046,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByOrderBySelect_ExecutesCorrectly()
+    public async Task FromGroupByOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1053,7 +1060,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByOrderByMultipleSelect_ExecutesCorrectly()
+    public async Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByOrderByMultipleSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1067,7 +1074,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByOrderByThreeKeysSelect_ExecutesCorrectly()
+    public async Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByOrderByThreeKeysSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1081,7 +1088,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByMultipleOrderBySelect_ExecutesCorrectly()
+    public async Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByMultipleOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1095,7 +1102,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByHavingOrderBySelect_ExecutesCorrectly()
+    public async Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByHavingOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1109,7 +1116,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task ComplexJoinWhereGroupByHavingOrderBySelect_ExecutesCorrectly()
+    public async Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.ComplexJoinWhereGroupByHavingOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1123,7 +1130,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task ComplexLeftJoinWhereGroupByOrderBySelect_ExecutesCorrectly()
+    public async Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
     {
         var query = TestQueries.ComplexLeftJoinWhereGroupByOrderBySelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1137,7 +1144,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByMinMaxSelect_ExecutesCorrectly()
+    public async Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByMinMaxSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1151,7 +1158,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromGroupByAvgSelect_ExecutesCorrectly()
+    public async Task FromGroupByAvgSelect_GeneratesCorrectSql()
     {
         var query = TestQueries.FromGroupByAvgSelect();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1165,7 +1172,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectSum_ExecutesCorrectly()
+    public async Task FromSelectSum_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectSum();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1179,7 +1186,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectAvg_ExecutesCorrectly()
+    public async Task FromSelectAvg_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectAvg();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1193,7 +1200,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectMin_ExecutesCorrectly()
+    public async Task FromSelectMin_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectMin();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1207,7 +1214,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task FromSelectMax_ExecutesCorrectly()
+    public async Task FromSelectMax_GeneratesCorrectSql()
     {
         var query = TestQueries.FromSelectMax();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1221,7 +1228,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task ParameterAsIntParam_ExecutesCorrectly()
+    public async Task ParameterAsIntParam_GeneratesCorrectSql()
     {
         var query = TestQueries.ParameterAsIntParam();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1235,7 +1242,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task ParameterAsStringParam_ExecutesCorrectly()
+    public async Task ParameterAsStringParam_GeneratesCorrectSql()
     {
         var query = TestQueries.ParameterAsStringParam();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1249,7 +1256,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task ParameterAsBoolParam_ExecutesCorrectly()
+    public async Task ParameterAsBoolParam_GeneratesCorrectSql()
     {
         var query = TestQueries.ParameterAsBoolParam();
         var (sql, parameters) = query.ToSqlServerRaw();
@@ -1273,7 +1280,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task BoolColumnDirectComparison_ExecutesCorrectly()
+    public async Task BoolColumnDirectComparison_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnDirectComparison();
@@ -1298,7 +1305,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task BoolColumnLiteralTrue_ExecutesCorrectly()
+    public async Task BoolColumnLiteralTrue_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralTrue();
@@ -1320,7 +1327,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
     }
 
     [Fact]
-    public async Task BoolColumnLiteralFalse_ExecutesCorrectly()
+    public async Task BoolColumnLiteralFalse_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralFalse();
@@ -1336,529 +1343,6 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
         // Assert - Should return inactive customers (only Minor User)
         Assert.Single(results);
         Assert.Contains(results, r => r.Name == "Minor User" && !r.IsActive);
-    }
-
-    // Interface implementation methods - these delegate to the actual integration test methods for consistency
-    [Fact]
-    public async Task From_GeneratesCorrectSql()
-    {
-        await From_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromStatic_GeneratesCorrectSql()
-    {
-        await FromStatic_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelect_GeneratesCorrectSql()
-    {
-        await FromSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectSingle_GeneratesCorrectSql()
-    {
-        await FromSelectSingle_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereInt_GeneratesCorrectSql()
-    {
-        await FromWhereInt_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereString_GeneratesCorrectSql()
-    {
-        await FromWhereString_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereMultiple_GeneratesCorrectSql()
-    {
-        await FromWhereMultiple_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByAsc_GeneratesCorrectSql()
-    {
-        await FromOrderByAsc_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByDesc_GeneratesCorrectSql()
-    {
-        await FromOrderByDesc_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelectOrderBy_GeneratesCorrectSql()
-    {
-        await FromWhereSelectOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelect_GeneratesCorrectSql()
-    {
-        await FromWhereSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereOr_GeneratesCorrectSql()
-    {
-        await FromWhereOr_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectExpression_GeneratesCorrectSql()
-    {
-        await FromSelectExpression_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereOrderBy_GeneratesCorrectSql()
-    {
-        await FromWhereOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereOrderBySelect_GeneratesCorrectSql()
-    {
-        await FromWhereOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelectNamed_GeneratesCorrectSql()
-    {
-        await FromWhereSelectNamed_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereFusionTwo_GeneratesCorrectSql()
-    {
-        await FromWhereFusionTwo_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereFusionThree_GeneratesCorrectSql()
-    {
-        await FromWhereFusionThree_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereFusionWithSelect_GeneratesCorrectSql()
-    {
-        await FromWhereFusionWithSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
-    {
-        await FromWhereFusionWithOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByThenBy_GeneratesCorrectSql()
-    {
-        await FromOrderByThenBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByThenByDescending_GeneratesCorrectSql()
-    {
-        await FromOrderByThenByDescending_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
-    {
-        await FromOrderByDescendingThenBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByMultiple_GeneratesCorrectSql()
-    {
-        await FromOrderByMultiple_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereOrderByThenBy_GeneratesCorrectSql()
-    {
-        await FromWhereOrderByThenBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByThenBySelect_GeneratesCorrectSql()
-    {
-        await FromOrderByThenBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereIsNull_GeneratesCorrectSql()
-    {
-        await FromWhereIsNull_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereIsNotNull_GeneratesCorrectSql()
-    {
-        await FromWhereIsNotNull_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereIsNullCombined_GeneratesCorrectSql()
-    {
-        await FromWhereIsNullCombined_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task SumAges_GeneratesCorrectSql()
-    {
-        await SumAges_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task CountCustomers_GeneratesCorrectSql()
-    {
-        await CountCustomers_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task CountActiveCustomers_GeneratesCorrectSql()
-    {
-        await CountActiveCustomers_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task SumAgesWithDb_GeneratesCorrectSql()
-    {
-        await SumAgesWithDb_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task CountCustomersWithDb_GeneratesCorrectSql()
-    {
-        await CountCustomersWithDb_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task CountActiveCustomersWithDb_GeneratesCorrectSql()
-    {
-        await CountActiveCustomersWithDb_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
-    {
-        await FromWhereAgeGreaterThanSum_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
-    {
-        await FromWhereAgeGreaterThanAverageAge_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAgeIn_GeneratesCorrectSql()
-    {
-        await FromWhereAgeIn_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAgeInSubquery_GeneratesCorrectSql()
-    {
-        await FromWhereAgeInSubquery_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
-    {
-        await FromWhereAgeInSubqueryWithClosure_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSubquery_GeneratesCorrectSql()
-    {
-        await FromSubquery_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
-    {
-        await FromWhereSelectWhereFromNested_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelectWhereNested_GeneratesCorrectSql()
-    {
-        await FromWhereSelectWhereNested_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupBySelect_GeneratesCorrectSql()
-    {
-        await FromGroupBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByMultipleSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByMultipleSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByHavingSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByHavingSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereGroupBySelect_GeneratesCorrectSql()
-    {
-        await FromWhereGroupBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereIsNullInt_GeneratesCorrectSql()
-    {
-        await FromWhereIsNullInt_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereIsNotNullInt_GeneratesCorrectSql()
-    {
-        await FromWhereIsNotNullInt_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task InnerJoinBasic_GeneratesCorrectSql()
-    {
-        await InnerJoinBasic_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task InnerJoinWithSelect_GeneratesCorrectSql()
-    {
-        await InnerJoinWithSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task InnerJoinWithWhere_GeneratesCorrectSql()
-    {
-        await InnerJoinWithWhere_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task InnerJoinWithOrderBy_GeneratesCorrectSql()
-    {
-        await InnerJoinWithOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task LeftJoinBasic_GeneratesCorrectSql()
-    {
-        await LeftJoinBasic_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task LeftJoinWithSelect_GeneratesCorrectSql()
-    {
-        await LeftJoinWithSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task LeftJoinWithWhere_GeneratesCorrectSql()
-    {
-        await LeftJoinWithWhere_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task LeftJoinWithOrderBy_GeneratesCorrectSql()
-    {
-        await LeftJoinWithOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task InnerJoinWithGroupBy_GeneratesCorrectSql()
-    {
-        await InnerJoinWithGroupBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task LeftJoinWithAggregates_GeneratesCorrectSql()
-    {
-        await LeftJoinWithAggregates_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
-    {
-        await MultipleInnerJoinsFusion_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task MixedJoinTypesFusion_GeneratesCorrectSql()
-    {
-        await MixedJoinTypesFusion_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task JoinFusionWithWhere_GeneratesCorrectSql()
-    {
-        await JoinFusionWithWhere_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByOrderBySelect_GeneratesCorrectSql()
-    {
-        await FromGroupByOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByOrderByMultipleSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByOrderByThreeKeysSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
-    {
-        await FromGroupByMultipleOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
-    {
-        await FromGroupByHavingOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
-    {
-        await ComplexJoinWhereGroupByHavingOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
-    {
-        await ComplexLeftJoinWhereGroupByOrderBySelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByMinMaxSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromGroupByAvgSelect_GeneratesCorrectSql()
-    {
-        await FromGroupByAvgSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectSum_GeneratesCorrectSql()
-    {
-        await FromSelectSum_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectAvg_GeneratesCorrectSql()
-    {
-        await FromSelectAvg_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectMin_GeneratesCorrectSql()
-    {
-        await FromSelectMin_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectMax_GeneratesCorrectSql()
-    {
-        await FromSelectMax_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task ParameterAsIntParam_GeneratesCorrectSql()
-    {
-        await ParameterAsIntParam_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task ParameterAsStringParam_GeneratesCorrectSql()
-    {
-        await ParameterAsStringParam_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task ParameterAsBoolParam_GeneratesCorrectSql()
-    {
-        await ParameterAsBoolParam_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task BoolColumnDirectComparison_GeneratesCorrectSql()
-    {
-        await BoolColumnDirectComparison_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task BoolColumnLiteralTrue_GeneratesCorrectSql()
-    {
-        await BoolColumnLiteralTrue_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task BoolColumnLiteralFalse_GeneratesCorrectSql()
-    {
-        await BoolColumnLiteralFalse_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
-    {
-        await FromOrderByMultiple_ExecutesCorrectly(); // Note: delegating to the existing method
-    }
-
-    [Fact]
-    public async Task FromProductWhereSelect_GeneratesCorrectSql()
-    {
-        await FromProductWhereSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromSelectOrderBy_GeneratesCorrectSql()
-    {
-        await FromSelectOrderBy_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAnd_GeneratesCorrectSql()
-    {
-        await FromWhereAnd_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereAndSelect_GeneratesCorrectSql()
-    {
-        await FromWhereAndSelect_ExecutesCorrectly();
-    }
-
-    [Fact]
-    public async Task FromWhereSelectParameterized_GeneratesCorrectSql()
-    {
-        await FromWhereSelectParameterized_ExecutesCorrectly();
     }
 
     [Fact]

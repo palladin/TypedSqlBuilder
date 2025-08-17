@@ -77,25 +77,17 @@ public abstract class SqliteIntegrationTestBase : IDisposable
 
     private void SeedTestData()
     {
-        var insertCustomers = @"
+        var insertCustomers = $@"
             INSERT INTO customers (Id, Age, Name, IsActive) VALUES 
-            (1, 25, 'John Doe', 1),
-            (2, 30, 'Jane Smith', 1),
-            (3, 16, 'Minor User', 0),
-            (4, 65, 'Senior User', 1)";
+            {string.Join(",\n            ", TestDataConstants.CustomerTuples)}";
 
-        var insertProducts = @"
+        var insertProducts = $@"
             INSERT INTO products (ProductId, ProductName) VALUES
-            (1, 'Laptop'),
-            (2, 'Mouse'),
-            (3, 'Discontinued')";
+            {string.Join(",\n            ", TestDataConstants.ProductTuples)}";
 
-        var insertOrders = @"
+        var insertOrders = $@"
             INSERT INTO orders (OrderId, CustomerId, Amount) VALUES
-            (1, 1, 500),
-            (2, 1, 150),
-            (3, 2, 300),
-            (4, 4, 75)";
+            {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
 
         _connection.Execute(insertCustomers);
         _connection.Execute(insertProducts);

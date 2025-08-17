@@ -10,7 +10,7 @@ namespace TypedSqlBuilder.IntegrationTests;
 public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTestContract, ISqliteDialectTestContract
 {
     [Fact]
-    public void FromWhereInt_ExecutesCorrectly()
+    public Task FromWhereInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereInt();
@@ -26,10 +26,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "Jane Smith" && r.Age == 30);
         Assert.Contains(results, r => r.Name == "Senior User" && r.Age == 65);
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelect_ExecutesCorrectly()
+    public Task FromWhereSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelect();
@@ -45,10 +46,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "John Doe" && r.Id == 1);
         Assert.Contains(results, r => r.Name == "Jane Smith" && r.Id == 2);
         Assert.Contains(results, r => r.Name == "Senior User" && r.Id == 4);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinBasic_ExecutesCorrectly()
+    public Task InnerJoinBasic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinBasic();
@@ -72,10 +74,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         var janeOrders = results.Where(r => r.Name == "Jane Smith").ToList();
         Assert.Single(janeOrders);
         Assert.Equal(300, janeOrders[0].Amount);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereString_ExecutesCorrectly()
+    public Task FromWhereString_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereString();
@@ -87,10 +90,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert - Should return customers named "John"
         Assert.Empty(results); // No customer named exactly "John" in test data
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByAsc_ExecutesCorrectly()
+    public Task FromOrderByAsc_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByAsc();
@@ -106,10 +110,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal("John Doe", results[1].Name);
         Assert.Equal("Minor User", results[2].Name);
         Assert.Equal("Senior User", results[3].Name);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromProductWhereSelect_ExecutesCorrectly()
+    public Task FromProductWhereSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromProductWhereSelect();
@@ -124,10 +129,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.ProductName == "Laptop");
         Assert.Contains(results, r => r.ProductName == "Mouse");
         Assert.DoesNotContain(results, r => r.ProductName == "Discontinued");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void From_ExecutesCorrectly()
+    public Task From_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.From();
@@ -139,10 +145,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromStatic_ExecutesCorrectly()
+    public Task FromStatic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromStatic();
@@ -154,10 +161,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelect_ExecutesCorrectly()
+    public Task FromSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelect();
@@ -169,10 +177,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectSingle_ExecutesCorrectly()
+    public Task FromSelectSingle_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectSingle();
@@ -188,10 +197,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(30, results);
         Assert.Contains(16, results);
         Assert.Contains(65, results);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectExpression_ExecutesCorrectly()
+    public Task FromSelectExpression_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectExpression();
@@ -205,10 +215,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(4, results.Count);
         Assert.Contains(results, r => r.Expr1 == 125 && r.Expr2 == "John Doe - Customer"); // (1 * 100) + 25
         Assert.Contains(results, r => r.Expr1 == 230 && r.Expr2 == "Jane Smith - Customer"); // (2 * 100) + 30
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereMultiple_ExecutesCorrectly()
+    public Task FromWhereMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereMultiple();
@@ -222,10 +233,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(3, results.Count); // Adults except "Admin"
         Assert.DoesNotContain(results, r => r.Age <= 18);
         Assert.DoesNotContain(results, r => r.Name == "Admin");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOr_ExecutesCorrectly()
+    public Task FromWhereOr_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOr();
@@ -237,10 +249,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(2, results.Count); // Adults between 18-65 OR VIP (no VIP in test data, Minor User is 16 not 17)
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAnd_ExecutesCorrectly()
+    public Task FromWhereAnd_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAnd();
@@ -252,10 +265,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customer named exactly "John" in test data
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByDesc_ExecutesCorrectly()
+    public Task FromOrderByDesc_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByDesc();
@@ -271,10 +285,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(30, results[1].Age); // Jane Smith (30)
         Assert.Equal(25, results[2].Age); // John Doe (25)
         Assert.Equal(16, results[3].Age); // Minor User (16)
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAndSelect_ExecutesCorrectly()
+    public Task FromWhereAndSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAndSelect();
@@ -286,10 +301,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count); // Adults with non-empty names
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBy_ExecutesCorrectly()
+    public Task FromWhereOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBy();
@@ -304,10 +320,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(25, results[0].Age); // Should be ordered by age ascending
         Assert.Equal(30, results[1].Age);
         Assert.Equal(65, results[2].Age);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectOrderBy_ExecutesCorrectly()
+    public Task FromSelectOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectOrderBy();
@@ -323,10 +340,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal("John Doe", results[1].Name);
         Assert.Equal("Minor User", results[2].Name);
         Assert.Equal("Senior User", results[3].Name);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectOrderBy_ExecutesCorrectly()
+    public Task FromWhereSelectOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectOrderBy();
@@ -341,10 +359,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal("Jane Smith!", results[0].NameExpr); // Ordered by name
         Assert.Equal("John Doe!", results[1].NameExpr);
         Assert.Equal("Senior User!", results[2].NameExpr);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBySelect_ExecutesCorrectly()
+    public Task FromWhereOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBySelect();
@@ -359,10 +378,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(35, results[0].AgeExpr); // Age + 10, ordered by age
         Assert.Equal(40, results[1].AgeExpr);
         Assert.Equal(75, results[2].AgeExpr);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBySelectNamed_ExecutesCorrectly()
+    public Task FromWhereOrderBySelectNamed_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBySelectNamed();
@@ -377,10 +397,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal("Jane Smith (Customer)", results[0].CustomerInfo); // Ordered by name
         Assert.Equal("John Doe (Customer)", results[1].CustomerInfo);
         Assert.Equal("Senior User (Customer)", results[2].CustomerInfo);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectNamed_ExecutesCorrectly()
+    public Task FromWhereSelectNamed_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectNamed();
@@ -394,10 +415,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(3, results.Count);
         Assert.Contains(results, r => r.OriginalId == 1 && r.ModifiedId == 125);
         Assert.Contains(results, r => r.OriginalId == 2 && r.ModifiedId == 230);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectParameterized_ExecutesCorrectly()
+    public Task FromWhereSelectParameterized_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectParameterized(20, 35);
@@ -411,10 +433,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(2, results.Count);
         Assert.Contains(results, r => r.Name == "John Doe");
         Assert.Contains(results, r => r.Name == "Jane Smith");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionTwo_ExecutesCorrectly()
+    public Task FromWhereFusionTwo_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionTwo();
@@ -426,10 +449,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count); // Adults except Admin
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionThree_ExecutesCorrectly()
+    public Task FromWhereFusionThree_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionThree();
@@ -441,10 +465,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(2, results.Count); // Adults under 65, not Admin (Minor User is 16, excluded)
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionWithSelect_ExecutesCorrectly()
+    public Task FromWhereFusionWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionWithSelect();
@@ -456,10 +481,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionWithOrderBy_ExecutesCorrectly()
+    public Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionWithOrderBy();
@@ -472,10 +498,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(3, results.Count);
         Assert.Equal("Jane Smith", results[0].Name); // Ordered by name
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenBy_ExecutesCorrectly()
+    public Task FromOrderByThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenBy();
@@ -488,10 +515,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(4, results.Count);
         Assert.Equal("Jane Smith", results[0].Name); // First by name, then by age
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenByDescending_ExecutesCorrectly()
+    public Task FromOrderByThenByDescending_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenByDescending();
@@ -503,10 +531,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByDescendingThenBy_ExecutesCorrectly()
+    public Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByDescendingThenBy();
@@ -518,10 +547,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByMultiple_ExecutesCorrectly()
+    public Task FromOrderByMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByMultiple();
@@ -533,10 +563,18 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderByThenBy_ExecutesCorrectly()
+    public Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        // This method delegates to FromOrderByMultiple_GeneratesCorrectSql for interface compliance
+        return FromOrderByMultiple_GeneratesCorrectSql();
+    }
+
+    [Fact]
+    public Task FromWhereOrderByThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderByThenBy();
@@ -548,10 +586,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count); // Adults only
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenBySelect_ExecutesCorrectly()
+    public Task FromOrderByThenBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenBySelect();
@@ -563,10 +602,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNull_ExecutesCorrectly()
+    public Task FromWhereIsNull_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNull();
@@ -578,10 +618,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with null names in test data
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNotNull_ExecutesCorrectly()
+    public Task FromWhereIsNotNull_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNotNull();
@@ -593,10 +634,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count); // All customers have non-null names
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNullInt_ExecutesCorrectly()
+    public Task FromWhereIsNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNullInt();
@@ -608,10 +650,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with null ages
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNotNullInt_ExecutesCorrectly()
+    public Task FromWhereIsNotNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNotNullInt();
@@ -623,10 +666,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count); // All customers have non-null ages
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNullCombined_ExecutesCorrectly()
+    public Task FromWhereIsNullCombined_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNullCombined();
@@ -638,10 +682,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with null name and non-null age
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void SumAgesWithDb_ExecutesCorrectly()
+    public Task SumAgesWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.SumAgesWithDb();
@@ -653,10 +698,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(136, result); // 25 + 30 + 16 + 65
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountCustomersWithDb_ExecutesCorrectly()
+    public Task CountCustomersWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.CountCustomersWithDb();
@@ -668,10 +714,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, result);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountActiveCustomersWithDb_ExecutesCorrectly()
+    public Task CountActiveCustomersWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.CountActiveCustomersWithDb();
@@ -683,10 +730,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, result); // Adults only
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeGreaterThanSum_ExecutesCorrectly()
+    public Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeGreaterThanSum();
@@ -698,10 +746,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customer age > sum(all ages) = 136
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void SumAges_ExecutesCorrectly()
+    public Task SumAges_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.SumAges();
@@ -713,10 +762,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(136, result);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountCustomers_ExecutesCorrectly()
+    public Task CountCustomers_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.CountCustomers();
@@ -728,10 +778,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, result);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountActiveCustomers_ExecutesCorrectly()
+    public Task CountActiveCustomers_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.CountActiveCustomers();
@@ -743,10 +794,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, result);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeGreaterThanAverageAge_ExecutesCorrectly()
+    public Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeGreaterThanAverageAge();
@@ -758,10 +810,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No age > sum(136)
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeIn_ExecutesCorrectly()
+    public Task FromWhereAgeIn_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeIn();
@@ -775,10 +828,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(2, results.Count); // Ages 25 and 30 are in the list (18, 21, 25, 30)
         Assert.Contains(results, r => r.Age == 25);
         Assert.Contains(results, r => r.Age == 30);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeInSubquery_ExecutesCorrectly()
+    public Task FromWhereAgeInSubquery_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeInSubquery();
@@ -790,10 +844,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No VIP customers in test data
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeInSubqueryWithClosure_ExecutesCorrectly()
+    public Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeInSubqueryWithClosure();
@@ -805,10 +860,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with "_VIP" suffix in names
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSubquery_ExecutesCorrectly()
+    public Task FromSubquery_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSubquery();
@@ -822,10 +878,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(4, results.Count);
         Assert.Contains(results, r => r.Id == 1 && r.NewAge == 26); // Age + 1
         Assert.Contains(results, r => r.Id == 2 && r.NewAge == 31);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectWhereFromNested_ExecutesCorrectly()
+    public Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectWhereFromNested();
@@ -837,10 +894,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with Id > 100
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectWhereNested_ExecutesCorrectly()
+    public Task FromWhereSelectWhereNested_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectWhereNested();
@@ -852,10 +910,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No customers with Id > 100
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupBySelect_ExecutesCorrectly()
+    public Task FromGroupBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupBySelect();
@@ -868,10 +927,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(4, results.Count); // Each customer has unique age
         Assert.All(results, r => Assert.Equal(1, r.Count));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMultipleSelect_ExecutesCorrectly()
+    public Task FromGroupByMultipleSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMultipleSelect();
@@ -884,10 +944,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(4, results.Count); // Each customer is unique by (Age, Name)
         Assert.All(results, r => Assert.Equal(1, r.Count));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByHavingSelect_ExecutesCorrectly()
+    public Task FromGroupByHavingSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByHavingSelect();
@@ -899,10 +960,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Empty(results); // No age groups with count > 1 in test data
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereGroupBySelect_ExecutesCorrectly()
+    public Task FromWhereGroupBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereGroupBySelect();
@@ -915,10 +977,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(3, results.Count); // Adults only
         Assert.All(results, r => Assert.Equal(1, r.Count));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinBasic_ExecutesCorrectly()
+    public Task LeftJoinBasic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinBasic();
@@ -932,10 +995,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(5, results.Count); // All customers + their orders: John(2) + Jane(1) + Minor(0) + Senior(1) = 5 rows total
         Assert.Contains(results, r => r.Name == "John Doe" && r.OrderId.HasValue);
         Assert.Contains(results, r => r.Name == "Minor User" && !r.OrderId.HasValue); // Customer with no orders
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithSelect_ExecutesCorrectly()
+    public Task LeftJoinWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithSelect();
@@ -948,10 +1012,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(5, results.Count); // John(2) + Jane(1) + Minor(0) + Senior(1) = 5 rows
         Assert.Contains(results, r => r.CustomerInfo == "John Doe (Customer)");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithWhere_ExecutesCorrectly()
+    public Task LeftJoinWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithWhere();
@@ -964,10 +1029,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.True(results.Count >= 2); // Adults under 65
         Assert.All(results, r => Assert.True(r.Age >= 21 && r.Age < 65));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithOrderBy_ExecutesCorrectly()
+    public Task LeftJoinWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithOrderBy();
@@ -980,10 +1046,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(5, results.Count); // Adjusted for correct row count
         // Should be ordered by name ascending, then amount descending
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithSelect_ExecutesCorrectly()
+    public Task InnerJoinWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithSelect();
@@ -996,10 +1063,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(4, results.Count); // Only customers with orders
         Assert.Contains(results, r => r.CustomerName == "Senior User" && r.OrderAmount == 75); // Senior User has 1 order
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithWhere_ExecutesCorrectly()
+    public Task InnerJoinWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithWhere();
@@ -1012,10 +1080,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.True(results.Count >= 1); // Adults with orders over $100
         Assert.All(results, r => Assert.True(r.Age >= 18 && r.Amount > 100));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithOrderBy_ExecutesCorrectly()
+    public Task InnerJoinWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithOrderBy();
@@ -1028,10 +1097,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Equal(4, results.Count);
         // Should be ordered by customer name
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithGroupBy_ExecutesCorrectly()
+    public Task InnerJoinWithGroupBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithGroupBy();
@@ -1046,10 +1116,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.CustomerName == "John Doe" && r.TotalAmount == 650); // 500 + 150
         Assert.Contains(results, r => r.CustomerName == "Jane Smith" && r.TotalAmount == 300);
         Assert.Contains(results, r => r.CustomerName == "Senior User" && r.TotalAmount == 75);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithAggregates_ExecutesCorrectly()
+    public Task LeftJoinWithAggregates_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithAggregates();
@@ -1065,10 +1136,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.CustomerName == "Jane Smith" && r.OrderCount == 1 && r.TotalSpent == 300);
         Assert.Contains(results, r => r.CustomerName == "Minor User" && r.OrderCount == 1 && r.TotalSpent == null); // Customer with no orders
         Assert.Contains(results, r => r.CustomerName == "Senior User" && r.OrderCount == 1 && r.TotalSpent == 75);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void MultipleInnerJoinsFusion_ExecutesCorrectly()
+    public Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.MultipleInnerJoinsFusion();
@@ -1081,10 +1153,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         // This might return empty results if Order.Amount doesn't match Product.ProductId
         Assert.NotNull(results);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void MixedJoinTypesFusion_ExecutesCorrectly()
+    public Task MixedJoinTypesFusion_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.MixedJoinTypesFusion();
@@ -1096,10 +1169,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.NotNull(results);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void JoinFusionWithWhere_ExecutesCorrectly()
+    public Task JoinFusionWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.JoinFusionWithWhere();
@@ -1111,10 +1185,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.NotNull(results);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderBySelect_ExecutesCorrectly()
+    public Task FromGroupByOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderBySelect();
@@ -1128,10 +1203,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal(3, results.Count); // All customers with orders: John, Jane, Senior User
         // Should be ordered by total amount descending
         Assert.True(results[0].TotalAmount >= results[1].TotalAmount);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderByMultipleSelect_ExecutesCorrectly()
+    public Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderByMultipleSelect();
@@ -1143,10 +1219,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count); // All customers with orders
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderByThreeKeysSelect_ExecutesCorrectly()
+    public Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderByThreeKeysSelect();
@@ -1158,10 +1235,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(3, results.Count); // All customers with orders
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMultipleOrderBySelect_ExecutesCorrectly()
+    public Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMultipleOrderBySelect();
@@ -1173,10 +1251,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(4, results.Count);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByHavingOrderBySelect_ExecutesCorrectly()
+    public Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByHavingOrderBySelect();
@@ -1189,10 +1268,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert
         Assert.Single(results); // Only John Doe has more than 1 order
         Assert.Equal(650, results[0].TotalAmount);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ComplexJoinWhereGroupByHavingOrderBySelect_ExecutesCorrectly()
+    public Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ComplexJoinWhereGroupByHavingOrderBySelect();
@@ -1210,10 +1290,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         {
             Assert.Contains(results, r => r.CustomerName == "John Doe");
         }
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ComplexLeftJoinWhereGroupByOrderBySelect_ExecutesCorrectly()
+    public Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ComplexLeftJoinWhereGroupByOrderBySelect();
@@ -1228,10 +1309,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.CustomerName == "John Doe" && r.OrderCount == 2);
         Assert.Contains(results, r => r.CustomerName == "Jane Smith" && r.OrderCount == 1);
         Assert.Contains(results, r => r.CustomerName == "Senior User" && r.OrderCount == 1); // Senior User has 1 order
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMinMaxSelect_ExecutesCorrectly()
+    public Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMinMaxSelect();
@@ -1246,10 +1328,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.CustomerId == 1 && r.MinAmount == 150 && r.MaxAmount == 500 && r.OrderCount == 2);
         Assert.Contains(results, r => r.CustomerId == 2 && r.MinAmount == 300 && r.MaxAmount == 300 && r.OrderCount == 1);
         Assert.Contains(results, r => r.CustomerId == 4 && r.MinAmount == 75 && r.MaxAmount == 75 && r.OrderCount == 1);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByAvgSelect_ExecutesCorrectly()
+    public Task FromGroupByAvgSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByAvgSelect();
@@ -1264,10 +1347,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.CustomerId == 1 && r.AvgAmount == 325.0 && r.OrderCount == 2); // (500 + 150) / 2
         Assert.Contains(results, r => r.CustomerId == 2 && r.AvgAmount == 300.0 && r.OrderCount == 1);
         Assert.Contains(results, r => r.CustomerId == 4 && r.AvgAmount == 75.0 && r.OrderCount == 1);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectSum_ExecutesCorrectly()
+    public Task FromSelectSum_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectSum();
@@ -1279,10 +1363,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(1025, result); // 500 + 150 + 300 + 75 (all orders)
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectAvg_ExecutesCorrectly()
+    public Task FromSelectAvg_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectAvg();
@@ -1294,10 +1379,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(256.25, Math.Round(result, 2)); // 1025 / 4 = 256.25
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectMin_ExecutesCorrectly()
+    public Task FromSelectMin_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectMin();
@@ -1309,10 +1395,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(75, result); // Minimum order amount
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectMax_ExecutesCorrectly()
+    public Task FromSelectMax_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectMax();
@@ -1324,10 +1411,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
 
         // Assert
         Assert.Equal(500, result);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsIntParam_ExecutesCorrectly()
+    public Task ParameterAsIntParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsIntParam();
@@ -1346,10 +1434,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "Jane Smith");
         Assert.Contains(results, r => r.Name == "Senior User");
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsStringParam_ExecutesCorrectly()
+    public Task ParameterAsStringParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsStringParam();
@@ -1366,10 +1455,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Single(results);
         Assert.Equal(1, results[0].Id);
         Assert.Equal(25, results[0].Age);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsBoolParam_ExecutesCorrectly()
+    public Task ParameterAsBoolParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsBoolParam();
@@ -1388,10 +1478,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "Jane Smith" && r.Age == 30);
         Assert.Contains(results, r => r.Name == "Senior User" && r.Age == 65);
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnDirectComparison_ExecutesCorrectly()
+    public Task BoolColumnDirectComparison_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnDirectComparison();
@@ -1410,10 +1501,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "Jane Smith" && r.IsActive);
         Assert.Contains(results, r => r.Name == "Senior User" && r.IsActive);
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnLiteralTrue_ExecutesCorrectly()
+    public Task BoolColumnLiteralTrue_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralTrue();
@@ -1429,10 +1521,11 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Contains(results, r => r.Name == "Jane Smith" && r.IsActive);
         Assert.Contains(results, r => r.Name == "Senior User" && r.IsActive);
         Assert.DoesNotContain(results, r => r.Name == "Minor User");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnLiteralFalse_ExecutesCorrectly()
+    public Task BoolColumnLiteralFalse_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralFalse();
@@ -1445,622 +1538,6 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         // Assert - Should return inactive customers (only Minor User)
         Assert.Single(results);
         Assert.Contains(results, r => r.Name == "Minor User" && !r.IsActive);
-    }
-
-    // Interface implementation methods - these delegate to the actual integration test methods for consistency
-    [Fact]
-    public Task From_GeneratesCorrectSql()
-    {
-        From_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromStatic_GeneratesCorrectSql()
-    {
-        FromStatic_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelect_GeneratesCorrectSql()
-    {
-        FromSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectSingle_GeneratesCorrectSql()
-    {
-        FromSelectSingle_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereInt_GeneratesCorrectSql()
-    {
-        FromWhereInt_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereString_GeneratesCorrectSql()
-    {
-        FromWhereString_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereMultiple_GeneratesCorrectSql()
-    {
-        FromWhereMultiple_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByAsc_GeneratesCorrectSql()
-    {
-        FromOrderByAsc_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByDesc_GeneratesCorrectSql()
-    {
-        FromOrderByDesc_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelectOrderBy_GeneratesCorrectSql()
-    {
-        FromWhereSelectOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelect_GeneratesCorrectSql()
-    {
-        FromWhereSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereOr_GeneratesCorrectSql()
-    {
-        FromWhereOr_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectExpression_GeneratesCorrectSql()
-    {
-        FromSelectExpression_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereOrderBy_GeneratesCorrectSql()
-    {
-        FromWhereOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereOrderBySelect_GeneratesCorrectSql()
-    {
-        FromWhereOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelectNamed_GeneratesCorrectSql()
-    {
-        FromWhereSelectNamed_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereFusionTwo_GeneratesCorrectSql()
-    {
-        FromWhereFusionTwo_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereFusionThree_GeneratesCorrectSql()
-    {
-        FromWhereFusionThree_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereFusionWithSelect_GeneratesCorrectSql()
-    {
-        FromWhereFusionWithSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
-    {
-        FromWhereFusionWithOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByThenBy_GeneratesCorrectSql()
-    {
-        FromOrderByThenBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByThenByDescending_GeneratesCorrectSql()
-    {
-        FromOrderByThenByDescending_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
-    {
-        FromOrderByDescendingThenBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByMultiple_GeneratesCorrectSql()
-    {
-        FromOrderByMultiple_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereOrderByThenBy_GeneratesCorrectSql()
-    {
-        FromWhereOrderByThenBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByThenBySelect_GeneratesCorrectSql()
-    {
-        FromOrderByThenBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereIsNull_GeneratesCorrectSql()
-    {
-        FromWhereIsNull_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereIsNotNull_GeneratesCorrectSql()
-    {
-        FromWhereIsNotNull_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereIsNullInt_GeneratesCorrectSql()
-    {
-        FromWhereIsNullInt_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereIsNotNullInt_GeneratesCorrectSql()
-    {
-        FromWhereIsNotNullInt_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereIsNullCombined_GeneratesCorrectSql()
-    {
-        FromWhereIsNullCombined_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task SumAges_GeneratesCorrectSql()
-    {
-        SumAges_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task CountCustomers_GeneratesCorrectSql()
-    {
-        CountCustomers_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task CountActiveCustomers_GeneratesCorrectSql()
-    {
-        CountActiveCustomers_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
-    {
-        FromWhereAgeGreaterThanAverageAge_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAgeIn_GeneratesCorrectSql()
-    {
-        FromWhereAgeIn_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAgeInSubquery_GeneratesCorrectSql()
-    {
-        FromWhereAgeInSubquery_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
-    {
-        FromWhereAgeInSubqueryWithClosure_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSubquery_GeneratesCorrectSql()
-    {
-        FromSubquery_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
-    {
-        FromWhereSelectWhereFromNested_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelectWhereNested_GeneratesCorrectSql()
-    {
-        FromWhereSelectWhereNested_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupBySelect_GeneratesCorrectSql()
-    {
-        FromGroupBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByMultipleSelect_GeneratesCorrectSql()
-    {
-        FromGroupByMultipleSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByHavingSelect_GeneratesCorrectSql()
-    {
-        FromGroupByHavingSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereGroupBySelect_GeneratesCorrectSql()
-    {
-        FromWhereGroupBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InnerJoinBasic_GeneratesCorrectSql()
-    {
-        InnerJoinBasic_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InnerJoinWithSelect_GeneratesCorrectSql()
-    {
-        InnerJoinWithSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InnerJoinWithWhere_GeneratesCorrectSql()
-    {
-        InnerJoinWithWhere_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InnerJoinWithOrderBy_GeneratesCorrectSql()
-    {
-        InnerJoinWithOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task LeftJoinBasic_GeneratesCorrectSql()
-    {
-        LeftJoinBasic_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task LeftJoinWithSelect_GeneratesCorrectSql()
-    {
-        LeftJoinWithSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task LeftJoinWithWhere_GeneratesCorrectSql()
-    {
-        LeftJoinWithWhere_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task LeftJoinWithOrderBy_GeneratesCorrectSql()
-    {
-        LeftJoinWithOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InnerJoinWithGroupBy_GeneratesCorrectSql()
-    {
-        InnerJoinWithGroupBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task LeftJoinWithAggregates_GeneratesCorrectSql()
-    {
-        LeftJoinWithAggregates_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
-    {
-        MultipleInnerJoinsFusion_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task MixedJoinTypesFusion_GeneratesCorrectSql()
-    {
-        MixedJoinTypesFusion_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task JoinFusionWithWhere_GeneratesCorrectSql()
-    {
-        JoinFusionWithWhere_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByOrderBySelect_GeneratesCorrectSql()
-    {
-        FromGroupByOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
-    {
-        FromGroupByOrderByMultipleSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
-    {
-        FromGroupByOrderByThreeKeysSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
-    {
-        FromGroupByMultipleOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
-    {
-        FromGroupByHavingOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
-    {
-        ComplexJoinWhereGroupByHavingOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
-    {
-        ComplexLeftJoinWhereGroupByOrderBySelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
-    {
-        FromGroupByMinMaxSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromGroupByAvgSelect_GeneratesCorrectSql()
-    {
-        FromGroupByAvgSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectSum_GeneratesCorrectSql()
-    {
-        FromSelectSum_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectAvg_GeneratesCorrectSql()
-    {
-        FromSelectAvg_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectMin_GeneratesCorrectSql()
-    {
-        FromSelectMin_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectMax_GeneratesCorrectSql()
-    {
-        FromSelectMax_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task ParameterAsIntParam_GeneratesCorrectSql()
-    {
-        ParameterAsIntParam_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task ParameterAsStringParam_GeneratesCorrectSql()
-    {
-        ParameterAsStringParam_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task ParameterAsBoolParam_GeneratesCorrectSql()
-    {
-        ParameterAsBoolParam_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task BoolColumnDirectComparison_GeneratesCorrectSql()
-    {
-        BoolColumnDirectComparison_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task BoolColumnLiteralTrue_GeneratesCorrectSql()
-    {
-        BoolColumnLiteralTrue_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task BoolColumnLiteralFalse_GeneratesCorrectSql()
-    {
-        BoolColumnLiteralFalse_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
-    {
-        FromOrderByMultiple_ExecutesCorrectly(); // Note: delegating to the existing method
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAnd_GeneratesCorrectSql()
-    {
-        FromWhereAnd_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAndSelect_GeneratesCorrectSql()
-    {
-        FromWhereAndSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereSelectParameterized_GeneratesCorrectSql()
-    {
-        FromWhereSelectParameterized_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereOrderBySelectNamed_GeneratesCorrectSql()
-    {
-        FromWhereOrderBySelectNamed_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromSelectOrderBy_GeneratesCorrectSql()
-    {
-        FromSelectOrderBy_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromProductWhereSelect_GeneratesCorrectSql()
-    {
-        FromProductWhereSelect_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
-    {
-        FromWhereAgeGreaterThanSum_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task SumAgesWithDb_GeneratesCorrectSql()
-    {
-        SumAgesWithDb_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task CountCustomersWithDb_GeneratesCorrectSql()
-    {
-        CountCustomersWithDb_ExecutesCorrectly();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task CountActiveCustomersWithDb_GeneratesCorrectSql()
-    {
-        CountActiveCustomersWithDb_ExecutesCorrectly();
         return Task.CompletedTask;
     }
 

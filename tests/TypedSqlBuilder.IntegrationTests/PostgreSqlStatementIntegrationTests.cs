@@ -31,7 +31,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task InsertBasic_ExecutesAgainstDatabase()
+    public async Task InsertBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -54,7 +54,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task InsertPartial_ExecutesAgainstDatabase()
+    public async Task InsertPartial_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -78,7 +78,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateNewCustomer_ExecutesAgainstDatabase()
+    public async Task UpdateNewCustomer_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -109,7 +109,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateBasic_ExecutesAgainstDatabase()
+    public async Task UpdateBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -138,7 +138,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateMultiple_ExecutesAgainstDatabase()
+    public async Task UpdateMultiple_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -167,7 +167,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateConditional_ExecutesAgainstDatabase()
+    public async Task UpdateConditional_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -196,7 +196,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task DeleteBasic_ExecutesAgainstDatabase()
+    public async Task DeleteBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -224,7 +224,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task DeleteConditional_ExecutesAgainstDatabase()
+    public async Task DeleteConditional_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -253,7 +253,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task DeleteAll_ExecutesAgainstDatabase()
+    public async Task DeleteAll_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -278,7 +278,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateSetNull_ExecutesAgainstDatabase()
+    public async Task UpdateSetNull_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -299,7 +299,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateSetNullInt_ExecutesAgainstDatabase()
+    public async Task UpdateSetNullInt_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -320,7 +320,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateSetNullMixed_ExecutesAgainstDatabase()
+    public async Task UpdateSetNullMixed_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -342,7 +342,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task UpdateSetNullWhere_ExecutesAgainstDatabase()
+    public async Task UpdateSetNullWhere_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -385,7 +385,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task InsertWithNull_ExecutesAgainstDatabase()
+    public async Task InsertWithNull_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -408,7 +408,7 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
     }
 
     [Fact]
-    public async Task InsertWithNullInt_ExecutesAgainstDatabase()
+    public async Task InsertWithNullInt_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
@@ -428,91 +428,6 @@ public class PostgreSqlStatementIntegrationTests : IClassFixture<PostgreSqlFixtu
             Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
             Assert.Null(insertedCustomer.Age); // Age should be NULL
         });
-    }
-
-    // Interface implementation methods - these delegate to the actual integration test methods for consistency
-    [Fact]
-    public async Task InsertBasic_GeneratesCorrectSql()
-    {
-        await InsertBasic_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateBasic_GeneratesCorrectSql()
-    {
-        await UpdateBasic_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task DeleteBasic_GeneratesCorrectSql()
-    {
-        await DeleteBasic_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task DeleteAll_GeneratesCorrectSql()
-    {
-        await DeleteAll_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateConditional_GeneratesCorrectSql()
-    {
-        await UpdateConditional_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task InsertPartial_GeneratesCorrectSql()
-    {
-        await InsertPartial_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateMultiple_GeneratesCorrectSql()
-    {
-        await UpdateMultiple_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task DeleteConditional_GeneratesCorrectSql()
-    {
-        await DeleteConditional_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateSetNull_GeneratesCorrectSql()
-    {
-        await UpdateSetNull_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateSetNullMixed_GeneratesCorrectSql()
-    {
-        await UpdateSetNullMixed_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateSetNullInt_GeneratesCorrectSql()
-    {
-        await UpdateSetNullInt_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task UpdateSetNullWhere_GeneratesCorrectSql()
-    {
-        await UpdateSetNullWhere_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task InsertWithNull_GeneratesCorrectSql()
-    {
-        await InsertWithNull_ExecutesAgainstDatabase();
-    }
-
-    [Fact]
-    public async Task InsertWithNullInt_GeneratesCorrectSql()
-    {
-        await InsertWithNullInt_ExecutesAgainstDatabase();
     }
 
     [Fact]

@@ -75,7 +75,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
     }
 
         [Fact]
-    public void InsertBasic_ExecutesAgainstDatabase()
+    public Task InsertBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -96,10 +96,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Equal("John Doe", insertedCustomer.Name);
             Assert.Equal(25, insertedCustomer.Age);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InsertPartial_ExecutesAgainstDatabase()
+    public Task InsertPartial_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -120,6 +121,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Equal("Partial Customer", insertedCustomer.Name);
             Assert.Equal(28, insertedCustomer.Age);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
@@ -204,21 +206,6 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
     }
 
     [Fact]
-    public Task UpdateBasic_GeneratesCorrectSql()
-    {
-        // Just verify SQL generation without database execution
-        var statement = TestStatements.UpdateBasic();
-        var (sql, parameters) = statement.ToSqliteRaw();
-
-        // Assert SQL structure is correct
-        Assert.Equal("UPDATE customers SET Age = :p0 WHERE customers.Id = :p1", sql);
-        Assert.Equal(2, parameters.Count);
-        Assert.Equal(26, parameters[":p0"]);
-        Assert.Equal(200, parameters[":p1"]);
-        return Task.CompletedTask;
-    }
-
-    [Fact]
     public void UpdateNewCustomer_GeneratesSqlCorrectly()
     {
         // Just verify SQL generation and syntax using inline statement
@@ -235,7 +222,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
     }
 
     [Fact]
-    public void UpdateNewCustomer_ExecutesAgainstDatabase()
+    public Task UpdateNewCustomer_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -266,10 +253,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Equal(36, updatedCustomer.Age);
             Assert.Equal("New Customer", updatedCustomer.Name); // Name should remain unchanged
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateBasic_ExecutesAgainstDatabase()
+    public Task UpdateBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -299,10 +287,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Equal(26, updatedCustomer.Age);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateMultiple_ExecutesAgainstDatabase()
+    public Task UpdateMultiple_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -331,10 +320,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Equal(27, updatedCustomer.Age);
             Assert.Equal("John Smith", updatedCustomer.Name);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateConditional_ExecutesAgainstDatabase()
+    public Task UpdateConditional_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -354,10 +344,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var johnDoe = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Name = 'John Doe'");
             Assert.Equal(26, johnDoe.Age);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteBasic_ExecutesAgainstDatabase()
+    public Task DeleteBasic_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -389,10 +380,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var remainingCount = connection.QuerySingle<int>("SELECT COUNT(*) FROM customers WHERE Id = 200");
             Assert.Equal(0, remainingCount);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteConditional_ExecutesAgainstDatabase()
+    public Task DeleteConditional_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -416,10 +408,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Contains(remainingCustomers, c => c.Name == "Jane Smith");
             Assert.Contains(remainingCustomers, c => c.Name == "Senior User");
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteAll_ExecutesAgainstDatabase()
+    public Task DeleteAll_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -442,10 +435,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var remainingCustomers = connection.Query<CustomerDto>("SELECT * FROM customers").ToList();
             Assert.Empty(remainingCustomers);
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNull_ExecutesAgainstDatabase()
+    public Task UpdateSetNull_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -465,10 +459,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var customers = connection.Query<CustomerDto>("SELECT * FROM customers");
             Assert.All(customers, c => Assert.Null(c.Name)); // SQLite also stores NULL as null now
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullInt_ExecutesAgainstDatabase()
+    public Task UpdateSetNullInt_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -488,10 +483,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var customers = connection.Query<CustomerDto>("SELECT * FROM customers").ToList();
             Assert.All(customers, c => Assert.Null(c.Age)); // Age is now int?, so NULL remains null
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullMixed_ExecutesAgainstDatabase()
+    public Task UpdateSetNullMixed_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -512,10 +508,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.All(customers, c => Assert.Equal("John", c.Name));
             Assert.All(customers, c => Assert.Null(c.Age)); // Age is now int?, so NULL remains null
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullWhere_ExecutesAgainstDatabase()
+    public Task UpdateSetNullWhere_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -544,10 +541,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var updatedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 200");
             Assert.Null(updatedCustomer.Name); // SQLite also stores NULL as null now
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InsertWithNull_ExecutesAgainstDatabase()
+    public Task InsertWithNull_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -567,10 +565,11 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             var insertedCustomer = connection.QuerySingle<CustomerDto>("SELECT * FROM customers WHERE Id = 202");
             Assert.Null(insertedCustomer.Name); // SQLite also stores NULL as null now
         });
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public Task InsertWithNullInt_ExecutesAgainstDatabase()
+    public Task InsertWithNullInt_GeneratesCorrectSql()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -591,98 +590,6 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
             Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
             Assert.Null(insertedCustomer.Age); // Age should be NULL
         });
-        return Task.CompletedTask;
-    }
-
-    // Interface implementation methods - these delegate to the actual integration test methods for consistency
-    [Fact]
-    public Task InsertBasic_GeneratesCorrectSql()
-    {
-        InsertBasic_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task DeleteBasic_GeneratesCorrectSql()
-    {
-        DeleteBasic_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task DeleteAll_GeneratesCorrectSql()
-    {
-        DeleteAll_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateConditional_GeneratesCorrectSql()
-    {
-        UpdateConditional_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InsertPartial_GeneratesCorrectSql()
-    {
-        InsertPartial_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateMultiple_GeneratesCorrectSql()
-    {
-        UpdateMultiple_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task DeleteConditional_GeneratesCorrectSql()
-    {
-        DeleteConditional_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateSetNull_GeneratesCorrectSql()
-    {
-        UpdateSetNull_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateSetNullMixed_GeneratesCorrectSql()
-    {
-        UpdateSetNullMixed_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateSetNullInt_GeneratesCorrectSql()
-    {
-        UpdateSetNullInt_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task UpdateSetNullWhere_GeneratesCorrectSql()
-    {
-        UpdateSetNullWhere_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InsertWithNull_GeneratesCorrectSql()
-    {
-        InsertWithNull_ExecutesAgainstDatabase();
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InsertWithNullInt_GeneratesCorrectSql()
-    {
-        InsertWithNullInt_ExecutesAgainstDatabase();
         return Task.CompletedTask;
     }
 

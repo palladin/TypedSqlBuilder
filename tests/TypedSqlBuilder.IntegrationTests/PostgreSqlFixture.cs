@@ -102,27 +102,23 @@ public class PostgreSqlFixture : IAsyncLifetime
     private async Task SeedTestData(IDbConnection connection)
     {
         // Note: Using explicit IDs for consistent testing
-        var insertCustomers = @"
+        var customerTuples = TestDataConstants.Customers
+            .Select(c => $"({c.Id}, {c.Age}, '{c.Name}', {c.IsActive.ToString().ToLower()})");
+        
+        var insertCustomers = $@"
             INSERT INTO customers (id, age, name, isactive) VALUES 
-            (1, 25, 'John Doe', true),
-            (2, 30, 'Jane Smith', true),
-            (3, 16, 'Minor User', false),
-            (4, 65, 'Senior User', true);
-            SELECT setval(pg_get_serial_sequence('customers', 'id'), 4);";
+            {string.Join(",\n            ", customerTuples)};
+            SELECT setval(pg_get_serial_sequence('customers', 'id'), {TestDataConstants.Customers.Length});";
 
-        var insertProducts = @"
+        var insertProducts = $@"
             INSERT INTO products (productid, productname) VALUES
-            (1, 'Laptop'),
-            (2, 'Mouse'),
-            (3, 'Discontinued');
-            SELECT setval(pg_get_serial_sequence('products', 'productid'), 3);";
+            {string.Join(",\n            ", TestDataConstants.ProductTuples)};
+            SELECT setval(pg_get_serial_sequence('products', 'productid'), {TestDataConstants.Products.Length});";
 
-        var insertOrders = @"
+        var insertOrders = $@"
             INSERT INTO orders (orderid, customerid, amount) VALUES
-            (1, 1, 100),
-            (2, 2, 200),
-            (3, 1, 150);
-            SELECT setval(pg_get_serial_sequence('orders', 'orderid'), 3);";
+            {string.Join(",\n            ", TestDataConstants.OrderTuples)};
+            SELECT setval(pg_get_serial_sequence('orders', 'orderid'), {TestDataConstants.Orders.Length});";
 
         await connection.ExecuteAsync(insertCustomers);
         await connection.ExecuteAsync(insertProducts);
