@@ -5,29 +5,6 @@ using Dapper;
 namespace TypedSqlBuilder.IntegrationTests;
 
 /// <summary>
-/// POCO classes for Dapper mapping
-/// </summary>
-public class CustomerDto
-{
-    public int Id { get; set; }
-    public int Age { get; set; }
-    public string Name { get; set; } = string.Empty;
-}
-
-public class ProductDto
-{
-    public int ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-}
-
-public class OrderDto
-{
-    public int OrderId { get; set; }
-    public int CustomerId { get; set; }
-    public int Amount { get; set; }
-}
-
-/// <summary>
 /// Base class for SQLite integration tests with isolated database per test
 /// </summary>
 public abstract class SqliteIntegrationTestBase : IDisposable
@@ -127,24 +104,5 @@ public abstract class SqliteIntegrationTestBase : IDisposable
     public void Dispose()
     {
         _connection?.Dispose();
-    }
-}
-
-/// <summary>
-/// Extension methods for integration test helpers
-/// </summary>
-public static class IntegrationTestExtensions
-{
-    /// <summary>
-    /// Converts SQL builder parameters to Dapper parameters
-    /// </summary>
-    public static DynamicParameters ToDapperParameters(this IReadOnlyDictionary<string, object> parameters)
-    {
-        var dapperParams = new DynamicParameters();
-        foreach (var param in parameters)
-        {
-            dapperParams.Add(param.Key, param.Value);
-        }
-        return dapperParams;
     }
 }
