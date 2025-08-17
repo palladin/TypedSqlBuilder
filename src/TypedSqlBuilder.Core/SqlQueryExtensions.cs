@@ -541,4 +541,55 @@ public static class SqlQueryExtensions
         var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
         return (sql, resultContext.Parameters);
     }
+
+    /// <summary>
+    /// Compiles the SQL query to PostgreSQL syntax with parameters.
+    /// </summary>
+    /// <param name="query">The SQL query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = query.ToPostgreSqlRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToPostgreSqlRaw(this ISqlQuery query)
+    {
+        var context = new Context { Dialect = SqlDialect.PostgreSQL };
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context, 0);
+        return (sql, resultContext.Parameters);
+    }
+
+    /// <summary>
+    /// Compiles the SQL statement to PostgreSQL syntax with parameters.
+    /// </summary>
+    /// <param name="statement">The SQL statement to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = statement.ToPostgreSqlRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToPostgreSqlRaw(this ISqlStatement statement)
+    {
+        var context = new Context { Dialect = SqlDialect.PostgreSQL };
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context, 0);
+        return (sql, resultContext.Parameters);
+    }
+
+    /// <summary>
+    /// Compiles the SQL scalar query to PostgreSQL syntax with parameters.
+    /// </summary>
+    /// <param name="scalarQuery">The SQL scalar query to compile</param>
+    /// <returns>A tuple containing the SQL string and parameter dictionary</returns>
+    /// <example>
+    /// <code>
+    /// var (sql, parameters) = countQuery.ToPostgreSqlRaw();
+    /// </code>
+    /// </example>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToPostgreSqlRaw(this ISqlScalarQuery scalarQuery)
+    {
+        var context = new Context { Dialect = SqlDialect.PostgreSQL };
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
+        return (sql, resultContext.Parameters);
+    }
 }

@@ -441,7 +441,11 @@ internal static partial class SqlCompiler
         {
             // Boolean literals - handle dialect differences for true/false values
             case SqlBoolValue(var value):
-                return context.GenerateParameter(value ? 1 : 0);
+                return context.Dialect.Type switch
+                {
+                    DatabaseType.PostgreSQL => (value ? "true" : "false", context),
+                    _ => context.GenerateParameter(value ? 1 : 0)
+                };
             
             // String concatenation - handle dialect differences
             case SqlStringConcat(var left, var right):

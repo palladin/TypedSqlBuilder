@@ -8,7 +8,8 @@ namespace TypedSqlBuilder.Core;
 internal enum DatabaseType
 {
     SQLite,
-    SqlServer
+    SqlServer,
+    PostgreSQL
 }
 
 /// <summary>
@@ -46,6 +47,17 @@ internal record SqlDialect(
         ParameterPrefix: "@",
         StringConcatOperator: "CONCAT",
         UsesConcatFunction: true
+    );
+
+    /// <summary>
+    /// PostgreSQL dialect configuration.
+    /// Uses colon prefix for parameters (via Npgsql) and || operator for string concatenation.
+    /// </summary>
+    public static readonly SqlDialect PostgreSQL = new(
+        Type: DatabaseType.PostgreSQL,
+        ParameterPrefix: ":",
+        StringConcatOperator: "||",
+        UsesConcatFunction: false
     );
 }
 

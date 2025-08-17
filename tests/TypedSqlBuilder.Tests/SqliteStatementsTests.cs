@@ -7,10 +7,10 @@ namespace TypedSqlBuilder.Tests;
 /// <summary>
 /// SQLite-specific tests for INSERT, UPDATE, and DELETE statements using TestStatements
 /// </summary>
-public class SqliteStatementsTests
+public class SqliteStatementsTests : IStatementTestContract, ISqliteDialectTestContract
 {
     [Fact]
-    public void InsertBasic_GeneratesCorrectSql()
+    public Task InsertBasic_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.InsertBasic();
@@ -24,10 +24,11 @@ public class SqliteStatementsTests
         Assert.Equal(200, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
         Assert.Equal("John Doe", parameters[":p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateBasic_GeneratesCorrectSql()
+    public Task UpdateBasic_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateBasic();
@@ -40,10 +41,11 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(26, parameters[":p0"]);
         Assert.Equal(200, parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteBasic_GeneratesCorrectSql()
+    public Task DeleteBasic_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.DeleteBasic();
@@ -55,10 +57,11 @@ public class SqliteStatementsTests
         Assert.Equal("DELETE FROM customers WHERE customers.Id = :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(200, parameters[":p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteAll_GeneratesCorrectSql()
+    public Task DeleteAll_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.DeleteAll();
@@ -69,10 +72,11 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("DELETE FROM customers", sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateConditional_GeneratesCorrectSql()
+    public Task UpdateConditional_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateConditional();
@@ -86,10 +90,11 @@ public class SqliteStatementsTests
         Assert.Equal(1, parameters[":p0"]);
         Assert.Equal(18, parameters[":p1"]);
         Assert.Equal("Admin", parameters[":p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InsertPartial_GeneratesCorrectSql()
+    public Task InsertPartial_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.InsertPartial();
@@ -102,10 +107,11 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(28, parameters[":p0"]);
         Assert.Equal("Partial Customer", parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateMultiple_GeneratesCorrectSql()
+    public Task UpdateMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateMultiple();
@@ -119,10 +125,11 @@ public class SqliteStatementsTests
         Assert.Equal(27, parameters[":p0"]);
         Assert.Equal("John Smith", parameters[":p1"]);
         Assert.Equal(200, parameters[":p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void DeleteConditional_GeneratesCorrectSql()
+    public Task DeleteConditional_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.DeleteConditional();
@@ -135,10 +142,11 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Temp", parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void Sqlite_UsesColonPrefix()
+    public Task Sqlite_UsesColonPrefix()
     {
         // Arrange - using inline statement to verify colon prefix behavior
         var statement = TypedSql.Insert<Customer>()
@@ -155,10 +163,11 @@ public class SqliteStatementsTests
         Assert.Equal(200, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
         Assert.Equal("John Doe", parameters[":p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNull_GeneratesCorrectSql()
+    public Task UpdateSetNull_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateSetNull();
@@ -169,10 +178,11 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("UPDATE customers SET Name = NULL", sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullInt_GeneratesCorrectSql()
+    public Task UpdateSetNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateSetNullInt();
@@ -183,10 +193,11 @@ public class SqliteStatementsTests
         // Assert
         Assert.Equal("UPDATE customers SET Age = NULL", sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullMixed_GeneratesCorrectSql()
+    public Task UpdateSetNullMixed_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateSetNullMixed();
@@ -198,10 +209,11 @@ public class SqliteStatementsTests
         Assert.Equal("UPDATE customers SET Name = :p0, Age = NULL", sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters[":p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void UpdateSetNullWhere_GeneratesCorrectSql()
+    public Task UpdateSetNullWhere_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.UpdateSetNullWhere();
@@ -213,10 +225,11 @@ public class SqliteStatementsTests
         Assert.Equal("UPDATE customers SET Name = NULL WHERE customers.Id = :p0", sql);
         Assert.Single(parameters);
         Assert.Equal(200, parameters[":p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InsertWithNull_GeneratesCorrectSql()
+    public Task InsertWithNull_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.InsertWithNull();
@@ -229,10 +242,11 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(202, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InsertWithNullInt_GeneratesCorrectSql()
+    public Task InsertWithNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var statement = TestStatements.InsertWithNullInt();
@@ -245,6 +259,7 @@ public class SqliteStatementsTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(203, parameters[":p0"]);
         Assert.Equal("John", parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]

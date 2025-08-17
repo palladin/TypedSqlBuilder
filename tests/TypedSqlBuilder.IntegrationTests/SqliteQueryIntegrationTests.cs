@@ -7,7 +7,7 @@ namespace TypedSqlBuilder.IntegrationTests;
 /// <summary>
 /// Integration tests for SELECT queries executed against SQLite databases using Dapper
 /// </summary>
-public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase
+public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTestContract, ISqliteDialectTestContract
 {
     [Fact]
     public void FromWhereInt_ExecutesCorrectly()
@@ -1445,5 +1445,640 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase
         // Assert - Should return inactive customers (only Minor User)
         Assert.Single(results);
         Assert.Contains(results, r => r.Name == "Minor User" && !r.IsActive);
+    }
+
+    // Interface implementation methods - these delegate to the actual integration test methods for consistency
+    [Fact]
+    public Task From_GeneratesCorrectSql()
+    {
+        From_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromStatic_GeneratesCorrectSql()
+    {
+        FromStatic_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelect_GeneratesCorrectSql()
+    {
+        FromSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectSingle_GeneratesCorrectSql()
+    {
+        FromSelectSingle_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereInt_GeneratesCorrectSql()
+    {
+        FromWhereInt_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereString_GeneratesCorrectSql()
+    {
+        FromWhereString_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereMultiple_GeneratesCorrectSql()
+    {
+        FromWhereMultiple_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByAsc_GeneratesCorrectSql()
+    {
+        FromOrderByAsc_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByDesc_GeneratesCorrectSql()
+    {
+        FromOrderByDesc_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectOrderBy_GeneratesCorrectSql()
+    {
+        FromWhereSelectOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelect_GeneratesCorrectSql()
+    {
+        FromWhereSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereOr_GeneratesCorrectSql()
+    {
+        FromWhereOr_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectExpression_GeneratesCorrectSql()
+    {
+        FromSelectExpression_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereOrderBy_GeneratesCorrectSql()
+    {
+        FromWhereOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereOrderBySelect_GeneratesCorrectSql()
+    {
+        FromWhereOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectNamed_GeneratesCorrectSql()
+    {
+        FromWhereSelectNamed_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereFusionTwo_GeneratesCorrectSql()
+    {
+        FromWhereFusionTwo_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereFusionThree_GeneratesCorrectSql()
+    {
+        FromWhereFusionThree_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereFusionWithSelect_GeneratesCorrectSql()
+    {
+        FromWhereFusionWithSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
+    {
+        FromWhereFusionWithOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByThenBy_GeneratesCorrectSql()
+    {
+        FromOrderByThenBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByThenByDescending_GeneratesCorrectSql()
+    {
+        FromOrderByThenByDescending_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
+    {
+        FromOrderByDescendingThenBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByMultiple_GeneratesCorrectSql()
+    {
+        FromOrderByMultiple_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereOrderByThenBy_GeneratesCorrectSql()
+    {
+        FromWhereOrderByThenBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByThenBySelect_GeneratesCorrectSql()
+    {
+        FromOrderByThenBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereIsNull_GeneratesCorrectSql()
+    {
+        FromWhereIsNull_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereIsNotNull_GeneratesCorrectSql()
+    {
+        FromWhereIsNotNull_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereIsNullInt_GeneratesCorrectSql()
+    {
+        FromWhereIsNullInt_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereIsNotNullInt_GeneratesCorrectSql()
+    {
+        FromWhereIsNotNullInt_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereIsNullCombined_GeneratesCorrectSql()
+    {
+        FromWhereIsNullCombined_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task SumAges_GeneratesCorrectSql()
+    {
+        SumAges_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CountCustomers_GeneratesCorrectSql()
+    {
+        CountCustomers_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CountActiveCustomers_GeneratesCorrectSql()
+    {
+        CountActiveCustomers_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
+    {
+        FromWhereAgeGreaterThanAverageAge_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAgeIn_GeneratesCorrectSql()
+    {
+        FromWhereAgeIn_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAgeInSubquery_GeneratesCorrectSql()
+    {
+        FromWhereAgeInSubquery_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
+    {
+        FromWhereAgeInSubqueryWithClosure_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSubquery_GeneratesCorrectSql()
+    {
+        FromSubquery_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
+    {
+        FromWhereSelectWhereFromNested_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectWhereNested_GeneratesCorrectSql()
+    {
+        FromWhereSelectWhereNested_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupBySelect_GeneratesCorrectSql()
+    {
+        FromGroupBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByMultipleSelect_GeneratesCorrectSql()
+    {
+        FromGroupByMultipleSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByHavingSelect_GeneratesCorrectSql()
+    {
+        FromGroupByHavingSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereGroupBySelect_GeneratesCorrectSql()
+    {
+        FromWhereGroupBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InnerJoinBasic_GeneratesCorrectSql()
+    {
+        InnerJoinBasic_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InnerJoinWithSelect_GeneratesCorrectSql()
+    {
+        InnerJoinWithSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InnerJoinWithWhere_GeneratesCorrectSql()
+    {
+        InnerJoinWithWhere_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InnerJoinWithOrderBy_GeneratesCorrectSql()
+    {
+        InnerJoinWithOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LeftJoinBasic_GeneratesCorrectSql()
+    {
+        LeftJoinBasic_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LeftJoinWithSelect_GeneratesCorrectSql()
+    {
+        LeftJoinWithSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LeftJoinWithWhere_GeneratesCorrectSql()
+    {
+        LeftJoinWithWhere_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LeftJoinWithOrderBy_GeneratesCorrectSql()
+    {
+        LeftJoinWithOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InnerJoinWithGroupBy_GeneratesCorrectSql()
+    {
+        InnerJoinWithGroupBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task LeftJoinWithAggregates_GeneratesCorrectSql()
+    {
+        LeftJoinWithAggregates_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
+    {
+        MultipleInnerJoinsFusion_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MixedJoinTypesFusion_GeneratesCorrectSql()
+    {
+        MixedJoinTypesFusion_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task JoinFusionWithWhere_GeneratesCorrectSql()
+    {
+        JoinFusionWithWhere_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByOrderBySelect_GeneratesCorrectSql()
+    {
+        FromGroupByOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
+    {
+        FromGroupByOrderByMultipleSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
+    {
+        FromGroupByOrderByThreeKeysSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        FromGroupByMultipleOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    {
+        FromGroupByHavingOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    {
+        ComplexJoinWhereGroupByHavingOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
+    {
+        ComplexLeftJoinWhereGroupByOrderBySelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
+    {
+        FromGroupByMinMaxSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByAvgSelect_GeneratesCorrectSql()
+    {
+        FromGroupByAvgSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectSum_GeneratesCorrectSql()
+    {
+        FromSelectSum_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectAvg_GeneratesCorrectSql()
+    {
+        FromSelectAvg_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectMin_GeneratesCorrectSql()
+    {
+        FromSelectMin_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectMax_GeneratesCorrectSql()
+    {
+        FromSelectMax_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsIntParam_GeneratesCorrectSql()
+    {
+        ParameterAsIntParam_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsStringParam_GeneratesCorrectSql()
+    {
+        ParameterAsStringParam_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsBoolParam_GeneratesCorrectSql()
+    {
+        ParameterAsBoolParam_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task BoolColumnDirectComparison_GeneratesCorrectSql()
+    {
+        BoolColumnDirectComparison_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task BoolColumnLiteralTrue_GeneratesCorrectSql()
+    {
+        BoolColumnLiteralTrue_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task BoolColumnLiteralFalse_GeneratesCorrectSql()
+    {
+        BoolColumnLiteralFalse_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        FromOrderByMultiple_ExecutesCorrectly(); // Note: delegating to the existing method
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAnd_GeneratesCorrectSql()
+    {
+        FromWhereAnd_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAndSelect_GeneratesCorrectSql()
+    {
+        FromWhereAndSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectParameterized_GeneratesCorrectSql()
+    {
+        FromWhereSelectParameterized_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereOrderBySelectNamed_GeneratesCorrectSql()
+    {
+        FromWhereOrderBySelectNamed_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectOrderBy_GeneratesCorrectSql()
+    {
+        FromSelectOrderBy_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromProductWhereSelect_GeneratesCorrectSql()
+    {
+        FromProductWhereSelect_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
+    {
+        FromWhereAgeGreaterThanSum_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task SumAgesWithDb_GeneratesCorrectSql()
+    {
+        SumAgesWithDb_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CountCustomersWithDb_GeneratesCorrectSql()
+    {
+        CountCustomersWithDb_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CountActiveCustomersWithDb_GeneratesCorrectSql()
+    {
+        CountActiveCustomersWithDb_ExecutesCorrectly();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task Sqlite_UsesColonPrefix()
+    {
+        // Integration test for SQLite : parameter prefix
+        // Arrange - using inline query to test : symbol prefix
+        var query = TestQueries.FromWhereAnd(); // This uses parameters
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert - should use : prefix in generated SQL
+        Assert.Contains(":p", sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters[":p0"]);
+        Assert.Equal("John", parameters[":p1"]);
+        return Task.CompletedTask;
     }
 }

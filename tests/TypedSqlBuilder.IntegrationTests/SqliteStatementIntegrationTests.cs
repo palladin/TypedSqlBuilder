@@ -7,7 +7,7 @@ namespace TypedSqlBuilder.IntegrationTests;
 /// <summary>
 /// Integration tests for INSERT, UPDATE, DELETE statements executed against SQLite databases using Dapper
 /// </summary>
-public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
+public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IStatementTestContract, ISqliteDialectTestContract
 {
     [Fact]
     public void InsertStatement_ExecutesCorrectly()
@@ -204,7 +204,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
     }
 
     [Fact]
-    public void UpdateBasic_GeneratesCorrectSql()
+    public Task UpdateBasic_GeneratesCorrectSql()
     {
         // Just verify SQL generation without database execution
         var statement = TestStatements.UpdateBasic();
@@ -215,6 +215,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
         Assert.Equal(2, parameters.Count);
         Assert.Equal(26, parameters[":p0"]);
         Assert.Equal(200, parameters[":p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
@@ -569,7 +570,7 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
     }
 
     [Fact]
-    public void InsertWithNullInt_ExecutesAgainstDatabase()
+    public Task InsertWithNullInt_ExecutesAgainstDatabase()
     {
         // Use transaction to ensure test isolation while executing real SQL
         WithTransaction(connection =>
@@ -590,5 +591,121 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase
             Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
             Assert.Null(insertedCustomer.Age); // Age should be NULL
         });
+        return Task.CompletedTask;
+    }
+
+    // Interface implementation methods - these delegate to the actual integration test methods for consistency
+    [Fact]
+    public Task InsertBasic_GeneratesCorrectSql()
+    {
+        InsertBasic_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DeleteBasic_GeneratesCorrectSql()
+    {
+        DeleteBasic_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DeleteAll_GeneratesCorrectSql()
+    {
+        DeleteAll_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateConditional_GeneratesCorrectSql()
+    {
+        UpdateConditional_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InsertPartial_GeneratesCorrectSql()
+    {
+        InsertPartial_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateMultiple_GeneratesCorrectSql()
+    {
+        UpdateMultiple_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DeleteConditional_GeneratesCorrectSql()
+    {
+        DeleteConditional_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNull_GeneratesCorrectSql()
+    {
+        UpdateSetNull_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNullMixed_GeneratesCorrectSql()
+    {
+        UpdateSetNullMixed_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNullInt_GeneratesCorrectSql()
+    {
+        UpdateSetNullInt_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNullWhere_GeneratesCorrectSql()
+    {
+        UpdateSetNullWhere_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InsertWithNull_GeneratesCorrectSql()
+    {
+        InsertWithNull_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InsertWithNullInt_GeneratesCorrectSql()
+    {
+        InsertWithNullInt_ExecutesAgainstDatabase();
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task Sqlite_UsesColonPrefix()
+    {
+        // Integration test for SQLite : parameter prefix
+        // Arrange - using inline statement to test : symbol prefix
+        var statement = TypedSql.Insert<Customer>()
+            .Value(c => c.Id, 999)
+            .Value(c => c.Age, 25)
+            .Value(c => c.Name, "Colon Test");
+
+        // Act
+        var (sql, parameters) = statement.ToSqliteRaw();
+
+        // Assert - should use : prefix in generated SQL
+        Assert.Contains(":p", sql);
+        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(999, parameters[":p0"]);
+        Assert.Equal(25, parameters[":p1"]);
+        Assert.Equal("Colon Test", parameters[":p2"]);
+        return Task.CompletedTask;
     }
 }

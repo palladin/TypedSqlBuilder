@@ -8,7 +8,7 @@ namespace TypedSqlBuilder.IntegrationTests;
 /// <summary>
 /// Integration tests for INSERT, UPDATE, DELETE statements executed against SQL Server databases using Dapper
 /// </summary>
-public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture>
+public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture>, IStatementTestContract, ISqlServerDialectTestContract
 {
     private readonly SqlServerFixture _fixture;
 
@@ -127,16 +127,14 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - First insert a customer to update
+            // Arrange - First insert a customer to update (use ID from TestStatements.UpdateBasic)
             var insertStatement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 201)
+                .Value(c => c.Id, 200)
                 .Value(c => c.Age, 25)
-                .Value(c => c.Name, "Update Basic Test");
+                .Value(c => c.Name, "John Doe");
             await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
             
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Age, 26)
-                .Where(c => c.Id == 201);
+            var statement = TestStatements.UpdateBasic();
             
             // Act - Execute UPDATE against real database
             var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
@@ -144,11 +142,11 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
             // Assert
             Assert.Equal(1, updatedRows);
             
-            // Verify the update worked
+            // Verify the update worked (Age should be 26)
             var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 201", transaction: transaction);
-            Assert.Equal("Update Basic Test", updatedCustomer.Name); // Name should be unchanged
-            Assert.Equal(26, updatedCustomer.Age); // Age should be updated to 26
+                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+            Assert.Equal("John Doe", updatedCustomer.Name); // Name unchanged
+            Assert.Equal(26, updatedCustomer.Age); // Age updated from 25 to 26
         });
     }
 
@@ -158,17 +156,14 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - First insert a customer to update
+            // Arrange - First insert a customer to update (use ID from TestStatements.UpdateMultiple)
             var insertStatement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 202)
+                .Value(c => c.Id, 200)
                 .Value(c => c.Age, 25)
-                .Value(c => c.Name, "Update Multiple Test");
+                .Value(c => c.Name, "John Doe");
             await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
             
-            var statement = TypedSql.Update<Customer>()
-                .Set(c => c.Age, 27)
-                .Set(c => c.Name, "John Smith")
-                .Where(c => c.Id == 202);
+            var statement = TestStatements.UpdateMultiple();
             
             // Act - Execute UPDATE against real database
             var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
@@ -178,9 +173,9 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
             
             // Verify the update worked
             var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 202", transaction: transaction);
-            Assert.Equal("John Smith", updatedCustomer.Name); // Name updated
-            Assert.Equal(27, updatedCustomer.Age); // Age updated
+                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+            Assert.Equal("John Smith", updatedCustomer.Name); // Name updated from "John Doe" to "John Smith"
+            Assert.Equal(27, updatedCustomer.Age); // Age updated from 25 to 27
         });
     }
 
@@ -219,15 +214,14 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Arrange - First insert a customer to delete
+            // Arrange - First insert a customer to delete (use ID from TestStatements.DeleteBasic)
             var insertStatement = TypedSql.Insert<Customer>()
-                .Value(c => c.Id, 204)
+                .Value(c => c.Id, 200)
                 .Value(c => c.Age, 25)
-                .Value(c => c.Name, "Delete Basic Test");
+                .Value(c => c.Name, "John Doe");
             await ExecuteStatementAsync(connection, transaction, insertStatement, hasExplicitId: true);
             
-            var statement = TypedSql.Delete<Customer>()
-                .Where(c => c.Id == 204);
+            var statement = TestStatements.DeleteBasic();
             
             // Act - Execute DELETE against real database
             var deletedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
@@ -237,7 +231,7 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
             
             // Verify the delete worked
             var remainingCustomers = await connection.QueryAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 204", transaction: transaction);
+                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
             Assert.Empty(remainingCustomers);
         });
     }
@@ -446,6 +440,132 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
                 "SELECT * FROM customers WHERE Id = 203", transaction: transaction);
             Assert.Equal("John", insertedCustomer.Name); // Name should be "John"
             Assert.Null(insertedCustomer.Age); // Age should be NULL
+        });
+    }
+
+    // Interface implementation methods - these delegate to the actual integration test methods for consistency
+    [Fact]
+    public async Task InsertBasic_GeneratesCorrectSql()
+    {
+        await InsertBasic_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateBasic_GeneratesCorrectSql()
+    {
+        await UpdateBasic_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task DeleteBasic_GeneratesCorrectSql()
+    {
+        await DeleteBasic_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task DeleteAll_GeneratesCorrectSql()
+    {
+        await DeleteAll_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateConditional_GeneratesCorrectSql()
+    {
+        await UpdateConditional_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task InsertPartial_GeneratesCorrectSql()
+    {
+        await InsertPartial_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateMultiple_GeneratesCorrectSql()
+    {
+        await UpdateMultiple_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task DeleteConditional_GeneratesCorrectSql()
+    {
+        await DeleteConditional_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateSetNull_GeneratesCorrectSql()
+    {
+        await UpdateSetNull_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateSetNullMixed_GeneratesCorrectSql()
+    {
+        await UpdateSetNullMixed_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateSetNullInt_GeneratesCorrectSql()
+    {
+        await UpdateSetNullInt_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task UpdateSetNullWhere_GeneratesCorrectSql()
+    {
+        await UpdateSetNullWhere_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task InsertWithNull_GeneratesCorrectSql()
+    {
+        await InsertWithNull_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task InsertWithNullInt_GeneratesCorrectSql()
+    {
+        await InsertWithNullInt_ExecutesAgainstDatabase();
+    }
+
+    [Fact]
+    public async Task SqlServer_UsesAtSymbolPrefix()
+    {
+        // Integration test for SQL Server @ parameter prefix
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - using inline statement to test @ symbol prefix
+            var statement = TypedSql.Update<Customer>()
+                .Set(c => c.Name, "Inline Test");
+
+            // Act - Execute against real database  
+            var (sql, parameters) = statement.ToSqlServerRaw();
+            var dapperParams = parameters.ToDapperParameters();
+            
+            // First create test data
+            await ExecuteStatementAsync(connection, transaction,
+                TypedSql.Insert<Customer>()
+                    .Value(c => c.Id, 999)
+                    .Value(c => c.Age, 30)
+                    .Value(c => c.Name, "Original Name"),
+                hasExplicitId: true);
+
+            // Add WHERE clause for specific update
+            var updateStatement = TypedSql.Update<Customer>()
+                .Set(c => c.Name, "Inline Test")
+                .Where(c => c.Id == 999);
+                
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, updateStatement, hasExplicitId: false);
+            
+            // Assert - should use @ prefix in generated SQL and execute successfully
+            var (finalSql, finalParams) = updateStatement.ToSqlServerRaw();
+            Assert.Contains("@p", finalSql);
+            Assert.Equal(1, updatedRows);
+            
+            // Verify update worked
+            var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
+                "SELECT * FROM customers WHERE Id = 999", transaction: transaction);
+            Assert.Equal("Inline Test", updatedCustomer.Name);
         });
     }
 }

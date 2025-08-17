@@ -7,10 +7,10 @@ namespace TypedSqlBuilder.Tests;
 /// <summary>
 /// SQL Server-specific tests using queries from TestQueries
 /// </summary>
-public class SqlServerQueryTests
+public class SqlServerQueryTests : IQueryTestContract, ISqlServerDialectTestContract
 {
     [Fact]
-    public void From_GeneratesCorrectSql()
+    public Task From_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.From();
@@ -30,10 +30,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromStatic_GeneratesCorrectSql()
+    public Task FromStatic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromStatic();
@@ -53,8 +54,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
-    }    [Fact]
-    public void FromSelect_GeneratesCorrectSql()
+        return Task.CompletedTask;
+    }
+    
+    [Fact]
+    public Task FromSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelect();
@@ -72,10 +76,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectSingle_GeneratesCorrectSql()
+    public Task FromSelectSingle_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectSingle();
@@ -92,10 +97,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereInt_GeneratesCorrectSql()
+    public Task FromWhereInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereInt();
@@ -118,10 +124,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereString_GeneratesCorrectSql()
+    public Task FromWhereString_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereString();
@@ -144,10 +151,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereMultiple_GeneratesCorrectSql()
+    public Task FromWhereMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereMultiple();
@@ -171,10 +179,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByAsc_GeneratesCorrectSql()
+    public Task FromOrderByAsc_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByAsc();
@@ -196,10 +205,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByDesc_GeneratesCorrectSql()
+    public Task FromOrderByDesc_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByDesc();
@@ -221,10 +231,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectOrderBy_GeneratesCorrectSql()
+    public Task FromWhereSelectOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectOrderBy();
@@ -249,10 +260,11 @@ public class SqlServerQueryTests
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(1, parameters["@p1"]);
         Assert.Equal("!", parameters["@p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelect_GeneratesCorrectSql()
+    public Task FromWhereSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelect();
@@ -273,10 +285,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(21, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOr_GeneratesCorrectSql()
+    public Task FromWhereOr_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOr();
@@ -301,10 +314,11 @@ public class SqlServerQueryTests
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(65, parameters["@p1"]);
         Assert.Equal("VIP", parameters["@p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectExpression_GeneratesCorrectSql()
+    public Task FromSelectExpression_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSelectExpression();
@@ -325,10 +339,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(100, parameters["@p0"]);
         Assert.Equal(" - Customer", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBy_GeneratesCorrectSql()
+    public Task FromWhereOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBy();
@@ -354,10 +369,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBySelect_GeneratesCorrectSql()
+    public Task FromWhereOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBySelect();
@@ -383,10 +399,11 @@ public class SqlServerQueryTests
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
         Assert.Equal(10, parameters["@p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void SqlServer_UsesAtSymbolPrefix()
+    public Task SqlServer_UsesAtSymbolPrefix()
     {
         // Arrange
         var query = TestQueries.FromWhereAnd();
@@ -410,10 +427,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("John", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderBySelectNamed_GeneratesExpectedSql()
+    public Task FromWhereOrderBySelectNamed_GeneratesExpectedSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderBySelectNamed();
@@ -440,10 +458,11 @@ public class SqlServerQueryTests
         Assert.Equal("", parameters["@p1"]);
         Assert.Equal(" (Customer)", parameters["@p2"]);
         Assert.Equal(5, parameters["@p3"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromProductWhereSelect_WorksCorrectly()
+    public Task FromProductWhereSelect_WorksCorrectly()
     {
         // Arrange
         var query = TestQueries.FromProductWhereSelect();
@@ -464,6 +483,7 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal("Discontinued", parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Theory]
@@ -494,7 +514,7 @@ public class SqlServerQueryTests
     }
 
     [Fact]
-    public void FromWhereSelectNamed_GeneratesCorrectSql()
+    public Task FromWhereSelectNamed_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectNamed();
@@ -517,10 +537,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectOrderBy_ProducesCorrectResults()
+    public Task FromSelectOrderBy_ProducesCorrectResults()
     {
         // Arrange
         var query = TestQueries.FromSelectOrderBy();
@@ -541,10 +562,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAndSelect_WorksCorrectly()
+    public Task FromWhereAndSelect_WorksCorrectly()
     {
         // Arrange
         var query = TestQueries.FromWhereAndSelect();
@@ -566,10 +588,11 @@ public class SqlServerQueryTests
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
         Assert.True(true, "Clean architecture with extension methods works perfectly!");
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionTwo_GeneratesCorrectSql()
+    public Task FromWhereFusionTwo_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionTwo();
@@ -592,10 +615,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionThree_GeneratesCorrectSql()
+    public Task FromWhereFusionThree_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionThree();
@@ -619,10 +643,11 @@ public class SqlServerQueryTests
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
         Assert.Equal(65, parameters["@p2"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionWithSelect_GeneratesCorrectSql()
+    public Task FromWhereFusionWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionWithSelect();
@@ -643,10 +668,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal("", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereFusionWithOrderBy_GeneratesCorrectSql()
+    public Task FromWhereFusionWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereFusionWithOrderBy();
@@ -671,10 +697,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal("Admin", parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenBy_GeneratesCorrectSql()
+    public Task FromOrderByThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenBy();
@@ -696,10 +723,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenByDescending_GeneratesCorrectSql()
+    public Task FromOrderByThenByDescending_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenByDescending();
@@ -721,10 +749,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByDescendingThenBy_GeneratesCorrectSql()
+    public Task FromOrderByDescendingThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByDescendingThenBy();
@@ -746,10 +775,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByMultiple_GeneratesCorrectSql()
+    public Task FromOrderByMultiple_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByMultiple();
@@ -771,10 +801,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereOrderByThenBy_GeneratesCorrectSql()
+    public Task FromWhereOrderByThenBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereOrderByThenBy();
@@ -798,10 +829,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromOrderByThenBySelect_GeneratesCorrectSql()
+    public Task FromOrderByThenBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromOrderByThenBySelect();
@@ -821,10 +853,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNull_GeneratesCorrectSql()
+    public Task FromWhereIsNull_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNull();
@@ -846,10 +879,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNotNull_GeneratesCorrectSql()
+    public Task FromWhereIsNotNull_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNotNull();
@@ -871,10 +905,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNullCombined_GeneratesCorrectSql()
+    public Task FromWhereIsNullCombined_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNullCombined();
@@ -896,10 +931,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void SumAges_GeneratesCorrectSql()
+    public Task SumAges_GeneratesCorrectSql()
     {
         // Arrange
         var sumExpr = TestQueries.SumAges();
@@ -916,10 +952,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountCustomers_GeneratesCorrectSql()
+    public Task CountCustomers_GeneratesCorrectSql()
     {
         // Arrange
         var countExpr = TestQueries.CountCustomers();
@@ -936,10 +973,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountActiveCustomers_GeneratesCorrectSql()
+    public Task CountActiveCustomers_GeneratesCorrectSql()
     {
         // Arrange
         var countExpr = TestQueries.CountActiveCustomers();
@@ -959,10 +997,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void SumAgesWithDb_GeneratesCorrectSql()
+    public Task SumAgesWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var sumExpr = TestQueries.SumAgesWithDb();
@@ -979,10 +1018,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountCustomersWithDb_GeneratesCorrectSql()
+    public Task CountCustomersWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var countExpr = TestQueries.CountCustomersWithDb();
@@ -999,10 +1039,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void CountActiveCustomersWithDb_GeneratesCorrectSql()
+    public Task CountActiveCustomersWithDb_GeneratesCorrectSql()
     {
         // Arrange
         var countExpr = TestQueries.CountActiveCustomersWithDb();
@@ -1022,10 +1063,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
+    public Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeGreaterThanSum();
@@ -1049,10 +1091,11 @@ public class SqlServerQueryTests
                 customers a1)
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
+    public Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeGreaterThanAverageAge();
@@ -1076,10 +1119,11 @@ public class SqlServerQueryTests
                 customers a1)
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeIn_GeneratesCorrectSql()
+    public Task FromWhereAgeIn_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeIn();
@@ -1104,10 +1148,11 @@ public class SqlServerQueryTests
         Assert.Equal(21, parameters["@p1"]);
         Assert.Equal(25, parameters["@p2"]);
         Assert.Equal(30, parameters["@p3"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeInSubquery_GeneratesCorrectSql()
+    public Task FromWhereAgeInSubquery_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeInSubquery();
@@ -1134,10 +1179,11 @@ public class SqlServerQueryTests
             """, sql);
         Assert.Single(parameters);
         Assert.Equal("VIP", parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
+    public Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereAgeInSubqueryWithClosure();
@@ -1164,10 +1210,11 @@ public class SqlServerQueryTests
             """, sql);
         Assert.Single(parameters);
         Assert.Equal("_VIP", parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSubquery_GeneratesCorrectSql()
+    public Task FromSubquery_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromSubquery();
@@ -1189,10 +1236,11 @@ public class SqlServerQueryTests
             """, sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters["@p0"]);        
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectWhereFromNested_GeneratesCorrectSql()
+    public Task FromWhereSelectWhereFromNested_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectWhereFromNested();
@@ -1221,10 +1269,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereSelectWhereNested_GeneratesCorrectSql()
+    public Task FromWhereSelectWhereNested_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereSelectWhereNested();
@@ -1252,10 +1301,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupBySelect_GeneratesCorrectSql()
+    public Task FromGroupBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupBySelect();
@@ -1275,10 +1325,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMultipleSelect_GeneratesCorrectSql()
+    public Task FromGroupByMultipleSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMultipleSelect();
@@ -1299,10 +1350,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByHavingSelect_GeneratesCorrectSql()
+    public Task FromGroupByHavingSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByHavingSelect();
@@ -1325,10 +1377,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereGroupBySelect_GeneratesCorrectSql()
+    public Task FromWhereGroupBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereGroupBySelect();
@@ -1351,10 +1404,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNullInt_GeneratesCorrectSql()
+    public Task FromWhereIsNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNullInt();
@@ -1376,10 +1430,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromWhereIsNotNullInt_GeneratesCorrectSql()
+    public Task FromWhereIsNotNullInt_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromWhereIsNotNullInt();
@@ -1401,11 +1456,12 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     // JOIN Tests
     [Fact]
-    public void InnerJoinBasic_GeneratesCorrectSql()
+    public Task InnerJoinBasic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinBasic();
@@ -1426,10 +1482,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithSelect_GeneratesCorrectSql()
+    public Task InnerJoinWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithSelect();
@@ -1448,10 +1505,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithWhere_GeneratesCorrectSql()
+    public Task InnerJoinWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithWhere();
@@ -1485,10 +1543,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithOrderBy_GeneratesCorrectSql()
+    public Task InnerJoinWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithOrderBy();
@@ -1511,10 +1570,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinBasic_GeneratesCorrectSql()
+    public Task LeftJoinBasic_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinBasic();
@@ -1534,10 +1594,11 @@ public class SqlServerQueryTests
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithSelect_GeneratesCorrectSql()
+    public Task LeftJoinWithSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithSelect();
@@ -1555,10 +1616,11 @@ public class SqlServerQueryTests
             LEFT JOIN orders a1 ON a0.Id = a1.CustomerId
             """, sql);
         Assert.Equal(" (Customer)", parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithWhere_GeneratesCorrectSql()
+    public Task LeftJoinWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithWhere();
@@ -1592,10 +1654,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.Equal(21, parameters["@p0"]);
         Assert.Equal(65, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithOrderBy_GeneratesCorrectSql()
+    public Task LeftJoinWithOrderBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithOrderBy();
@@ -1617,10 +1680,11 @@ public class SqlServerQueryTests
                 a0.Name ASC, a1.Amount DESC
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void InnerJoinWithGroupBy_GeneratesCorrectSql()
+    public Task InnerJoinWithGroupBy_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.InnerJoinWithGroupBy();
@@ -1641,10 +1705,11 @@ public class SqlServerQueryTests
                 a0.Id, a0.Name
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void LeftJoinWithAggregates_GeneratesCorrectSql()
+    public Task LeftJoinWithAggregates_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.LeftJoinWithAggregates();
@@ -1667,11 +1732,12 @@ public class SqlServerQueryTests
                 a0.Id
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     // JOIN Fusion Tests - Testing the new JoinClause fusion functionality
     [Fact]
-    public void MultipleInnerJoinsFusion_GeneratesCorrectSql()
+    public Task MultipleInnerJoinsFusion_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.MultipleInnerJoinsFusion();
@@ -1692,10 +1758,11 @@ public class SqlServerQueryTests
             INNER JOIN products a2 ON a1.Amount = a2.ProductId
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void MixedJoinTypesFusion_GeneratesCorrectSql()
+    public Task MixedJoinTypesFusion_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.MixedJoinTypesFusion();
@@ -1716,10 +1783,11 @@ public class SqlServerQueryTests
             LEFT JOIN products a2 ON a1.Amount = a2.ProductId
             """, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void JoinFusionWithWhere_GeneratesCorrectSql()
+    public Task JoinFusionWithWhere_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.JoinFusionWithWhere();
@@ -1752,10 +1820,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters["@p0"]);
         Assert.Equal(100, parameters["@p1"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderBySelect_GeneratesCorrectSql()
+    public Task FromGroupByOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderBySelect();
@@ -1777,10 +1846,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
+    public Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderByMultipleSelect();
@@ -1803,10 +1873,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
+    public Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByOrderByThreeKeysSelect();
@@ -1829,10 +1900,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
+    public Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMultipleOrderBySelect();
@@ -1855,10 +1927,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    public Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByHavingOrderBySelect();
@@ -1882,10 +1955,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(1, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
+    public Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ComplexJoinWhereGroupByHavingOrderBySelect();
@@ -1918,10 +1992,11 @@ public class SqlServerQueryTests
         Assert.Equal(50, parameters["@p1"]);
         Assert.Equal(2, parameters["@p2"]);
         Assert.Equal(500, parameters["@p3"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
+    public Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ComplexLeftJoinWhereGroupByOrderBySelect();
@@ -1948,10 +2023,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByMinMaxSelect_GeneratesCorrectSql()
+    public Task FromGroupByMinMaxSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByMinMaxSelect();
@@ -1973,10 +2049,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromGroupByAvgSelect_GeneratesCorrectSql()
+    public Task FromGroupByAvgSelect_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.FromGroupByAvgSelect();
@@ -1997,10 +2074,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectSum_GeneratesCorrectSql()
+    public Task FromSelectSum_GeneratesCorrectSql()
     {
         // Arrange
         var scalarQuery = TestQueries.FromSelectSum();
@@ -2017,10 +2095,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectAvg_GeneratesCorrectSql()
+    public Task FromSelectAvg_GeneratesCorrectSql()
     {
         // Arrange
         var scalarQuery = TestQueries.FromSelectAvg();
@@ -2037,10 +2116,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectMin_GeneratesCorrectSql()
+    public Task FromSelectMin_GeneratesCorrectSql()
     {
         // Arrange
         var scalarQuery = TestQueries.FromSelectMin();
@@ -2057,10 +2137,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void FromSelectMax_GeneratesCorrectSql()
+    public Task FromSelectMax_GeneratesCorrectSql()
     {
         // Arrange
         var scalarQuery = TestQueries.FromSelectMax();
@@ -2077,10 +2158,11 @@ public class SqlServerQueryTests
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsIntParam_GeneratesCorrectSql()
+    public Task ParameterAsIntParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsIntParam();
@@ -2101,10 +2183,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.True(parameters.ContainsKey("@minAge"));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsStringParam_GeneratesCorrectSql()
+    public Task ParameterAsStringParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsStringParam();
@@ -2125,10 +2208,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.True(parameters.ContainsKey("@customerName"));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void ParameterAsBoolParam_GeneratesCorrectSql()
+    public Task ParameterAsBoolParam_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.ParameterAsBoolParam();
@@ -2151,10 +2235,11 @@ public class SqlServerQueryTests
         Assert.Equal(2, parameters.Count);
         Assert.True(parameters.ContainsKey("@isAdult"));
         Assert.Equal(18, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnDirectComparison_GeneratesCorrectSql()
+    public Task BoolColumnDirectComparison_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnDirectComparison();
@@ -2177,10 +2262,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.True(parameters.ContainsKey("@isActive"));
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnLiteralTrue_GeneratesCorrectSql()
+    public Task BoolColumnLiteralTrue_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralTrue();
@@ -2202,10 +2288,11 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(1, parameters["@p0"]);
+        return Task.CompletedTask;
     }
 
     [Fact]
-    public void BoolColumnLiteralFalse_GeneratesCorrectSql()
+    public Task BoolColumnLiteralFalse_GeneratesCorrectSql()
     {
         // Arrange
         var query = TestQueries.BoolColumnLiteralFalse();
@@ -2227,5 +2314,160 @@ public class SqlServerQueryTests
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
         Assert.Equal(0, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAnd_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAnd();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
+        FROM 
+            customers a0
+        WHERE 
+            (a0.Age > @p0) AND (a0.Name = @p1)
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(18, parameters["@p0"]);
+        Assert.Equal("John", parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereAndSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereAndSelect();
+
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            (a0.Age >= @p0) AND (a0.Name != @p1)
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal("", parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereSelectParameterized_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereSelectParameterized(21, 65);
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        Assert.Equal($$"""
+            SELECT 
+                a0.Id AS Id,
+                a0.Name AS Name
+            FROM 
+                customers a0
+            WHERE 
+                (a0.Age >= @p0) AND (a0.Age <= @p1)
+            """, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(21, parameters["@p0"]);
+        Assert.Equal(65, parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromProductWhereSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromProductWhereSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName
+        FROM 
+            products a0
+        WHERE 
+            a0.ProductName != @p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal("Discontinued", parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectOrderBy_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromSelectOrderBy();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name,
+            (a0.Age + @p0) AS prj0
+        FROM 
+            customers a0
+        ORDER BY 
+            a0.Name ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByMultiple();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Age AS Age,
+            a0.Name AS Name,
+            a0.IsActive AS IsActive
+        FROM 
+            customers a0
+        ORDER BY 
+            a0.Name ASC, a0.Age DESC, a0.Id ASC
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
     }
 }
