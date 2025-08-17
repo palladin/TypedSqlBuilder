@@ -71,42 +71,12 @@ public interface ISqlUpdateWhereStatement<TSqlTable> : ISqlUpdateWhereStatement,
 /// <summary>
 /// Represents a SET clause in an UPDATE statement.
 /// </summary>
-internal abstract record SetClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
-
-/// <summary>
-/// SET clause for integer columns.
-/// </summary>
-internal record SetIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : SetClause(table => IntColumnSelector(table), IntValue);
-
-/// <summary>
-/// SET clause for string columns.
-/// </summary>
-internal record SetStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : SetClause(table => StringColumnSelector(table), StringValue);
-
-/// <summary>
-/// SET clause for boolean columns.
-/// </summary>
-internal record SetBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : SetClause(table => BoolColumnSelector(table), BoolValue);
+internal record SetClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// Represents a VALUE clause in an INSERT statement.
 /// </summary>
-internal abstract record ValueClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
-
-/// <summary>
-/// VALUE clause for integer columns.
-/// </summary>
-internal record InsertIntClause(Func<ISqlTable, SqlExprInt> IntColumnSelector, SqlExprInt IntValue) : ValueClause(table => IntColumnSelector(table), IntValue);
-
-/// <summary>
-/// VALUE clause for string columns.
-/// </summary>
-internal record InsertStringClause(Func<ISqlTable, SqlExprString> StringColumnSelector, SqlExprString StringValue) : ValueClause(table => StringColumnSelector(table), StringValue);
-
-/// <summary>
-/// VALUE clause for boolean columns.
-/// </summary>
-internal record InsertBoolClause(Func<ISqlTable, SqlExprBool> BoolColumnSelector, SqlExprBool BoolValue) : ValueClause(table => BoolColumnSelector(table), BoolValue);
+internal record ValueClause(Func<ISqlTable, SqlExpr> ColumnSelector, SqlExpr Value);
 
 /// <summary>
 /// Base record representing a SQL DELETE statement.

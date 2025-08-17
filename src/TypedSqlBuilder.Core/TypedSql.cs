@@ -114,7 +114,7 @@ public static class TypedSql
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetIntClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -129,7 +129,7 @@ public static class TypedSql
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetStringClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -144,7 +144,7 @@ public static class TypedSql
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
-        var setClause = new SetBoolClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -161,7 +161,7 @@ public static class TypedSql
         where TSqlTable : ISqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
-        var setClause = new SetIntClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -177,7 +177,7 @@ public static class TypedSql
         where TSqlTable : ISqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
-        var setClause = new SetStringClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -193,7 +193,7 @@ public static class TypedSql
         where TSqlTable : ISqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
-        var setClause = new SetBoolClause(t => columnSelector((TSqlTable)t), value);
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
     }
 
@@ -232,7 +232,7 @@ public static class TypedSql
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertIntClause(t => columnSelector((TSqlTable)t), value);
+        var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
     }
 
@@ -247,7 +247,7 @@ public static class TypedSql
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertStringClause(t => columnSelector((TSqlTable)t), value);
+        var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
     }
 
@@ -262,7 +262,7 @@ public static class TypedSql
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
         where TSqlTable : ISqlTable, new()
     {
-        var valueClause = new InsertBoolClause(t => columnSelector((TSqlTable)t), value);
+        var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
     }
 }
