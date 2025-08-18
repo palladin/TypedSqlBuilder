@@ -90,11 +90,6 @@ public interface ISqlColumn
 	public string ColumnName { get; }
 }
 
-public interface ISqlColumn<TCol> : ISqlColumn where TCol : ISqlColumn<TCol>
-{	
-	static abstract TCol Create(string tableName, string columnName);
-}
-
 // Generic comparison base classes for reducing compiler repetition and eliminating type-specific classes
 
 /// <summary>

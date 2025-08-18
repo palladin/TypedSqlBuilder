@@ -83,7 +83,7 @@ internal static partial class SqlCompiler
     /// <param name="table">The table being updated</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The SQL string representation and updated context</returns>
-    private static (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, ISqlTable table, Context context, int scopeLevel)
+    private static (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, SqlTable table, Context context, int scopeLevel)
     {
         var items = new List<string>();
         var ctx = context;
@@ -111,7 +111,7 @@ internal static partial class SqlCompiler
     /// <param name="table">The table being inserted into</param>
     /// <param name="context">The compilation context</param>
     /// <returns>The columns clause, values clause, and updated context</returns>
-    private static (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, ISqlTable table, Context context, int scopeLevel)
+    private static (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, SqlTable table, Context context, int scopeLevel)
     {
         var columns = new List<string>();
         var valuesSql = new List<string>();
@@ -141,7 +141,7 @@ internal static partial class SqlCompiler
     /// <param name="statement">The UPDATE or SET statement to extract from</param>
     /// <returns>A tuple containing the target table and all SET clauses</returns>
     /// <exception cref="NotSupportedException">Thrown when the statement type is not supported for extraction</exception>
-    private static (ISqlTable table, ImmutableArray<SetClause> setClauses) ExtractUpdateTableAndClauses(ISqlStatement statement)
+    private static (SqlTable table, ImmutableArray<SetClause> setClauses) ExtractUpdateTableAndClauses(ISqlStatement statement)
     {
         switch (statement)
         {
@@ -162,7 +162,7 @@ internal static partial class SqlCompiler
     /// <param name="statement">The INSERT or VALUE statement to extract from</param>
     /// <returns>A tuple containing the target table and all VALUE clauses</returns>
     /// <exception cref="NotSupportedException">Thrown when the statement type is not supported for extraction</exception>
-    private static (ISqlTable table, ImmutableArray<ValueClause> valueClauses) ExtractInsertTableAndClauses(ISqlStatement statement)
+    private static (SqlTable table, ImmutableArray<ValueClause> valueClauses) ExtractInsertTableAndClauses(ISqlStatement statement)
     {
         switch (statement)
         {

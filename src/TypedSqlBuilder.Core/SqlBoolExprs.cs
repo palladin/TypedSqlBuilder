@@ -46,18 +46,16 @@ internal class SqlBoolOr(SqlExprBool left, SqlExprBool right) : SqlExprBool
 /// Represents a reference to a boolean column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
-public class SqlBoolColumn : SqlExprBool, ISqlColumn<SqlBoolColumn>
+public class SqlBoolColumn : SqlExprBool, ISqlColumn
 {    
-    private SqlBoolColumn(string tableName, string columnName)
+    internal SqlBoolColumn(string tableName, string columnName)
     {
         TableName = tableName;
         ColumnName = columnName;        
     }
     
     public string TableName { get; }
-    public string ColumnName { get; }
-    
-    public static SqlBoolColumn Create(string tableName, string columnName) => new SqlBoolColumn(tableName, columnName);
+    public string ColumnName { get; }        
     
     public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {

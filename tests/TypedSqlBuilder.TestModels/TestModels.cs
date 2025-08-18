@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TypedSqlBuilder.Core;
 
 namespace TypedSqlBuilder.TestModels;
@@ -5,31 +6,40 @@ namespace TypedSqlBuilder.TestModels;
 /// <summary>
 /// Sample table definition for testing
 /// </summary>
-public class Customer() : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn, SqlBoolColumn>("customers")
+public class Customer() : SqlTable("customers")
 {
-    public SqlIntColumn Id => Column1("Id");
-    public SqlIntColumn Age => Column2("Age");
-    public SqlStringColumn Name => Column3("Name");
-    public SqlBoolColumn IsActive => Column4("IsActive");
+    [Column("Id")]
+    public SqlIntColumn Id { get; set; } = default!;
+    [Column("Age")]
+    public SqlIntColumn Age { get; set; } = default!;
+    [Column("Name")]
+    public SqlStringColumn Name { get; set; } = default!;
+    [Column("IsActive")]
+    public SqlBoolColumn IsActive { get; set; } = default!;
 }
 
 /// <summary>
 /// Sample table with different column types for comprehensive testing
 /// </summary>
-public class Product() : SqlTable<SqlIntColumn, SqlStringColumn>("products") 
+public class Product() : SqlTable("products") 
 {
-    public SqlIntColumn ProductId => Column1("ProductId");
-    public SqlStringColumn ProductName => Column2("ProductName");
+    [Column("ProductId")]
+    public SqlIntColumn ProductId { get; set; } = default!;
+    [Column("ProductName")]
+    public SqlStringColumn ProductName { get; set; } = default!;
 }
 
 /// <summary>
 /// Sample order table for testing joins with customers
 /// </summary>
-public class Order() : SqlTable<SqlIntColumn, SqlIntColumn, SqlIntColumn>("orders")
+public class Order() : SqlTable("orders")
 {
-    public SqlIntColumn OrderId => Column1("OrderId");
-    public SqlIntColumn CustomerId => Column2("CustomerId");
-    public SqlIntColumn Amount => Column3("Amount");
+    [Column("OrderId")]
+    public SqlIntColumn OrderId { get; set; } = default!;
+    [Column("CustomerId")]
+    public SqlIntColumn CustomerId { get; set; } = default!;
+    [Column("Amount")]
+    public SqlIntColumn Amount { get; set; } = default!;
 }
 
 /// <summary>

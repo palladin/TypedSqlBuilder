@@ -21,7 +21,7 @@ public static class TypedSql
     /// </code>
     /// </example>
     public static ISqlQuery<TSqlTable> From<TSqlTable>()
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new FromTableClause<TSqlTable>(new TSqlTable());
     }
@@ -49,7 +49,7 @@ public static class TypedSql
     /// multiple times in complex queries or joins.
     /// </remarks>
     public static ISqlQuery<TSqlTable> From<TSqlTable>(this TSqlTable _)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         // Create a fresh instance of the table
         return new FromTableClause<TSqlTable>(new TSqlTable());
@@ -74,7 +74,7 @@ public static class TypedSql
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
     /// <returns>A DELETE statement that can be further composed with WHERE clauses</returns>
     public static ISqlDeleteStatement<TSqlTable> Delete<TSqlTable>()
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new DeleteStatement<TSqlTable>(new TSqlTable());
     }
@@ -87,7 +87,7 @@ public static class TypedSql
     /// <param name="predicate">A function that defines the filter condition</param>
     /// <returns>A DELETE statement with the WHERE clause applied</returns>
     public static ISqlDeleteWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlDeleteStatement<TSqlTable> deleteStatement, Func<TSqlTable, SqlExprBool> predicate)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new DeleteWhereStatement<TSqlTable>(deleteStatement, predicate);
     }
@@ -98,7 +98,7 @@ public static class TypedSql
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
     /// <returns>An UPDATE statement that can be further composed with SET and WHERE clauses</returns>
     public static ISqlUpdateStatement<TSqlTable> Update<TSqlTable>()
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new UpdateStatement<TSqlTable>(new TSqlTable());
     }
@@ -112,7 +112,7 @@ public static class TypedSql
     /// <param name="value">The new value to set for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
@@ -127,7 +127,7 @@ public static class TypedSql
     /// <param name="value">The new value to set for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
@@ -142,7 +142,7 @@ public static class TypedSql
     /// <param name="value">The new value to set for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
         return new SetStatement<TSqlTable>(updateStatement, setClause);
@@ -158,7 +158,7 @@ public static class TypedSql
     /// <param name="valueSelector">A function that generates the new value expression for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprInt> columnSelector, Func<TSqlTable, SqlExprInt> valueSelector)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
@@ -174,7 +174,7 @@ public static class TypedSql
     /// <param name="valueSelector">A function that generates the new value expression for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprString> columnSelector, Func<TSqlTable, SqlExprString> valueSelector)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
@@ -190,7 +190,7 @@ public static class TypedSql
     /// <param name="valueSelector">A function that generates the new value expression for the column</param>
     /// <returns>An UPDATE statement with the SET clause applied</returns>
     public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> columnSelector, Func<TSqlTable, SqlExprBool> valueSelector)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var value = valueSelector(new TSqlTable());
         var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
@@ -205,7 +205,7 @@ public static class TypedSql
     /// <param name="predicate">A function that defines the filter condition</param>
     /// <returns>An UPDATE statement with the WHERE clause applied</returns>
     public static ISqlUpdateWhereStatement<TSqlTable> Where<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprBool> predicate)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new UpdateWhereFromStatement<TSqlTable>(updateStatement, predicate);
     }
@@ -216,7 +216,7 @@ public static class TypedSql
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
     /// <returns>An INSERT statement that can be further composed with VALUE clauses</returns>
     public static ISqlInsertStatement<TSqlTable> Insert<TSqlTable>()
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         return new InsertStatement<TSqlTable>(new TSqlTable());
     }
@@ -230,7 +230,7 @@ public static class TypedSql
     /// <param name="value">The value to insert for the column</param>
     /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprInt> columnSelector, SqlExprInt value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
@@ -245,7 +245,7 @@ public static class TypedSql
     /// <param name="value">The value to insert for the column</param>
     /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprString> columnSelector, SqlExprString value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);
@@ -260,7 +260,7 @@ public static class TypedSql
     /// <param name="value">The value to insert for the column</param>
     /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprBool> columnSelector, SqlExprBool value)
-        where TSqlTable : ISqlTable, new()
+        where TSqlTable : SqlTable, new()
     {
         var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
         return new ValueStatement<TSqlTable>(insertStatement, valueClause);

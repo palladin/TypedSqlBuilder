@@ -72,21 +72,11 @@ public interface ISqlGroupByHavingQuery<TSource> : ISqlGroupByQuery<TSource>
     where TSource : ITuple;
 
 /// <summary>
-/// Interface for SQL table representations that support tuple-like indexing.
-/// Extends ITuple to provide column access capabilities.
-/// </summary>
-public interface ISqlTable : ITuple
-{
-    string TableName { get; }
-    object?[] Columns { get; }
-}
-
-/// <summary>
 /// Base record representing a SQL FROM clause.
 /// Establishes the source table for a query.
 /// </summary>
 /// <param name="Table">The table being queried</param>
-internal record FromTableClause(ISqlTable Table) : ISqlQuery;
+internal record FromTableClause(SqlTable Table) : ISqlQuery;
 
 /// <summary>
 /// Base record representing a SQL FROM clause with a subquery.
@@ -101,7 +91,7 @@ internal record FromSubQueryClause(ISqlQuery Query) : ISqlQuery;
 /// </summary>
 /// <typeparam name="TColumns">The tuple type representing the table's columns</typeparam>
 /// <param name="Table">The table being queried</param>
-internal record FromTableClause<TColumns>(ISqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
+internal record FromTableClause<TColumns>(SqlTable Table) : FromTableClause(Table), ISqlQuery<TColumns>
     where TColumns : ITuple;
 
 /// <summary>
@@ -323,11 +313,11 @@ public enum JoinType
     Left,    
 }
 
-internal record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
+internal record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, SqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
 
 internal record JoinClause<TOuter, TInner, TKey, TResult>(JoinType JoinType, ISqlQuery<TOuter> TypedOuter, TInner Inner, Func<TOuter, TKey> OuterKeySelector, Func<TInner, TKey> InnerKeySelector, Func<TOuter, TInner, TResult> ResultSelector, ImmutableArray<string?> Aliases) 
     : JoinClause(TypedOuter, [(JoinType, Inner, x => OuterKeySelector((TOuter)x), x => InnerKeySelector((TInner)x), (x, y) => ResultSelector((TOuter)x, (TInner)y), Aliases)]), ISqlQuery<TResult>
         where TOuter : ITuple
-        where TInner : ISqlTable
+        where TInner : SqlTable
         where TKey : SqlExpr
         where TResult : ITuple;

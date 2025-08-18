@@ -9,12 +9,14 @@ using Dapper;
 using TypedSqlBuilder.Core;
 
 // Define table schema 
-public class Customer() 
-    : SqlTable<SqlIntColumn, SqlIntColumn, SqlStringColumn>("customers")
+public class Customer() : SqlTable("customers")
 {
-    public SqlIntColumn Id => Column1("Id");
-    public SqlIntColumn Age => Column2("Age");
-    public SqlStringColumn Name => Column3("Name");
+    [Column("Id")]
+    public SqlIntColumn Id { get; set; } = default!;
+    [Column("Age")]
+    public SqlIntColumn Age { get; set; } = default!;
+    [Column("Name")]
+    public SqlStringColumn Name { get; set; } = default!;
 }
 
 // Build complex queries with fluent syntax

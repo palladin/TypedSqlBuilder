@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TypedSqlBuilder.Core;
 
@@ -11,6 +13,26 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 internal static partial class SqlCompiler
 {
+    /// <summary>
+    /// Static cache for reflection results to avoid repeated reflection on the same table types.
+    /// Key: Table Type, Value: Array of PropertyInfo objects that represent SqlColumn properties.
+    /// </summary>
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _reflectionCache = new();
+
+    /// <summary>
+    /// Gets the SqlColumn properties for a given table type, using cached results when available.
+    /// </summary>
+    /// <param name="tableType">The SqlTable type to analyze</param>
+    /// <returns>Array of PropertyInfo objects representing SqlColumn properties</returns>
+    private static PropertyInfo[] GetTableProperties(Type tableType)
+    {
+        return _reflectionCache.GetOrAdd(tableType, type => 
+            type.GetProperties()
+                .Where(prop => prop.GetIndexParameters().Length == 0 && 
+                              typeof(ISqlColumn).IsAssignableFrom(prop.PropertyType))
+                .ToArray());
+    }
+
     /// <summary>
     /// Helper method to generate indentation strings for SQL formatting.
     /// </summary>
@@ -154,9 +176,9 @@ internal static partial class SqlCompiler
     /// <exception cref="NotSupportedException">Thrown when a tuple contains unsupported item types</exception>
     private static ImmutableArray<SqlExpr> FlattenTuple(ITuple tuple)
     {
-        if (tuple is ISqlTable sqlTable)
+        if (tuple is SqlTable sqlTable)
         {
-            return FlattenTable(sqlTable);
+            return sqlTable.Columns;
         }
 
         var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
@@ -171,9 +193,9 @@ internal static partial class SqlCompiler
                 case SqlExpr expr:
                     flattened.Add(expr);
                     break;
-                case ISqlTable table:
+                case SqlTable table:
                 {
-                    flattened.AddRange(FlattenTable(table));
+                    flattened.AddRange(table.Columns);
                     break;
                 }
                 case ITuple subTuple:
@@ -186,30 +208,6 @@ internal static partial class SqlCompiler
         }
         return flattened.ToImmutable();
     }
-
-    private static ImmutableArray<SqlExpr> FlattenTable(ISqlTable sqlTable)
-    {
-        if (sqlTable.Columns.All(c => c is { } && c is SqlExpr sqlExpr))
-        {
-            return sqlTable.Columns.Cast<SqlExpr>().ToImmutableArray();
-        }
-
-        var flattened = ImmutableArray.CreateBuilder<SqlExpr>();
-        // use reflection on sqlTable to get properties that return ISqlColumn and have no parameters
-        var properties = sqlTable.GetType().GetProperties()
-            .Where(prop => prop.GetIndexParameters().Length == 0 && typeof(ISqlColumn).IsAssignableFrom(prop.PropertyType));
-            
-        foreach (var prop in properties)
-        {
-            if (prop.GetValue(sqlTable) is SqlExpr sqlExpr)
-            {
-                flattened.Add(sqlExpr);
-            }
-        }
-        return flattened.ToImmutable();
-    }
-
-          
     
 
     /// <summary>
@@ -897,7 +895,7 @@ internal static partial class SqlCompiler
         }
     }
 
-    private static (ImmutableArray<string> JoinClauses, ITuple Tuple, Context Context) CompileJoin(ImmutableArray<(JoinType JoinType, ISqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> joinData, ITuple currentTuple, Context currentContext, int scopeLevel)
+    private static (ImmutableArray<string> JoinClauses, ITuple Tuple, Context Context) CompileJoin(ImmutableArray<(JoinType JoinType, SqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> joinData, ITuple currentTuple, Context currentContext, int scopeLevel)
     {
         if (joinData.IsEmpty)
             throw new InvalidOperationException("JoinClause must contain at least one join operation");

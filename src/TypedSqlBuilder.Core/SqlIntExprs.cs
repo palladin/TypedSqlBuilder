@@ -172,18 +172,16 @@ internal class SqlIntDiv(SqlExprInt left, SqlExprInt right) : SqlExprInt
 /// Represents a reference to an integer column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
-public class SqlIntColumn : SqlExprInt, ISqlColumn<SqlIntColumn>
+public class SqlIntColumn : SqlExprInt, ISqlColumn
 {    
-    private SqlIntColumn(string tableName, string columnName)
+    internal SqlIntColumn(string tableName, string columnName)
     {
         TableName = tableName;
         ColumnName = columnName;        
     }
     
     public string TableName { get; }
-    public string ColumnName { get; }
-    
-    public static SqlIntColumn Create(string tableName, string columnName) => new SqlIntColumn(tableName, columnName);
+    public string ColumnName { get; }    
     
     public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {

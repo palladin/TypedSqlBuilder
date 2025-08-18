@@ -29,18 +29,16 @@ internal class SqlStringConcat(SqlExprString left, SqlExprString right) : SqlExp
 /// Represents a reference to a string column in a SQL table.
 /// This class is used for column references in SQL queries.
 /// </summary>
-public class SqlStringColumn : SqlExprString, ISqlColumn<SqlStringColumn>
+public class SqlStringColumn : SqlExprString, ISqlColumn
 {
-    private SqlStringColumn(string tableName, string columnName)
+    internal SqlStringColumn(string tableName, string columnName)
     {
         TableName = tableName;
         ColumnName = columnName;        
     }
     
     public string TableName { get; }
-    public string ColumnName { get; }
-
-    public static SqlStringColumn Create(string tableName, string columnName) => new SqlStringColumn(tableName, columnName);
+    public string ColumnName { get; }    
 
     public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {

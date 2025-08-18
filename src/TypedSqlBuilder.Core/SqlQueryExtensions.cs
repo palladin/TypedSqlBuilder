@@ -398,7 +398,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static ISqlQuery<TResult> InnerJoin<TOuter, TInner, TKey, TResult>(this ISqlQuery<TOuter> outer, TInner inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
         where TOuter : ITuple
-        where TInner : ISqlTable, new()
+        where TInner : SqlTable, new()
         where TKey : SqlExpr
         where TResult : ITuple        
     {
@@ -432,7 +432,7 @@ public static class SqlQueryExtensions
     /// </example>
     public static ISqlQuery<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this ISqlQuery<TOuter> outer, TInner inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
         where TOuter : ITuple
-        where TInner : ISqlTable, new()
+        where TInner : SqlTable, new()
         where TKey : SqlExpr
         where TResult : ITuple        
     {
