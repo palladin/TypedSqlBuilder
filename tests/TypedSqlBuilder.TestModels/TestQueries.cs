@@ -628,4 +628,83 @@ public static class TestQueries
         => Db.Customers.From()
             .Where(c => c.Age.Abs() > "minAge".AsIntParam().Abs())
             .Select(c => (c.Id, c.Name, c.Age));
+
+    // ========== NEW COLUMN TYPES TESTS - DECIMAL ==========
+    
+    // Test decimal comparison
+    public static ISqlQuery FromWhereDecimalComparison()
+        => Db.Products.From().Where(p => p.Price > 100.50m);
+
+    // Test decimal arithmetic operations
+    public static ISqlQuery FromSelectDecimalArithmetic()
+        => Db.Products.From().Select(p => (p.ProductName, p.Price * 1.1m, p.Price + 10.0m, p.Price - 5.0m));
+
+    // Test decimal null checks
+    public static ISqlQuery FromWhereDecimalIsNull()
+        => Db.Products.From().Where(p => p.Price == SqlNull.Value);
+
+    public static ISqlQuery FromWhereDecimalIsNotNull()
+        => Db.Products.From().Where(p => p.Price != SqlNull.Value);
+
+    // Test decimal case expression
+    public static ISqlQuery CaseDecimalExpression()
+        => Db.Products.From()
+            .Select(p => (p.ProductName, ExpensiveFlag: SqlFunc.Case(p.Price > 1000m, "Expensive", SqlFunc.Case(p.Price > 100m, "Moderate", "Cheap"))));
+
+    // Test decimal parameter
+    public static ISqlQuery ParameterAsDecimalParam()
+        => Db.Products.From().Where(p => p.Price > "minPrice".AsDecimalParam());
+
+    // ========== NEW COLUMN TYPES TESTS - DATETIME ==========
+    
+    // Test DateTime comparison
+    public static ISqlQuery FromWhereCreatedDateComparison()
+        => Db.Products.From().Where(p => p.CreatedDate > new DateTime(2024, 1, 1));
+
+    // Test DateTime null checks
+    public static ISqlQuery FromWhereCreatedDateIsNull()
+        => Db.Products.From().Where(p => p.CreatedDate == SqlNull.Value);
+
+    public static ISqlQuery FromWhereCreatedDateIsNotNull()
+        => Db.Products.From().Where(p => p.CreatedDate != SqlNull.Value);
+
+    // Test DateTime aggregates (using existing pattern)
+    public static ISqlQuery FromSelectCreatedDateMinMax()
+        => Db.Products.From()
+            .Select(p => (p.ProductName, EarliestDate: p.CreatedDate, LatestDate: p.CreatedDate));
+
+    // Test DateTime case expression
+    public static ISqlQuery CaseDateTimeExpression()
+        => Db.Products.From()
+            .Select(p => (p.ProductName, Age: SqlFunc.Case(p.CreatedDate < new DateTime(2020, 1, 1), "Old", SqlFunc.Case(p.CreatedDate < new DateTime(2024, 1, 1), "Recent", "New"))));
+
+    // Test DateTime parameter
+    public static ISqlQuery ParameterAsDateTimeParam()
+        => Db.Products.From().Where(p => p.CreatedDate > "startDate".AsDateTimeParam());
+
+    // ========== NEW COLUMN TYPES TESTS - GUID ==========
+    
+    // Test Guid equality
+    public static ISqlQuery FromWhereUniqueIdEquals()
+        => Db.Products.From().Where(p => p.UniqueId == Guid.Parse("12345678-1234-1234-1234-123456789012"));
+
+    // Test Guid inequality
+    public static ISqlQuery FromWhereUniqueIdNotEquals()
+        => Db.Products.From().Where(p => p.UniqueId != Guid.Empty);
+
+    // Test Guid null checks
+    public static ISqlQuery FromWhereUniqueIdIsNull()
+        => Db.Products.From().Where(p => p.UniqueId == SqlNull.Value);
+
+    public static ISqlQuery FromWhereUniqueIdIsNotNull()
+        => Db.Products.From().Where(p => p.UniqueId != SqlNull.Value);
+
+    // Test Guid case expression
+    public static ISqlQuery CaseGuidExpression()
+        => Db.Products.From()
+            .Select(p => (p.ProductName, Status: SqlFunc.Case(p.UniqueId == Guid.Empty, "Empty", "HasId")));
+
+    // Test Guid parameter
+    public static ISqlQuery ParameterAsGuidParam()
+        => Db.Products.From().Where(p => p.UniqueId == "targetId".AsGuidParam());
 }

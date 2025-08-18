@@ -264,6 +264,203 @@ public abstract class SqlExprString : SqlExpr
 }
 
 /// <summary>
+/// Abstract base class for SQL decimal expressions.
+/// </summary>
+#pragma warning disable CS0660, CS0661
+public abstract class SqlExprDecimal : SqlExpr
+{
+	/// <summary>
+	/// Implicitly converts a decimal value to a SqlExprDecimal.
+	/// </summary>
+	/// <param name="value">The decimal value to convert</param>
+	/// <returns>A SqlExprDecimal representing the decimal value</returns>
+	public static implicit operator SqlExprDecimal(decimal value) => new SqlDecimalValue(value);
+
+	/// <summary>
+	/// Implements the equality operator (==) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the equality comparison</returns>
+	public static SqlExprBool operator ==(SqlExprDecimal left, SqlExprDecimal right) => new SqlEquals<SqlExprDecimal>(left, right);
+	
+	/// <summary>
+	/// Implements the inequality operator (!=) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the inequality comparison</returns>
+	public static SqlExprBool operator !=(SqlExprDecimal left, SqlExprDecimal right) => new SqlNotEquals<SqlExprDecimal>(left, right);
+
+	/// <summary>
+	/// Implements the addition operator (+) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the addition</returns>
+	public static SqlExprDecimal operator +(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalAdd(left, right);
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the subtraction</returns>
+	public static SqlExprDecimal operator -(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalSub(left, right);
+	
+	/// <summary>
+	/// Implements the unary negation operator (-) for decimal expressions.
+	/// </summary>
+	/// <param name="value">The operand to negate</param>
+	/// <returns>A decimal expression representing the negation</returns>
+	public static SqlExprDecimal operator -(SqlExprDecimal value) => new SqlDecimalMinus(value);
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the multiplication</returns>
+	public static SqlExprDecimal operator *(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalMult(left, right);
+	
+	/// <summary>
+	/// Implements the division operator (/) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the division</returns>
+	public static SqlExprDecimal operator /(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalDiv(left, right);
+
+	/// <summary>
+	/// Implements the greater than operator (>) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than comparison</returns>
+	public static SqlExprBool operator >(SqlExprDecimal left, SqlExprDecimal right) => new SqlGreaterThan<SqlExprDecimal>(left, right);
+	
+	/// <summary>
+	/// Implements the less than operator (&lt;) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than comparison</returns>
+	public static SqlExprBool operator <(SqlExprDecimal left, SqlExprDecimal right) => new SqlLessThan<SqlExprDecimal>(left, right);
+
+	/// <summary>
+	/// Implements the greater than or equal operator (>=) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than or equal comparison</returns>
+	public static SqlExprBool operator >=(SqlExprDecimal left, SqlExprDecimal right) =>
+		new SqlGreaterThanOrEqualTo<SqlExprDecimal>(left, right);
+
+	/// <summary>
+	/// Implements the less than or equal operator (&lt;=) for decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than or equal comparison</returns>
+	public static SqlExprBool operator <=(SqlExprDecimal left, SqlExprDecimal right) =>
+		new SqlLessThanOrEqualTo<SqlExprDecimal>(left, right);
+}
+
+/// <summary>
+/// Abstract base class for SQL DateTime expressions.
+/// </summary>
+#pragma warning disable CS0660, CS0661
+public abstract class SqlExprDateTime : SqlExpr
+{
+	/// <summary>
+	/// Implicitly converts a DateTime value to a SqlExprDateTime.
+	/// </summary>
+	/// <param name="value">The DateTime value to convert</param>
+	/// <returns>A SqlExprDateTime representing the DateTime value</returns>
+	public static implicit operator SqlExprDateTime(DateTime value) => new SqlDateTimeValue(value);
+
+	/// <summary>
+	/// Implements the equality operator (==) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the equality comparison</returns>
+	public static SqlExprBool operator ==(SqlExprDateTime left, SqlExprDateTime right) => new SqlEquals<SqlExprDateTime>(left, right);
+	
+	/// <summary>
+	/// Implements the inequality operator (!=) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the inequality comparison</returns>
+	public static SqlExprBool operator !=(SqlExprDateTime left, SqlExprDateTime right) => new SqlNotEquals<SqlExprDateTime>(left, right);
+
+	/// <summary>
+	/// Implements the greater than operator (>) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than comparison</returns>
+	public static SqlExprBool operator >(SqlExprDateTime left, SqlExprDateTime right) => new SqlGreaterThan<SqlExprDateTime>(left, right);
+	
+	/// <summary>
+	/// Implements the less than operator (&lt;) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than comparison</returns>
+	public static SqlExprBool operator <(SqlExprDateTime left, SqlExprDateTime right) => new SqlLessThan<SqlExprDateTime>(left, right);
+
+	/// <summary>
+	/// Implements the greater than or equal operator (>=) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than or equal comparison</returns>
+	public static SqlExprBool operator >=(SqlExprDateTime left, SqlExprDateTime right) =>
+		new SqlGreaterThanOrEqualTo<SqlExprDateTime>(left, right);
+
+	/// <summary>
+	/// Implements the less than or equal operator (&lt;=) for DateTime expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than or equal comparison</returns>
+	public static SqlExprBool operator <=(SqlExprDateTime left, SqlExprDateTime right) =>
+		new SqlLessThanOrEqualTo<SqlExprDateTime>(left, right);
+}
+
+/// <summary>
+/// Abstract base class for SQL GUID expressions.
+/// </summary>
+#pragma warning disable CS0660, CS0661
+public abstract class SqlExprGuid : SqlExpr
+{
+	/// <summary>
+	/// Implicitly converts a Guid value to a SqlExprGuid.
+	/// </summary>
+	/// <param name="value">The Guid value to convert</param>
+	/// <returns>A SqlExprGuid representing the Guid value</returns>
+	public static implicit operator SqlExprGuid(Guid value) => new SqlGuidValue(value);
+
+	/// <summary>
+	/// Implements the equality operator (==) for GUID expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the equality comparison</returns>
+	public static SqlExprBool operator ==(SqlExprGuid left, SqlExprGuid right) => new SqlEquals<SqlExprGuid>(left, right);
+	
+	/// <summary>
+	/// Implements the inequality operator (!=) for GUID expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the inequality comparison</returns>
+	public static SqlExprBool operator !=(SqlExprGuid left, SqlExprGuid right) => new SqlNotEquals<SqlExprGuid>(left, right);
+}
+
+/// <summary>
 /// Interface for SQL column expressions.
 /// Provides access to table and column name information for all column types.
 /// </summary>

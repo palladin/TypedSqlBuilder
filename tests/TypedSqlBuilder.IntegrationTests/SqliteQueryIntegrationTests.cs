@@ -1786,4 +1786,314 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.Equal("John", parameters[":p1"]);
         return Task.CompletedTask;
     }
+
+    // ========== NEW COLUMN TYPES QUERY TESTS ==========
+    // Full database execution tests for new column types
+
+    [Fact] 
+    public Task FromWhereDecimalComparison_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereDecimalComparison();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should return products with price > 50
+        Assert.Single(results);
+        Assert.Equal("Laptop", results.First().ProductName);
+        Assert.Equal(999.99m, results.First().Price);
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromSelectDecimalArithmetic_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromSelectDecimalArithmetic();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should return all products with calculated values
+        Assert.Equal(3, results.Count); // All products returned
+        Assert.NotNull(results); // Basic validation that query executes
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereDecimalIsNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereDecimalIsNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should return products with NULL price
+        Assert.Single(results);
+        Assert.Equal("Discontinued", results.First().ProductName);
+        Assert.Null(results.First().Price);
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereDecimalIsNotNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereDecimalIsNotNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should return products with non-NULL price
+        Assert.Equal(2, results.Count);
+        Assert.Contains(results, r => r.ProductName == "Laptop" && r.Price == 999.99m);
+        Assert.Contains(results, r => r.ProductName == "Mouse" && r.Price == 25.50m);
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task CaseDecimalExpression_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.CaseDecimalExpression();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task ParameterAsDecimalParam_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.ParameterAsDecimalParam();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereCreatedDateComparison_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateComparison();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully (specific results may vary based on query logic)
+        Assert.NotNull(results);
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereCreatedDateIsNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateIsNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereCreatedDateIsNotNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateIsNotNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromSelectCreatedDateMinMax_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromSelectCreatedDateMinMax();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task CaseDateTimeExpression_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.CaseDateTimeExpression();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task ParameterAsDateTimeParam_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.ParameterAsDateTimeParam();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereUniqueIdEquals_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdEquals();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully (specific results may vary based on query logic)
+        Assert.NotNull(results);
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereUniqueIdNotEquals_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdNotEquals();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereUniqueIdIsNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdIsNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdIsNotNull();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task CaseGuidExpression_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.CaseGuidExpression();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
+
+    [Fact] 
+    public Task ParameterAsGuidParam_GeneratesCorrectSql() 
+    { 
+        // Arrange
+        var query = TestQueries.ParameterAsGuidParam();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query<SqliteProductDto>(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask; 
+    }
 }

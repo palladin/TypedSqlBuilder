@@ -2653,4 +2653,497 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         Assert.Null(parameters[":minAge"]);
         return Task.CompletedTask;
     }
+
+    // ========== NEW COLUMN TYPES TESTS - DECIMAL ==========
+    
+    [Fact]
+    public Task FromWhereDecimalComparison_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereDecimalComparison();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.Price > :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(100.50m, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectDecimalArithmetic_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromSelectDecimalArithmetic();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            (a0.Price * :p0) AS prj0,
+            (a0.Price + :p1) AS prj1,
+            (a0.Price - :p2) AS prj2
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(1.1m, parameters[":p0"]);
+        Assert.Equal(10.0m, parameters[":p1"]);
+        Assert.Equal(5.0m, parameters[":p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereDecimalIsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereDecimalIsNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.Price IS NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereDecimalIsNotNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereDecimalIsNotNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.Price IS NOT NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseDecimalExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseDecimalExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            CASE WHEN a0.Price > :p0 THEN :p1 ELSE CASE WHEN a0.Price > :p2 THEN :p3 ELSE :p4 END END AS ExpensiveFlag
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(5, parameters.Count);
+        Assert.Equal(1000m, parameters[":p0"]);
+        Assert.Equal("Expensive", parameters[":p1"]);
+        Assert.Equal(100m, parameters[":p2"]);
+        Assert.Equal("Moderate", parameters[":p3"]);
+        Assert.Equal("Cheap", parameters[":p4"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsDecimalParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsDecimalParam();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.Price > :minPrice
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":minPrice"));
+        return Task.CompletedTask;
+    }
+
+    // ========== NEW COLUMN TYPES TESTS - DATETIME ==========
+
+    [Fact]
+    public Task FromWhereCreatedDateComparison_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateComparison();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.CreatedDate > :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(new DateTime(2024, 1, 1), parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereCreatedDateIsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateIsNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.CreatedDate IS NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereCreatedDateIsNotNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereCreatedDateIsNotNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.CreatedDate IS NOT NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromSelectCreatedDateMinMax_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromSelectCreatedDateMinMax();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            a0.CreatedDate AS EarliestDate,
+            a0.CreatedDate AS LatestDate
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseDateTimeExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseDateTimeExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            CASE WHEN a0.CreatedDate < :p0 THEN :p1 ELSE CASE WHEN a0.CreatedDate < :p2 THEN :p3 ELSE :p4 END END AS Age
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(5, parameters.Count);
+        Assert.Equal(new DateTime(2020, 1, 1), parameters[":p0"]);
+        Assert.Equal("Old", parameters[":p1"]);
+        Assert.Equal(new DateTime(2024, 1, 1), parameters[":p2"]);
+        Assert.Equal("Recent", parameters[":p3"]);
+        Assert.Equal("New", parameters[":p4"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsDateTimeParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsDateTimeParam();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.CreatedDate > :startDate
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":startDate"));
+        return Task.CompletedTask;
+    }
+
+    // ========== NEW COLUMN TYPES TESTS - GUID ==========
+
+    [Fact]
+    public Task FromWhereUniqueIdEquals_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdEquals();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.UniqueId = :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(Guid.Parse("12345678-1234-1234-1234-123456789012"), parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereUniqueIdNotEquals_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdNotEquals();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.UniqueId != :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(Guid.Empty, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereUniqueIdIsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdIsNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.UniqueId IS NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromWhereUniqueIdIsNotNull();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.UniqueId IS NOT NULL
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task CaseGuidExpression_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.CaseGuidExpression();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            CASE WHEN a0.UniqueId = :p0 THEN :p1 ELSE :p2 END AS Status
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(Guid.Empty, parameters[":p0"]);
+        Assert.Equal("Empty", parameters[":p1"]);
+        Assert.Equal("HasId", parameters[":p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task ParameterAsGuidParam_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.ParameterAsGuidParam();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.ProductName AS ProductName,
+            a0.Price AS Price,
+            a0.CreatedDate AS CreatedDate,
+            a0.UniqueId AS UniqueId
+        FROM 
+            products a0
+        WHERE 
+            a0.UniqueId = :targetId
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.True(parameters.ContainsKey(":targetId"));
+        return Task.CompletedTask;
+    }
 }

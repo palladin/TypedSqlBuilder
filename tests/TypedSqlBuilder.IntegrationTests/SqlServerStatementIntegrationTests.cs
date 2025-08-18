@@ -20,14 +20,14 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
     /// <summary>
     /// Helper method to execute a statement with proper IDENTITY_INSERT handling
     /// </summary>
-    private async Task<int> ExecuteStatementAsync(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction, ISqlStatement statement, bool hasExplicitId = true)
+    private async Task<int> ExecuteStatementAsync(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction, ISqlStatement statement, bool hasExplicitId = true, string tableName = "customers")
     {
         var (sql, parameters) = statement.ToSqlServerRaw();
         var dapperParams = parameters.ToDapperParameters();
 
         if (hasExplicitId)
         {
-            await connection.ExecuteAsync("SET IDENTITY_INSERT customers ON", transaction: transaction);
+            await connection.ExecuteAsync($"SET IDENTITY_INSERT {tableName} ON", transaction: transaction);
         }
 
         try
@@ -38,7 +38,7 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
         {
             if (hasExplicitId)
             {
-                await connection.ExecuteAsync("SET IDENTITY_INSERT customers OFF", transaction: transaction);
+                await connection.ExecuteAsync($"SET IDENTITY_INSERT {tableName} OFF", transaction: transaction);
             }
         }
     }
@@ -481,6 +481,144 @@ public class SqlServerStatementIntegrationTests : IClassFixture<SqlServerFixture
             var updatedCustomer = await connection.QuerySingleAsync<CustomerDto>(
                 "SELECT * FROM customers WHERE Id = 999", transaction: transaction);
             Assert.Equal("Inline Test", updatedCustomer.Name);
+        });
+    }
+
+    // ========== NEW COLUMN TYPES INTEGRATION TESTS - STUBS ==========
+
+    [Fact]
+    public async Task InsertWithNewColumns_GeneratesCorrectSql()
+    {
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange
+            var statement = TestStatements.InsertWithNewColumns();
+            
+            // Act - Execute INSERT statement (no explicit ID, so hasExplicitId = false)
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Get the inserted record to verify
+            var product = await connection.QueryFirstOrDefaultAsync<ProductDto>(
+                "SELECT * FROM products WHERE ProductName = @name", 
+                new { name = "Test Product" }, transaction: transaction);
+            
+            // Assert: Verify the record was inserted correctly
+            Assert.NotNull(product);
+            Assert.Equal("Test Product", product.ProductName);
+            Assert.Equal(99.99m, product.Price);
+            Assert.Equal(new DateTime(2024, 8, 18), product.CreatedDate);
+            Assert.Equal(Guid.Parse("12345678-1234-1234-1234-123456789012"), product.UniqueId);
+        });
+    }
+
+    [Fact]
+    public async Task UpdateWithNewColumns_GeneratesCorrectSql()
+    {
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a product with ProductId = 100 to match TestStatement expectation
+            await connection.ExecuteAsync(
+                "SET IDENTITY_INSERT products ON", transaction: transaction);
+            await connection.ExecuteAsync(
+                "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (@id, @name, @price, @date, @guid)", 
+                new { 
+                    id = 100,
+                    name = "Original Product", 
+                    price = 50.00m, 
+                    date = new DateTime(2024, 1, 1), 
+                    guid = Guid.Parse("11111111-1111-1111-1111-111111111111") 
+                }, transaction: transaction);
+            await connection.ExecuteAsync(
+                "SET IDENTITY_INSERT products OFF", transaction: transaction);
+            
+            // Use the actual TestStatement
+            var statement = TestStatements.UpdateWithNewColumns();
+            
+            // Act - Execute UPDATE statement
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify update worked with expected values from TestStatement
+            var updatedProduct = await connection.QuerySingleAsync<ProductDto>(
+                "SELECT * FROM products WHERE ProductId = 100", transaction: transaction);
+            
+            Assert.Equal("Original Product", updatedProduct.ProductName); // Name should not change
+            Assert.Equal(119.99m, updatedProduct.Price);
+            Assert.Equal(new DateTime(2024, 12, 25), updatedProduct.CreatedDate);
+            Assert.Equal(Guid.Parse("87654321-4321-4321-4321-210987654321"), updatedProduct.UniqueId);
+        });
+    }
+
+    [Fact]
+    public async Task InsertWithNewColumnsNull_GeneratesCorrectSql()
+    {
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange
+            var statement = TestStatements.InsertWithNewColumnsNull();
+            
+            // Act - Execute INSERT statement (no explicit ID, so hasExplicitId = false)
+            var insertedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Get the inserted record to verify
+            var product = await connection.QueryFirstOrDefaultAsync<ProductDto>(
+                "SELECT * FROM products WHERE ProductName = @name", 
+                new { name = "Null Test" }, transaction: transaction);
+            
+            // Assert: Verify the record was inserted correctly with NULL values
+            Assert.NotNull(product);
+            Assert.Equal("Null Test", product.ProductName);
+            Assert.Null(product.Price);
+            Assert.Null(product.CreatedDate);
+            Assert.Null(product.UniqueId);
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSetNewColumnsNull_GeneratesCorrectSql()
+    {
+        await _fixture.WithTransactionAsync(async (connection, transaction) =>
+        {
+            // Arrange - First insert a product with ProductId = 101 to match TestStatement expectation
+            await connection.ExecuteAsync(
+                "SET IDENTITY_INSERT products ON", transaction: transaction);
+            await connection.ExecuteAsync(
+                "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (@id, @name, @price, @date, @guid)", 
+                new { 
+                    id = 101,
+                    name = "Test Product", 
+                    price = 75.25m, 
+                    date = new DateTime(2024, 6, 15), 
+                    guid = Guid.Parse("99999999-9999-9999-9999-999999999999") 
+                }, transaction: transaction);
+            await connection.ExecuteAsync(
+                "SET IDENTITY_INSERT products OFF", transaction: transaction);
+            
+            // Use the actual TestStatement
+            var statement = TestStatements.UpdateSetNewColumnsNull();
+            
+            // Act - Execute UPDATE statement
+            var updatedRows = await ExecuteStatementAsync(connection, transaction, statement, hasExplicitId: false);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify update worked - all new column types should be NULL
+            var updatedProduct = await connection.QuerySingleAsync<ProductDto>(
+                "SELECT * FROM products WHERE ProductId = 101", transaction: transaction);
+            
+            Assert.Equal("Test Product", updatedProduct.ProductName); // Name should not change
+            Assert.Null(updatedProduct.Price);
+            Assert.Null(updatedProduct.CreatedDate);
+            Assert.Null(updatedProduct.UniqueId);
         });
     }
 }

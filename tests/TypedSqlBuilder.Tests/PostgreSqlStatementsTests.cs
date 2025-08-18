@@ -311,4 +311,76 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         Assert.Equal(35, parameters[":p1"]);
         Assert.Equal("New Customer", parameters[":p2"]);
     }
+
+    // ========== NEW COLUMN TYPES STATEMENT TESTS ==========
+
+    [Fact]
+    public Task InsertWithNewColumns_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.InsertWithNewColumns();
+
+        // Act
+        var (sql, parameters) = statement.ToPostgreSqlRaw();
+
+        // Assert
+        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (:p0, :p1, :p2, :p3)", sql);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal("Test Product", parameters[":p0"]);
+        Assert.Equal(99.99m, parameters[":p1"]);
+        Assert.Equal(new DateTime(2024, 8, 18), parameters[":p2"]);
+        Assert.Equal(Guid.Parse("12345678-1234-1234-1234-123456789012"), parameters[":p3"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateWithNewColumns_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateWithNewColumns();
+
+        // Act
+        var (sql, parameters) = statement.ToPostgreSqlRaw();
+
+        // Assert
+        Assert.Equal("UPDATE products SET Price = :p0, CreatedDate = :p1, UniqueId = :p2 WHERE products.ProductId = :p3", sql);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal(119.99m, parameters[":p0"]); // Corrected values
+        Assert.Equal(new DateTime(2024, 12, 25), parameters[":p1"]);
+        Assert.Equal(Guid.Parse("87654321-4321-4321-4321-210987654321"), parameters[":p2"]);
+        Assert.Equal(100, parameters[":p3"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InsertWithNewColumnsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.InsertWithNewColumnsNull();
+
+        // Act
+        var (sql, parameters) = statement.ToPostgreSqlRaw();
+
+        // Assert
+        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (:p0, NULL, NULL, NULL)", sql);
+        Assert.Single(parameters); // Only non-NULL values are parameterized
+        Assert.Equal("Null Test", parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNewColumnsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNewColumnsNull();
+
+        // Act
+        var (sql, parameters) = statement.ToPostgreSqlRaw();
+
+        // Assert
+        Assert.Equal("UPDATE products SET Price = NULL, CreatedDate = NULL, UniqueId = NULL WHERE products.ProductId = :p0", sql);
+        Assert.Single(parameters);
+        Assert.Equal(101, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
 }

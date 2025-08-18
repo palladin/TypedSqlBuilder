@@ -615,4 +615,141 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
         Assert.Equal("Colon Test", parameters[":p2"]);
         return Task.CompletedTask;
     }
+
+    // ========== NEW COLUMN TYPES STATEMENT TESTS ==========
+    
+    [Fact] 
+    public Task InsertWithNewColumns_GeneratesCorrectSql()
+    {
+        return Task.Run(() => WithTransaction(connection =>
+        {
+            // Arrange
+            var statement = TestStatements.InsertWithNewColumns();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute INSERT statement
+            var dapperParams = parameters.ToDapperParameters();
+            var insertedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Get the inserted record to verify
+            var product = connection.QueryFirstOrDefault<SqliteProductDto>(
+                "SELECT * FROM products WHERE ProductName = :name", 
+                new { name = "Test Product" });
+            
+            // Assert: Verify the record was inserted correctly
+            Assert.NotNull(product);
+            Assert.Equal("Test Product", product.ProductName);
+            Assert.Equal(99.99m, product.Price);
+            Assert.Equal(new DateTime(2024, 8, 18), product.CreatedDate);
+            // For SQLite, UUID is stored as TEXT
+            Assert.Equal("12345678-1234-1234-1234-123456789012", product.UniqueId);
+        }));
+    }
+    
+    [Fact] 
+    public Task UpdateWithNewColumns_GeneratesCorrectSql()
+    {
+        return Task.Run(() => WithTransaction(connection =>
+        {
+            // Arrange - First insert a product with ProductId = 100 to match TestStatement expectation
+            connection.Execute(
+                "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (100, :name, :price, :date, :guid)", 
+                new { 
+                    name = "Original Product", 
+                    price = 50.00m, 
+                    date = new DateTime(2024, 1, 1), 
+                    guid = Guid.Parse("11111111-1111-1111-1111-111111111111").ToString() 
+                });
+            
+            // Use the actual TestStatement
+            var statement = TestStatements.UpdateWithNewColumns();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute UPDATE statement
+            var dapperParams = parameters.ToDapperParameters();
+            var updatedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify update worked with expected values from TestStatement
+            var updatedProduct = connection.QuerySingle<SqliteProductDto>(
+                "SELECT * FROM products WHERE ProductId = 100");
+            
+            Assert.Equal("Original Product", updatedProduct.ProductName); // Name should not change
+            Assert.Equal(119.99m, updatedProduct.Price);
+            Assert.Equal(new DateTime(2024, 12, 25), updatedProduct.CreatedDate);
+            Assert.Equal("87654321-4321-4321-4321-210987654321", updatedProduct.UniqueId);
+        }));
+    }
+    
+    [Fact] 
+    public Task InsertWithNewColumnsNull_GeneratesCorrectSql()
+    {
+        return Task.Run(() => WithTransaction(connection =>
+        {
+            // Arrange
+            var statement = TestStatements.InsertWithNewColumnsNull();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute INSERT statement
+            var dapperParams = parameters.ToDapperParameters();
+            var insertedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert
+            Assert.Equal(1, insertedRows);
+            
+            // Get the inserted record to verify
+            var product = connection.QueryFirstOrDefault<SqliteProductDto>(
+                "SELECT * FROM products WHERE ProductName = :name", 
+                new { name = "Null Test" });
+            
+            // Assert: Verify the record was inserted correctly with NULL values
+            Assert.NotNull(product);
+            Assert.Equal("Null Test", product.ProductName);
+            Assert.Null(product.Price);
+            Assert.Null(product.CreatedDate);
+            Assert.Null(product.UniqueId);
+        }));
+    }
+    
+    [Fact] 
+    public Task UpdateSetNewColumnsNull_GeneratesCorrectSql()
+    {
+        return Task.Run(() => WithTransaction(connection =>
+        {
+            // Arrange - First insert a product with ProductId = 101 to match TestStatement expectation
+            connection.Execute(
+                "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (101, :name, :price, :date, :guid)", 
+                new { 
+                    name = "Test Product", 
+                    price = 75.25m, 
+                    date = new DateTime(2024, 6, 15), 
+                    guid = Guid.Parse("99999999-9999-9999-9999-999999999999").ToString() 
+                });
+            
+            // Use the actual TestStatement
+            var statement = TestStatements.UpdateSetNewColumnsNull();
+            var (sql, parameters) = statement.ToSqliteRaw();
+            
+            // Act - Execute UPDATE statement
+            var dapperParams = parameters.ToDapperParameters();
+            var updatedRows = connection.Execute(sql, dapperParams);
+            
+            // Assert
+            Assert.Equal(1, updatedRows);
+            
+            // Verify update worked - all new column types should be NULL
+            var updatedProduct = connection.QuerySingle<SqliteProductDto>(
+                "SELECT * FROM products WHERE ProductId = 101");
+            
+            Assert.Equal("Test Product", updatedProduct.ProductName); // Name should not change
+            Assert.Null(updatedProduct.Price);
+            Assert.Null(updatedProduct.CreatedDate);
+            Assert.Null(updatedProduct.UniqueId);
+        }));
+    }
 }

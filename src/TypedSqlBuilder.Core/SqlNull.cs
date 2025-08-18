@@ -31,4 +31,25 @@ public class SqlNull
     /// <param name="_">The SqlNull instance (ignored)</param>
     /// <returns>A SqlBoolNull instance</returns>
     public static implicit operator SqlExprBool(SqlNull _) => new SqlBoolNull();
+    
+    /// <summary>
+    /// Implicitly converts SqlNull to a typed decimal null expression.
+    /// </summary>
+    /// <param name="_">The SqlNull instance (ignored)</param>
+    /// <returns>A SqlDecimalNull instance</returns>
+    public static implicit operator SqlExprDecimal(SqlNull _) => new SqlDecimalNull();
+    
+    /// <summary>
+    /// Implicitly converts SqlNull to a typed DateTime null expression.
+    /// </summary>
+    /// <param name="_">The SqlNull instance (ignored)</param>
+    /// <returns>A SqlDateTimeNull instance</returns>
+    public static implicit operator SqlExprDateTime(SqlNull _) => new SqlDateTimeNull();
+    
+    /// <summary>
+    /// Implicitly converts SqlNull to a typed GUID null expression.
+    /// </summary>
+    /// <param name="_">The SqlNull instance (ignored)</param>
+    /// <returns>A SqlGuidNull instance</returns>
+    public static implicit operator SqlExprGuid(SqlNull _) => new SqlGuidNull();
 }

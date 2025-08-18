@@ -80,7 +80,10 @@ public class PostgreSqlFixture : IAsyncLifetime
         var createProducts = @"
             CREATE TABLE products (
                 productid SERIAL PRIMARY KEY,
-                productname VARCHAR(255)
+                productname VARCHAR(255),
+                price DECIMAL(18,2),
+                createddate TIMESTAMP,
+                uniqueid UUID
             )";
 
         var createOrders = @"
@@ -111,7 +114,7 @@ public class PostgreSqlFixture : IAsyncLifetime
             SELECT setval(pg_get_serial_sequence('customers', 'id'), {TestDataConstants.Customers.Length});";
 
         var insertProducts = $@"
-            INSERT INTO products (productid, productname) VALUES
+            INSERT INTO products (productid, productname, price, createddate, uniqueid) VALUES
             {string.Join(",\n            ", TestDataConstants.ProductTuples)};
             SELECT setval(pg_get_serial_sequence('products', 'productid'), {TestDataConstants.Products.Length});";
 

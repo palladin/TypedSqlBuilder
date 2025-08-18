@@ -59,7 +59,10 @@ public abstract class SqliteIntegrationTestBase : IDisposable
         var createProducts = @"
             CREATE TABLE products (
                 ProductId INTEGER PRIMARY KEY,
-                ProductName TEXT
+                ProductName TEXT,
+                Price REAL,
+                CreatedDate TEXT,
+                UniqueId TEXT
             )";
         
         var createOrders = @"
@@ -82,8 +85,8 @@ public abstract class SqliteIntegrationTestBase : IDisposable
             {string.Join(",\n            ", TestDataConstants.CustomerTuples)}";
 
         var insertProducts = $@"
-            INSERT INTO products (ProductId, ProductName) VALUES
-            {string.Join(",\n            ", TestDataConstants.ProductTuples)}";
+            INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES
+            {string.Join(",\n            ", TestDataConstants.SqliteProductTuples)}";
 
         var insertOrders = $@"
             INSERT INTO orders (OrderId, CustomerId, Amount) VALUES

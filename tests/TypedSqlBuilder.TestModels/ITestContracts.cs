@@ -109,6 +109,30 @@ public interface IQueryTestContract
     Task AbsInWhere_GeneratesCorrectSql();
     Task AbsExpression_GeneratesCorrectSql();
     Task AbsParameter_GeneratesCorrectSql();
+    
+    // New column types tests - Decimal
+    Task FromWhereDecimalComparison_GeneratesCorrectSql();
+    Task FromSelectDecimalArithmetic_GeneratesCorrectSql();
+    Task FromWhereDecimalIsNull_GeneratesCorrectSql();
+    Task FromWhereDecimalIsNotNull_GeneratesCorrectSql();
+    Task CaseDecimalExpression_GeneratesCorrectSql();
+    Task ParameterAsDecimalParam_GeneratesCorrectSql();
+    
+    // New column types tests - DateTime
+    Task FromWhereCreatedDateComparison_GeneratesCorrectSql();
+    Task FromWhereCreatedDateIsNull_GeneratesCorrectSql();
+    Task FromWhereCreatedDateIsNotNull_GeneratesCorrectSql();
+    Task FromSelectCreatedDateMinMax_GeneratesCorrectSql();
+    Task CaseDateTimeExpression_GeneratesCorrectSql();
+    Task ParameterAsDateTimeParam_GeneratesCorrectSql();
+    
+    // New column types tests - Guid
+    Task FromWhereUniqueIdEquals_GeneratesCorrectSql();
+    Task FromWhereUniqueIdNotEquals_GeneratesCorrectSql();
+    Task FromWhereUniqueIdIsNull_GeneratesCorrectSql();
+    Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql();
+    Task CaseGuidExpression_GeneratesCorrectSql();
+    Task ParameterAsGuidParam_GeneratesCorrectSql();
 }
 
 /// <summary>
@@ -133,6 +157,12 @@ public interface IStatementTestContract
     Task UpdateSetNullWhere_GeneratesCorrectSql();
     Task InsertWithNull_GeneratesCorrectSql();
     Task InsertWithNullInt_GeneratesCorrectSql();
+    
+    // New column types statement tests
+    Task InsertWithNewColumns_GeneratesCorrectSql();
+    Task UpdateWithNewColumns_GeneratesCorrectSql();
+    Task InsertWithNewColumnsNull_GeneratesCorrectSql();
+    Task UpdateSetNewColumnsNull_GeneratesCorrectSql();
 }
 
 /// <summary>

@@ -113,6 +113,39 @@ public static class SqlFunc
     }
 
     /// <summary>
+    /// Creates a SQL decimal parameter from a string name.
+    /// Extension method that allows string literals to be converted to SQL parameters.
+    /// </summary>
+    /// <param name="name">The parameter name (e.g., "@price", ":amount")</param>
+    /// <returns>A SQL decimal parameter expression</returns>
+    public static SqlExprDecimal AsDecimalParam(this string name)
+    {
+        return new SqlParameterDecimal(name);
+    }
+
+    /// <summary>
+    /// Creates a SQL DateTime parameter from a string name.
+    /// Extension method that allows string literals to be converted to SQL parameters.
+    /// </summary>
+    /// <param name="name">The parameter name (e.g., "@createdDate", ":timestamp")</param>
+    /// <returns>A SQL DateTime parameter expression</returns>
+    public static SqlExprDateTime AsDateTimeParam(this string name)
+    {
+        return new SqlParameterDateTime(name);
+    }
+
+    /// <summary>
+    /// Creates a SQL Guid parameter from a string name.
+    /// Extension method that allows string literals to be converted to SQL parameters.
+    /// </summary>
+    /// <param name="name">The parameter name (e.g., "@uniqueId", ":guid")</param>
+    /// <returns>A SQL Guid parameter expression</returns>
+    public static SqlExprGuid AsGuidParam(this string name)
+    {
+        return new SqlParameterGuid(name);
+    }
+
+    /// <summary>
     /// Creates a SQL ABS() function expression for the given integer expression.
     /// Returns the absolute (non-negative) value of the input.
     /// </summary>
@@ -244,5 +277,77 @@ public static class SqlFunc
     public static SqlExprBool In(this SqlExprBool expr, ISqlQuery<ValueTuple<SqlExprBool>> subQuery)
     {
         return new SqlInSubQuery<SqlExprBool>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for decimal values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The decimal expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprDecimal expr, params ImmutableArray<SqlExprDecimal> values)
+    {
+        return new SqlInValues<SqlExprDecimal>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a decimal subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The decimal expression to test</param>
+    /// <param name="subQuery">The subquery that returns decimal values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprDecimal expr, ISqlQuery<ValueTuple<SqlExprDecimal>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprDecimal>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for DateTime values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The DateTime expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprDateTime expr, params ImmutableArray<SqlExprDateTime> values)
+    {
+        return new SqlInValues<SqlExprDateTime>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a DateTime subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The DateTime expression to test</param>
+    /// <param name="subQuery">The subquery that returns DateTime values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprDateTime expr, ISqlQuery<ValueTuple<SqlExprDateTime>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprDateTime>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression for GUID values.
+    /// Equivalent to: expr IN (value1, value2, value3, ...)
+    /// </summary>
+    /// <param name="expr">The GUID expression to test</param>
+    /// <param name="values">The values to test against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprGuid expr, params ImmutableArray<SqlExprGuid> values)
+    {
+        return new SqlInValues<SqlExprGuid>(expr, values);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a GUID subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The GUID expression to test</param>
+    /// <param name="subQuery">The subquery that returns GUID values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprGuid expr, ISqlQuery<ValueTuple<SqlExprGuid>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprGuid>(expr, subQuery);
     }
 }

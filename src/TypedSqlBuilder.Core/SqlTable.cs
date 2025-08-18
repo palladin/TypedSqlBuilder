@@ -78,6 +78,9 @@ public abstract class SqlTable : ITuple
                 _ when typeof(SqlIntColumn) == returnType => new SqlIntColumn(TableName, columnAttr.Name),
                 _ when typeof(SqlStringColumn) == returnType => new SqlStringColumn(TableName, columnAttr.Name),
                 _ when typeof(SqlBoolColumn) == returnType => new SqlBoolColumn(TableName, columnAttr.Name),
+                _ when typeof(SqlDecimalColumn) == returnType => new SqlDecimalColumn(TableName, columnAttr.Name),
+                _ when typeof(SqlDateTimeColumn) == returnType => new SqlDateTimeColumn(TableName, columnAttr.Name),
+                _ when typeof(SqlGuidColumn) == returnType => new SqlGuidColumn(TableName, columnAttr.Name),
                 _ => throw new NotSupportedException($"Property type {returnType} is not supported as a column type.")
             };
 

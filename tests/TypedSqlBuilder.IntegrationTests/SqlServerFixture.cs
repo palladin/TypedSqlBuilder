@@ -80,7 +80,10 @@ public class SqlServerFixture : IAsyncLifetime
         var createProducts = @"
             CREATE TABLE products (
                 ProductId INT IDENTITY(1,1) PRIMARY KEY,
-                ProductName NVARCHAR(255)
+                ProductName NVARCHAR(255),
+                Price DECIMAL(18,2),
+                CreatedDate DATETIME2,
+                UniqueId UNIQUEIDENTIFIER
             )";
 
         var createOrders = @"
@@ -106,7 +109,10 @@ public class SqlServerFixture : IAsyncLifetime
             .Select(c => $"({c.Id}, {c.Age}, N'{c.Name}', {(c.IsActive ? 1 : 0)})");
 
         var productTuples = TestDataConstants.Products
-            .Select(p => $"({p.ProductId}, N'{p.ProductName}')");
+            .Select(p => $"({p.ProductId}, N'{p.ProductName}', " +
+                       $"{(p.Price.HasValue ? p.Price.Value.ToString("F2") : "NULL")}, " +
+                       $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
+                       $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})");
 
         var insertCustomers = $@"
             SET IDENTITY_INSERT customers ON;
@@ -116,7 +122,7 @@ public class SqlServerFixture : IAsyncLifetime
 
         var insertProducts = $@"
             SET IDENTITY_INSERT products ON;
-            INSERT INTO products (ProductId, ProductName) VALUES
+            INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES
             {string.Join(",\n            ", productTuples)};
             SET IDENTITY_INSERT products OFF;";
 

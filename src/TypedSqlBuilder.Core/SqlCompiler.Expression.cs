@@ -420,6 +420,179 @@ internal static partial class SqlCompiler
     }
 
     /// <summary>
+    /// Compiles decimal expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The decimal expression to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    private static (string, Context) CompileExprDecimal(SqlExprDecimal expr, Context context, int scopeLevel)
+    {
+        switch (expr)
+        {
+            // Literal values
+            case SqlDecimalValue(var value):
+            {
+                var (paramName, newContext) = context.GenerateParameter(value);
+                return (paramName, newContext);
+            }
+
+            // Arithmetic operations
+            case SqlDecimalAdd(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
+                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                return ($"({leftSql} + {rightSql})", rightCtx);
+            }
+
+            case SqlDecimalSub(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
+                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                return ($"({leftSql} - {rightSql})", rightCtx);
+            }
+
+            case SqlDecimalMinus(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"-{compiled}", ctx);
+            }
+
+            case SqlDecimalMult(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
+                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                return ($"({leftSql} * {rightSql})", rightCtx);
+            }
+
+            case SqlDecimalDiv(var left, var right):
+            {
+                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
+                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                return ($"({leftSql} / {rightSql})", rightCtx);
+            }
+
+            // Parameters
+            case SqlParameterDecimal(var name):
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
+
+            // CASE expressions
+            case SqlDecimalCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context, scopeLevel);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx, scopeLevel);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx, scopeLevel);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            // NULL value
+            case SqlDecimalNull:
+                return ("NULL", context);
+
+            default:
+                throw new NotSupportedException($"Decimal expression type {expr.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Compiles DateTime expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The DateTime expression to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    private static (string, Context) CompileExprDateTime(SqlExprDateTime expr, Context context, int scopeLevel)
+    {
+        switch (expr)
+        {
+            // Literal values
+            case SqlDateTimeValue(var value):
+            {
+                var (paramName, newContext) = context.GenerateParameter(value);
+                return (paramName, newContext);
+            }
+
+            // Parameters
+            case SqlParameterDateTime(var name):
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
+
+            // CASE expressions
+            case SqlDateTimeCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context, scopeLevel);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx, scopeLevel);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx, scopeLevel);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            // NULL value
+            case SqlDateTimeNull:
+                return ("NULL", context);
+
+            default:
+                throw new NotSupportedException($"DateTime expression type {expr.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Compiles GUID expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The GUID expression to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    private static (string, Context) CompileExprGuid(SqlExprGuid expr, Context context, int scopeLevel)
+    {
+        switch (expr)
+        {
+            // Literal values
+            case SqlGuidValue(var value):
+            {
+                var (paramName, newContext) = context.GenerateParameter(value);
+                return (paramName, newContext);
+            }
+
+            // Parameters
+            case SqlParameterGuid(var name):
+            {
+                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
+
+            // CASE expressions
+            case SqlGuidCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context, scopeLevel);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx, scopeLevel);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx, scopeLevel);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            // NULL value
+            case SqlGuidNull:
+                return ("NULL", context);
+
+            default:
+                throw new NotSupportedException($"GUID expression type {expr.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
     /// Compiles any SQL expression to SQL string representation.
     /// This method uses pattern matching to determine the specific expression type.
     /// Handles dialect-specific differences based on the context's dialect configuration.
@@ -479,6 +652,15 @@ internal static partial class SqlCompiler
 
             case SqlExprString stringExpr:
                 return CompileExprString(stringExpr, context, scopeLevel);
+
+            case SqlExprDecimal decimalExpr:
+                return CompileExprDecimal(decimalExpr, context, scopeLevel);
+
+            case SqlExprDateTime dateTimeExpr:
+                return CompileExprDateTime(dateTimeExpr, context, scopeLevel);
+
+            case SqlExprGuid guidExpr:
+                return CompileExprGuid(guidExpr, context, scopeLevel);
 
             default:
                 throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");

@@ -17,6 +17,18 @@ public class ProductDto
 {
     public int ProductId { get; set; }
     public string? ProductName { get; set; }
+    public decimal? Price { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public Guid? UniqueId { get; set; }
+}
+
+public class SqliteProductDto
+{
+    public int ProductId { get; set; }
+    public string? ProductName { get; set; }
+    public decimal? Price { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public string? UniqueId { get; set; }  // SQLite stores GUID as TEXT
 }
 
 public class OrderDto

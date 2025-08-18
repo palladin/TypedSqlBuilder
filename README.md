@@ -39,6 +39,7 @@ TypedSqlBuilder is designed to bridge the gap between raw SQL and complex ORMs. 
 - **Type safety**: Get LINQ-like compile-time checking and IntelliSense when building SQL queries
 - **Perfect for micro-ORMs**: Ideal companion for Dapper and other lightweight ORMs
 - **Full control**: Maintain complete control over your SQL while eliminating string concatenation errors
+- **Multiple-Databases**: Support for SQL Server, SQLite, and PostgreSQL
 
 ## Design
 

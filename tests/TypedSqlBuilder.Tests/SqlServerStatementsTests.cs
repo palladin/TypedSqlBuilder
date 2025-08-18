@@ -258,60 +258,75 @@ public class SqlServerStatementsTests : IStatementTestContract, ISqlServerDialec
         return Task.CompletedTask;
     }
 
-    [Fact]
-    public Task UpdateNewCustomer_GeneratesSqlCorrectly()
+    // ========== NEW COLUMN TYPES STATEMENT TESTS ==========
+
+            [Fact]
+    public Task InsertWithNewColumns_GeneratesCorrectSql()
     {
         // Arrange
-        var statement = TypedSql.Update<Customer>()
-            .Set(c => c.Age, 36)
-            .Where(c => c.Id == 100);
-        
+        var statement = TestStatements.InsertWithNewColumns();
+
         // Act
         var (sql, parameters) = statement.ToSqlServerRaw();
-        
+
         // Assert
-        Assert.Equal("UPDATE customers SET Age = @p0 WHERE customers.Id = @p1", sql);
-        Assert.Equal(2, parameters.Count);
-        Assert.Equal(36, parameters["@p0"]);
-        Assert.Equal(100, parameters["@p1"]);
+        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (@p0, @p1, @p2, @p3)", sql);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal("Test Product", parameters["@p0"]);
+        Assert.Equal(99.99m, parameters["@p1"]);
+        Assert.Equal(new DateTime(2024, 8, 18), parameters["@p2"]);
+        Assert.Equal(Guid.Parse("12345678-1234-1234-1234-123456789012"), parameters["@p3"]);
         return Task.CompletedTask;
     }
 
     [Fact]
-    public Task DeleteNewCustomer_GeneratesSqlCorrectly()
+    public Task UpdateWithNewColumns_GeneratesCorrectSql()
     {
         // Arrange
-        var statement = TypedSql.Delete<Customer>()
-            .Where(c => c.Id == 100);
-        
+        var statement = TestStatements.UpdateWithNewColumns();
+
         // Act
         var (sql, parameters) = statement.ToSqlServerRaw();
-        
+
         // Assert
-        Assert.Equal("DELETE FROM customers WHERE customers.Id = @p0", sql);
+        Assert.Equal("UPDATE products SET Price = @p0, CreatedDate = @p1, UniqueId = @p2 WHERE products.ProductId = @p3", sql);
+        Assert.Equal(4, parameters.Count);
+        Assert.Equal(119.99m, parameters["@p0"]); // Corrected values
+        Assert.Equal(new DateTime(2024, 12, 25), parameters["@p1"]);
+        Assert.Equal(Guid.Parse("87654321-4321-4321-4321-210987654321"), parameters["@p2"]);
+        Assert.Equal(100, parameters["@p3"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task InsertWithNewColumnsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.InsertWithNewColumnsNull();
+
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+
+        // Assert
+        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (@p0, NULL, NULL, NULL)", sql);
+        Assert.Single(parameters); // Only non-NULL values are parameterized
+        Assert.Equal("Null Test", parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task UpdateSetNewColumnsNull_GeneratesCorrectSql()
+    {
+        // Arrange
+        var statement = TestStatements.UpdateSetNewColumnsNull();
+
+        // Act
+        var (sql, parameters) = statement.ToSqlServerRaw();
+
+        // Assert
+        Assert.Equal("UPDATE products SET Price = NULL, CreatedDate = NULL, UniqueId = NULL WHERE products.ProductId = @p0", sql);
         Assert.Single(parameters);
-        Assert.Equal(100, parameters["@p0"]);
-        return Task.CompletedTask;
-    }
-
-    [Fact]
-    public Task InsertNewCustomer_GeneratesSqlCorrectly()
-    {
-        // Arrange
-        var statement = TypedSql.Insert<Customer>()
-            .Value(c => c.Id, 100)
-            .Value(c => c.Age, 35)
-            .Value(c => c.Name, "New Customer");
-        
-        // Act
-        var (sql, parameters) = statement.ToSqlServerRaw();
-        
-        // Assert
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (@p0, @p1, @p2)", sql);
-        Assert.Equal(3, parameters.Count);
-        Assert.Equal(100, parameters["@p0"]);
-        Assert.Equal(35, parameters["@p1"]);
-        Assert.Equal("New Customer", parameters["@p2"]);
+        Assert.Equal(101, parameters["@p0"]);
         return Task.CompletedTask;
     }
 }

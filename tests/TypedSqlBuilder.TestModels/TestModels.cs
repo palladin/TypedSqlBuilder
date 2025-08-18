@@ -27,6 +27,12 @@ public class Product() : SqlTable("products")
     public SqlIntColumn ProductId { get; set; } = default!;
     [Column("ProductName")]
     public SqlStringColumn ProductName { get; set; } = default!;
+    [Column("Price")]
+    public SqlDecimalColumn Price { get; set; } = default!;
+    [Column("CreatedDate")]
+    public SqlDateTimeColumn CreatedDate { get; set; } = default!;
+    [Column("UniqueId")]
+    public SqlGuidColumn UniqueId { get; set; } = default!;
 }
 
 /// <summary>

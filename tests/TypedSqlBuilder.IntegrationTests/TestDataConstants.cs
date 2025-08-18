@@ -19,13 +19,13 @@ public static class TestDataConstants
     ];
 
     /// <summary>
-    /// Product data: (ProductId, ProductName)
+    /// Product data: (ProductId, ProductName, Price, CreatedDate, UniqueId)
     /// </summary>
-    public static readonly (int ProductId, string ProductName)[] Products = 
+    public static readonly (int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)[] Products = 
     [
-        (1, "Laptop"),
-        (2, "Mouse"),
-        (3, "Discontinued")
+        (1, "Laptop", 999.99m, new DateTime(2023, 1, 15), new Guid("11111111-1111-1111-1111-111111111111")),
+        (2, "Mouse", 25.50m, new DateTime(2023, 6, 10), new Guid("22222222-2222-2222-2222-222222222222")),
+        (3, "Discontinued", null, null, null)
     ];
 
     /// <summary>
@@ -47,7 +47,22 @@ public static class TestDataConstants
     /// <summary>
     /// Generate product tuples as SQL strings
     /// </summary>
-    public static string[] ProductTuples => Products.Select(p => $"({p.ProductId}, '{p.ProductName}')").ToArray();
+    public static string[] ProductTuples => Products.Select(p => 
+        $"({p.ProductId}, '{p.ProductName}', " +
+        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2") : "NULL")}, " +
+        $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
+        $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"
+    ).ToArray();
+
+    /// <summary>
+    /// Generate product tuples for SQLite (different date format)
+    /// </summary>
+    public static string[] SqliteProductTuples => Products.Select(p => 
+        $"({p.ProductId}, '{p.ProductName}', " +
+        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2") : "NULL")}, " +
+        $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
+        $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"
+    ).ToArray();
 
     /// <summary>
     /// Generate order tuples as SQL strings
