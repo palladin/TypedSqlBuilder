@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Northwind Console App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/examples/Northwind.RetroConsole/bin/Debug/net9.0/Northwind.RetroConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/Northwind.RetroConsole",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ]
+}

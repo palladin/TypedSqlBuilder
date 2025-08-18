@@ -19,18 +19,19 @@ internal class SqlDecimalValue(decimal value) : SqlExprDecimal
 /// Represents a SQL addition operation between two decimal expressions.
 /// Equivalent to: left + right
 /// </summary>
-internal class SqlDecimalAdd(SqlExprDecimal left, SqlExprDecimal right) : SqlExprDecimal
+internal class SqlDecimalAdd(SqlExpr left, SqlExpr right) : SqlExprDecimal
 {
-	public void Deconstruct(out SqlExprDecimal leftOut, out SqlExprDecimal rightOut) => (leftOut, rightOut) = (left, right);
+    public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
+
 
 /// <summary>
 /// Represents a SQL subtraction operation between two decimal expressions.
 /// Equivalent to: left - right
 /// </summary>
-internal class SqlDecimalSub(SqlExprDecimal left, SqlExprDecimal right) : SqlExprDecimal
+internal class SqlDecimalSub(SqlExpr left, SqlExpr right) : SqlExprDecimal
 {
-	public void Deconstruct(out SqlExprDecimal leftOut, out SqlExprDecimal rightOut) => (leftOut, rightOut) = (left, right);
+    public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
@@ -46,18 +47,18 @@ internal class SqlDecimalMinus(SqlExprDecimal value) : SqlExprDecimal
 /// Represents a SQL multiplication operation between two decimal expressions.
 /// Equivalent to: left * right
 /// </summary>
-internal class SqlDecimalMult(SqlExprDecimal left, SqlExprDecimal right) : SqlExprDecimal
+internal class SqlDecimalMult(SqlExpr left, SqlExpr right) : SqlExprDecimal
 {
-	public void Deconstruct(out SqlExprDecimal leftOut, out SqlExprDecimal rightOut) => (leftOut, rightOut) = (left, right);
+	public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>
 /// Represents a SQL division operation between two decimal expressions.
 /// Equivalent to: left / right
 /// </summary>
-internal class SqlDecimalDiv(SqlExprDecimal left, SqlExprDecimal right) : SqlExprDecimal
+internal class SqlDecimalDiv(SqlExpr left, SqlExpr right) : SqlExprDecimal
 {
-	public void Deconstruct(out SqlExprDecimal leftOut, out SqlExprDecimal rightOut) => (leftOut, rightOut) = (left, right);
+	public void Deconstruct(out SqlExpr leftOut, out SqlExpr rightOut) => (leftOut, rightOut) = (left, right);
 }
 
 /// <summary>

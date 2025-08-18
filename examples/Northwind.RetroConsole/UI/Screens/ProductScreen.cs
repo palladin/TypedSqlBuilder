@@ -104,7 +104,7 @@ public class ProductScreen
             var selectedProduct = DosMenu.SelectFromList(
                 "PRODUCT CATALOG",
                 products,
-                product => $"  {product.ProductID,-4} {product.ProductName,-25} {product.CategoryName,-15} {product.UnitPrice,8:C} {product.UnitsInStock,6}",
+                product => $"  {product.ProductID,-6}  {product.ProductName,-30}  {product.CategoryName,-18}  {product.UnitPrice,10:C}  {product.UnitsInStock,8}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             
@@ -189,7 +189,7 @@ public class ProductScreen
             var selectedProduct = DosMenu.SelectFromList(
                 $"SEARCH RESULTS: '{searchTerm}'",
                 products,
-                product => $"  {product.ProductID,-4} {product.ProductName,-25} {product.CategoryName,-15} {product.UnitPrice,8:C} {product.UnitsInStock,6}",
+                product => $"  {product.ProductID,-6}  {product.ProductName,-30}  {product.CategoryName,-18}  {product.UnitPrice,10:C}  {product.UnitsInStock,8}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             
@@ -228,7 +228,7 @@ public class ProductScreen
             var selectedProduct = DosMenu.SelectFromList(
                 $"LOW STOCK ALERT ({lowStockProducts.Count} ITEMS)",
                 lowStockProducts,
-                product => $"  {product.ProductID,-4} {product.ProductName,-25} {product.UnitsInStock,3} units {product.UnitPrice,8:C}",
+                product => $"  {product.ProductID,-6}  {product.ProductName,-30}  {product.UnitsInStock,5} units  {product.UnitPrice,10:C}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             

@@ -299,6 +299,38 @@ public abstract class SqlExprDecimal : SqlExpr
 	/// <param name="right">The right operand</param>
 	/// <returns>A decimal expression representing the addition</returns>
 	public static SqlExprDecimal operator +(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalAdd(left, right);
+
+	/// <summary>
+	/// Implements the addition operator (+) for mixed decimal and integer expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the addition</returns>
+	public static SqlExprDecimal operator +(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalAdd(left, right);
+	
+	/// <summary>
+	/// Implements the addition operator (+) for mixed decimal and int expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the addition</returns>
+	public static SqlExprDecimal operator +(SqlExprDecimal left, int right) => new SqlDecimalAdd(left, new SqlIntValue(right));
+	
+	/// <summary>
+	/// Implements the addition operator (+) for mixed integer and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the addition</returns>
+	public static SqlExprDecimal operator +(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalAdd(left, right);
+	
+	/// <summary>
+	/// Implements the addition operator (+) for mixed int and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the addition</returns>
+	public static SqlExprDecimal operator +(int left, SqlExprDecimal right) => new SqlDecimalAdd(new SqlIntValue(left), right);
 	
 	/// <summary>
 	/// Implements the subtraction operator (-) for decimal expressions.
@@ -309,11 +341,45 @@ public abstract class SqlExprDecimal : SqlExpr
 	public static SqlExprDecimal operator -(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalSub(left, right);
 	
 	/// <summary>
+	/// Implements the subtraction operator (-) for mixed decimal and integer expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the subtraction</returns>
+	public static SqlExprDecimal operator -(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalSub(left, right);
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for mixed decimal and int expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the subtraction</returns>
+	public static SqlExprDecimal operator -(SqlExprDecimal left, int right) => new SqlDecimalSub(left, new SqlIntValue(right));
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for mixed integer and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the subtraction</returns>
+	public static SqlExprDecimal operator -(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalSub(left, right);
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for mixed int and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the subtraction</returns>
+	public static SqlExprDecimal operator -(int left, SqlExprDecimal right) => new SqlDecimalSub(new SqlIntValue(left), right);
+
+
+	/// <summary>
 	/// Implements the unary negation operator (-) for decimal expressions.
 	/// </summary>
 	/// <param name="value">The operand to negate</param>
 	/// <returns>A decimal expression representing the negation</returns>
 	public static SqlExprDecimal operator -(SqlExprDecimal value) => new SqlDecimalMinus(value);
+	
 	
 	/// <summary>
 	/// Implements the multiplication operator (*) for decimal expressions.
@@ -324,13 +390,77 @@ public abstract class SqlExprDecimal : SqlExpr
 	public static SqlExprDecimal operator *(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalMult(left, right);
 	
 	/// <summary>
+	/// Implements the multiplication operator (*) for mixed decimal and integer expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the multiplication</returns>
+	public static SqlExprDecimal operator *(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalMult(left, right);
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for mixed decimal and int expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the multiplication</returns>
+	public static SqlExprDecimal operator *(SqlExprDecimal left, int right) => new SqlDecimalMult(left, new SqlIntValue(right));
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for mixed integer and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the multiplication</returns>
+	public static SqlExprDecimal operator *(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalMult(left, right);
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for mixed int and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the multiplication</returns>
+	public static SqlExprDecimal operator *(int left, SqlExprDecimal right) => new SqlDecimalMult(new SqlIntValue(left), right);
+	
+	/// <summary>
 	/// Implements the division operator (/) for decimal expressions.
 	/// </summary>
 	/// <param name="left">The left operand</param>
 	/// <param name="right">The right operand</param>
 	/// <returns>A decimal expression representing the division</returns>
 	public static SqlExprDecimal operator /(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalDiv(left, right);
-
+	
+	/// <summary>
+	/// Implements the division operator (/) for mixed decimal and integer expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the division</returns>
+	public static SqlExprDecimal operator /(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalDiv(left, right);
+	
+	/// <summary>
+	/// Implements the division operator (/) for mixed decimal and int expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the division</returns>
+	public static SqlExprDecimal operator /(SqlExprDecimal left, int right) => new SqlDecimalDiv(left, new SqlIntValue(right));
+	
+	/// <summary>
+	/// Implements the division operator (/) for mixed integer and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the division</returns>
+	public static SqlExprDecimal operator /(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalDiv(left, right);
+	
+	/// <summary>
+	/// Implements the division operator (/) for mixed int and decimal expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A decimal expression representing the division</returns>
+	public static SqlExprDecimal operator /(int left, SqlExprDecimal right) => new SqlDecimalDiv(new SqlIntValue(left), right);
+		
 	/// <summary>
 	/// Implements the greater than operator (>) for decimal expressions.
 	/// </summary>

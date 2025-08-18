@@ -104,7 +104,7 @@ public class OrderScreen
             var selectedOrder = DosMenu.SelectFromList(
                 "RECENT ORDERS",
                 orders,
-                order => $"  {order.OrderID,-8} {order.CustomerName,-20} {order.OrderDate:MM/dd/yy,-10} {order.Total,10:C} {order.Status}",
+                order => $"  {order.OrderID,-10}  {order.CustomerName,-25}  {order.OrderDate:MM/dd/yy,-12}  {order.Total,12:C}  {order.Status}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             
@@ -155,7 +155,7 @@ public class OrderScreen
                 totalAmount += lineTotal;
                 
                 var discountText = detail.Discount > 0 ? $" ({detail.Discount:P0} disc)" : "";
-                content += $"{detail.ProductName,-25} {detail.Quantity,3} x {detail.UnitPrice,8:C}{discountText} = {lineTotal,10:C}\n";
+                content += $"{detail.ProductName,-30}  {detail.Quantity,3} x {detail.UnitPrice,10:C}{discountText}  =  {lineTotal,12:C}\n";
             }
             
             content += $"────────────────────────────────────────────\n";
@@ -231,7 +231,7 @@ public class OrderScreen
             var selectedOrder = DosMenu.SelectFromList(
                 $"PENDING ORDERS ({pendingOrders.Count} ITEMS)",
                 pendingOrders,
-                order => $"  {order.OrderID,-8} {order.CustomerName,-20} {order.OrderDate:MM/dd/yy,-10} {order.Total,10:C} {order.Status}",
+                order => $"  {order.OrderID,-10}  {order.CustomerName,-25}  {order.OrderDate:MM/dd/yy,-12}  {order.Total,12:C}  {order.Status}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             
@@ -262,7 +262,7 @@ public class OrderScreen
             var selectedOrder = DosMenu.SelectFromList(
                 $"SHIPPED ORDERS ({shippedOrders.Count} ITEMS)",
                 shippedOrders,
-                order => $"  {order.OrderID,-8} {order.CustomerName,-20} {order.ShippedDate:MM/dd/yy,-10} {order.Total,10:C} {order.Status}",
+                order => $"  {order.OrderID,-10}  {order.CustomerName,-25}  {order.ShippedDate:MM/dd/yy,-12}  {order.Total,12:C}  {order.Status}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             

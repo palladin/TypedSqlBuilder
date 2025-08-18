@@ -225,6 +225,66 @@ internal class MaxSqlIntClause(ISqlQuery<ValueTuple<SqlExprInt>> Query) : SqlSca
 }
 
 /// <summary>
+/// Represents a SQL SUM aggregate function applied to decimal queries.
+/// Inherits from SqlExprDecimal to be used as a decimal expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing decimal values to sum</param>
+internal class SumSqlDecimalClause(ISqlQuery<ValueTuple<SqlExprDecimal>> Query) : SqlScalarQuery<SqlExprDecimal>
+{
+    /// <summary>
+    /// Deconstructs the SUM clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being summed</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDecimal>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL AVG aggregate function applied to decimal queries.
+/// Inherits from SqlExprDecimal to be used as a decimal expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing decimal values to average</param>
+internal class AvgSqlDecimalClause(ISqlQuery<ValueTuple<SqlExprDecimal>> Query) : SqlScalarQuery<SqlExprDecimal>
+{
+    /// <summary>
+    /// Deconstructs the AVG clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being averaged</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDecimal>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MIN aggregate function applied to decimal queries.
+/// Inherits from SqlExprDecimal to be used as a decimal expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing decimal values to find minimum of</param>
+internal class MinSqlDecimalClause(ISqlQuery<ValueTuple<SqlExprDecimal>> Query) : SqlScalarQuery<SqlExprDecimal>
+{
+    /// <summary>
+    /// Deconstructs the MIN clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for minimum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDecimal>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MAX aggregate function applied to decimal queries.
+/// Inherits from SqlExprDecimal to be used as a decimal expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing decimal values to find maximum of</param>
+internal class MaxSqlDecimalClause(ISqlQuery<ValueTuple<SqlExprDecimal>> Query) : SqlScalarQuery<SqlExprDecimal>
+{
+    /// <summary>
+    /// Deconstructs the MAX clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for maximum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDecimal>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
 /// Base class for SQL COUNT aggregate functions.
 /// Provides the foundation for counting operations that return integer scalar values.
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.

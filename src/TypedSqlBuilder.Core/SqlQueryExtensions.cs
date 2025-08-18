@@ -17,7 +17,7 @@ public static class SqlQueryExtensions
             .Cast<TupleElementNamesAttribute>()
             .FirstOrDefault();
 
-        return tupleNamesAttr?.TransformNames?.ToImmutableArray() ?? [];
+        return tupleNamesAttr?.TransformNames?.Where(x => x is not null).ToImmutableArray() ?? [];
     }
 
 
@@ -102,6 +102,63 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
+    /// Projects the query result to a SQL decimal expression.
+    /// Used for selecting computed decimal values or preparing for aggregate operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL decimal expressions</param>
+    /// <returns>A new query that produces SQL decimal expressions</returns>
+    /// <example>
+    /// <code>
+    /// var priceQuery = productQuery.Select(product => product.UnitPrice * product.Quantity);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<ValueTuple<SqlExprDecimal>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDecimal> selector)
+        where TSource : ITuple
+    {
+        return new SelectClause<TSource, ValueTuple<SqlExprDecimal>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
+    }
+
+    /// <summary>
+    /// Projects the query result to a SQL DateTime expression.
+    /// Used for selecting computed DateTime values or preparing for date operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL DateTime expressions</param>
+    /// <returns>A new query that produces SQL DateTime expressions</returns>
+    /// <example>
+    /// <code>
+    /// var dateQuery = orderQuery.Select(order => order.OrderDate);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<ValueTuple<SqlExprDateTime>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDateTime> selector)
+        where TSource : ITuple
+    {
+        return new SelectClause<TSource, ValueTuple<SqlExprDateTime>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
+    }
+
+    /// <summary>
+    /// Projects the query result to a SQL GUID expression.
+    /// Used for selecting computed GUID values or preparing for identifier operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL GUID expressions</param>
+    /// <returns>A new query that produces SQL GUID expressions</returns>
+    /// <example>
+    /// <code>
+    /// var idQuery = userQuery.Select(user => user.Id);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<ValueTuple<SqlExprGuid>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprGuid> selector)
+        where TSource : ITuple
+    {
+        return new SelectClause<TSource, ValueTuple<SqlExprGuid>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
+    }
+
+    /// <summary>
     /// Applies the SUM aggregate function to a query of integer expressions.
     /// Computes the total sum of all integer values in the query result.
     /// </summary>
@@ -163,6 +220,70 @@ public static class SqlQueryExtensions
     public static SqlScalarQuery<SqlExprInt> Max(this ISqlQuery<ValueTuple<SqlExprInt>> query)
     {
         return new MaxSqlIntClause(query);
+    }
+
+    /// <summary>
+    /// Applies the SUM aggregate function to a query of decimal expressions.
+    /// Computes the total sum of all decimal values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL decimal expressions</param>
+    /// <returns>A SQL scalar query representing the sum of all values</returns>
+    /// <example>
+    /// <code>
+    /// var totalPrice = productQuery.Select(product => product.UnitPrice * product.Quantity).Sum();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDecimal> Sum(this ISqlQuery<ValueTuple<SqlExprDecimal>> query)
+    {
+        return new SumSqlDecimalClause(query);
+    }
+
+    /// <summary>
+    /// Applies the AVG aggregate function to a query of decimal expressions.
+    /// Computes the average of all decimal values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL decimal expressions</param>
+    /// <returns>A SQL scalar query representing the average of all values</returns>
+    /// <example>
+    /// <code>
+    /// var avgPrice = productQuery.Select(product => product.UnitPrice).Avg();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDecimal> Avg(this ISqlQuery<ValueTuple<SqlExprDecimal>> query)
+    {
+        return new AvgSqlDecimalClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to a query of decimal expressions.
+    /// Finds the minimum value among all decimal values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL decimal expressions</param>
+    /// <returns>A SQL scalar query representing the minimum value</returns>
+    /// <example>
+    /// <code>
+    /// var minPrice = productQuery.Select(product => product.UnitPrice).Min();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDecimal> Min(this ISqlQuery<ValueTuple<SqlExprDecimal>> query)
+    {
+        return new MinSqlDecimalClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to a query of decimal expressions.
+    /// Finds the maximum value among all decimal values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL decimal expressions</param>
+    /// <returns>A SQL scalar query representing the maximum value</returns>
+    /// <example>
+    /// <code>
+    /// var maxPrice = productQuery.Select(product => product.UnitPrice).Max();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDecimal> Max(this ISqlQuery<ValueTuple<SqlExprDecimal>> query)
+    {
+        return new MaxSqlDecimalClause(query);
     }
 
     /// <summary>

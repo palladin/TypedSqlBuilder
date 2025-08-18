@@ -27,7 +27,7 @@ var (sql, params)  =
             .Select(c => (c.Id, c.Name))
             .ToSqlServerRaw();
 
-var customers = connection.Query<(int Id, string Name)>(sql, params.ToDapperParameters());
+var customers = connection.Query<(int Id, string Name)>(sql, params);
 ```
 
 ## Motivation

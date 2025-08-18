@@ -16,7 +16,7 @@ public class OrderService
     
     public List<Order> GetRecentOrders(int limit = 50)
     {
-        // First, get the basic order data with joins
+        // Get orders with customer and employee information
         var query = NorthwindDb.Orders.From()
             .LeftJoin(
                 NorthwindDb.Customers,
@@ -27,23 +27,41 @@ public class OrderService
                 NorthwindDb.Employees,
                 result => result.Order.EmployeeID,
                 e => e.EmployeeID,
-                (result, e) => (
-                    OrderID: result.Order.OrderID,
-                    CustomerID: result.Order.CustomerID,
-                    EmployeeID: result.Order.EmployeeID,
-                    OrderDate: result.Order.OrderDate,
-                    RequiredDate: result.Order.RequiredDate,
-                    ShippedDate: result.Order.ShippedDate,
-                    Freight: result.Order.Freight,
-                    ShipName: result.Order.ShipName,
-                    ShipCity: result.Order.ShipCity,
-                    ShipCountry: result.Order.ShipCountry,
-                    CustomerName: result.Customer.CompanyName,
-                    EmployeeName: e.FirstName + " " + e.LastName
-                ))
-            .OrderBy(result => (result.OrderDate, Sort.Desc));
+                (result, e) => (Order: result.Order, Customer: result.Customer, Employee: e))
+            .OrderBy(result => (result.Order.OrderDate, Sort.Desc))
+            .Select(result => (
+                OrderID: result.Order.OrderID,
+                CustomerID: result.Order.CustomerID,
+                EmployeeID: result.Order.EmployeeID,
+                OrderDate: result.Order.OrderDate,
+                RequiredDate: result.Order.RequiredDate,
+                ShippedDate: result.Order.ShippedDate,
+                ShipVia: result.Order.ShipVia,
+                Freight: result.Order.Freight,
+                ShipName: result.Order.ShipName,
+                ShipAddress: result.Order.ShipAddress,
+                ShipCity: result.Order.ShipCity,
+                ShipRegion: result.Order.ShipRegion,
+                ShipPostalCode: result.Order.ShipPostalCode,
+                ShipCountry: result.Order.ShipCountry,
+                CustomerName: result.Customer.CompanyName,
+                EmployeeName: result.Employee.FirstName + " " + result.Employee.LastName,
+                Total: NorthwindDb.OrderDetails.From()
+                    .Where(od => od.OrderID == result.Order.OrderID)
+                    .Select(od => od.UnitPrice * od.Quantity * (1 - od.Discount)).Sum()
+            ));
             
-        return ExecuteQuery<Order>(query);
+        var orders = ExecuteQuery<Order>(query);
+        
+        // Calculate totals for each order using raw SQL for now
+        foreach (var order in orders)
+        {
+            var sql = "SELECT COALESCE(SUM(UnitPrice * Quantity * (1 - Discount)), 0) FROM OrderDetails WHERE OrderID = @orderId";
+            var total = _db.Connection.QuerySingle<decimal>(sql, new { orderId = order.OrderID });
+            order.Total = total;
+        }
+        
+        return orders;
     }
     
     public List<OrderDetail> GetOrderDetails(int orderId)
@@ -81,24 +99,25 @@ public class OrderService
                 NorthwindDb.Employees,
                 result => result.Order.EmployeeID,
                 e => e.EmployeeID,
-                (result, e) => (
-                    OrderID: result.Order.OrderID,
-                    CustomerID: result.Order.CustomerID,
-                    EmployeeID: result.Order.EmployeeID,
-                    OrderDate: result.Order.OrderDate,
-                    RequiredDate: result.Order.RequiredDate,
-                    ShippedDate: result.Order.ShippedDate,
-                    ShipVia: result.Order.ShipVia,
-                    Freight: result.Order.Freight,
-                    ShipName: result.Order.ShipName,
-                    ShipAddress: result.Order.ShipAddress,
-                    ShipCity: result.Order.ShipCity,
-                    ShipRegion: result.Order.ShipRegion,
-                    ShipPostalCode: result.Order.ShipPostalCode,
-                    ShipCountry: result.Order.ShipCountry,
-                    CustomerName: result.Customer.CompanyName,
-                    EmployeeName: e.FirstName + " " + e.LastName
-                ));
+                (result, e) => (Order: result.Order, Customer: result.Customer, Employee: e))
+            .Select(result => (
+                OrderID: result.Order.OrderID,
+                CustomerID: result.Order.CustomerID,
+                EmployeeID: result.Order.EmployeeID,
+                OrderDate: result.Order.OrderDate,
+                RequiredDate: result.Order.RequiredDate,
+                ShippedDate: result.Order.ShippedDate,
+                ShipVia: result.Order.ShipVia,
+                Freight: result.Order.Freight,
+                ShipName: result.Order.ShipName,
+                ShipAddress: result.Order.ShipAddress,
+                ShipCity: result.Order.ShipCity,
+                ShipRegion: result.Order.ShipRegion,
+                ShipPostalCode: result.Order.ShipPostalCode,
+                ShipCountry: result.Order.ShipCountry,
+                CustomerName: result.Customer.CompanyName,
+                EmployeeName: result.Employee.FirstName + " " + result.Employee.LastName
+            ));
             
         return ExecuteQuery<Order>(query).FirstOrDefault();
     }
@@ -116,25 +135,36 @@ public class OrderService
                 NorthwindDb.Employees,
                 result => result.Order.EmployeeID,
                 e => e.EmployeeID,
-                (result, e) => (
-                    OrderID: result.Order.OrderID,
-                    CustomerID: result.Order.CustomerID,
-                    EmployeeID: result.Order.EmployeeID,
-                    OrderDate: result.Order.OrderDate,
-                    RequiredDate: result.Order.RequiredDate,
-                    ShippedDate: result.Order.ShippedDate,
-                    Freight: result.Order.Freight,
-                    CustomerName: result.Customer.CompanyName,
-                    EmployeeName: e.FirstName + " " + e.LastName
-                ))
-            .OrderBy(result => (result.OrderDate, Sort.Desc));
+                (result, e) => (Order: result.Order, Customer: result.Customer, Employee: e))
+            .OrderBy(result => (result.Order.OrderDate, Sort.Desc))
+            .Select(result => (
+                OrderID: result.Order.OrderID,
+                CustomerID: result.Order.CustomerID,
+                EmployeeID: result.Order.EmployeeID,
+                OrderDate: result.Order.OrderDate,
+                RequiredDate: result.Order.RequiredDate,
+                ShippedDate: result.Order.ShippedDate,
+                Freight: result.Order.Freight,
+                CustomerName: result.Customer.CompanyName,
+                EmployeeName: result.Employee.FirstName + " " + result.Employee.LastName
+            ));
             
-        return ExecuteQuery<Order>(query);
+        var orders = ExecuteQuery<Order>(query);
+        
+        // Calculate totals for each order
+        foreach (var order in orders)
+        {
+            var sql = "SELECT COALESCE(SUM(UnitPrice * Quantity * (1 - Discount)), 0) FROM OrderDetails WHERE OrderID = @orderId";
+            var total = _db.Connection.QuerySingle<decimal>(sql, new { orderId = order.OrderID });
+            order.Total = total;
+        }
+        
+        return orders;
     }
     
     private List<T> ExecuteQuery<T>(ISqlQuery query)
     {
-        var (sql, parameters) = query.ToSqliteRaw();
+        var (sql, parameters) = query.ToSqliteRaw();        
         var results = _db.Connection.Query<T>(sql, parameters).ToList();
         
         // Handle computed properties for Order objects
@@ -142,6 +172,8 @@ public class OrderService
         {
             if (item is Order order)
             {
+                Console.WriteLine($"DEBUG ORDER: ID={order.OrderID}, CustomerName='{order.CustomerName}', EmployeeName='{order.EmployeeName}'");
+                
                 if (order.ShippedDate != null)
                     order.Status = "SHIPPED";
                 else if (order.OrderDate != null)

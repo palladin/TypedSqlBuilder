@@ -230,7 +230,7 @@ public static class DatabaseSetup
             -- Customers
             INSERT INTO Customers (CustomerID, CompanyName, ContactName, City, Country, Phone) VALUES
             ('ALFKI', 'Alfreds Futterkiste', 'Maria Anders', 'Berlin', 'Germany', '030-0074321'),
-            ('ANATR', 'Ana Trujillo Emparedados y helados', 'Ana Trujillo', 'México D.F.', 'Mexico', '(5) 555-4729'),
+            ('ANATR', 'Ana Trujillo', 'Ana Trujillo', 'México D.F.', 'Mexico', '(5) 555-4729'),
             ('ANTON', 'Antonio Moreno Taquería', 'Antonio Moreno', 'México D.F.', 'Mexico', '(5) 555-3932'),
             ('AROUT', 'Around the Horn', 'Thomas Hardy', 'London', 'UK', '(171) 555-7788'),
             ('BERGS', 'Berglunds snabbköp', 'Christina Berglund', 'Luleå', 'Sweden', '0921-12 34 65'),

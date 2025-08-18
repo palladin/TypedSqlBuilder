@@ -99,7 +99,7 @@ public class CustomerScreen
                     var selectedCustomer = DosMenu.SelectFromList(
                         "CUSTOMER DATABASE",
                         customers,
-                        customer => $"  {customer.CustomerID,-6} {customer.CompanyName,-25} {customer.ContactName,-20} {customer.City,-15} {customer.Country}",
+                        customer => $"  {customer.CustomerID,-8}  {customer.CompanyName,-30}  {customer.ContactName,-25}  {customer.City,-18}  {customer.Country}",
                         "↑↓ Navigate  ENTER=Details  F3=Orders  ESC=Back"
                     );
                     
@@ -180,7 +180,7 @@ public class CustomerScreen
             var selectedOrder = DosMenu.SelectFromList(
                 $"ORDERS FOR {customer.CompanyName}",
                 orders,
-                order => $"  {order.OrderID,-8} {order.OrderDate:MM/dd/yy,-10} {order.Total,10:C} {order.Status}",
+                order => $"  {order.OrderID,-10}  {order.OrderDate:MM/dd/yy,-12}  {order.Total,12:C}  {order.Status}",
                 "↑↓ Navigate  ENTER=Details  ESC=Back"
             );
             
@@ -210,7 +210,7 @@ public class CustomerScreen
         
         foreach (var detail in details)
         {
-            content += $"{detail.ProductName,-20} {detail.Quantity,3} x {detail.UnitPrice,8:C} = {detail.LineTotal,10:C}\n";
+            content += $"{detail.ProductName,-25}  {detail.Quantity,3} x {detail.UnitPrice,10:C}  =  {detail.LineTotal,12:C}\n";
         }
         
         content += $"\n                                    Total: {order.Total:C}";
