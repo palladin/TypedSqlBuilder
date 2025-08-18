@@ -290,7 +290,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount));
+                (c, o) => (c.Id, c.Name, o.Id, o.Amount));
 
     public static ISqlQuery InnerJoinWithSelect()
         => Db.Customers.From()
@@ -307,7 +307,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, c.Age, o.OrderId, o.Amount))
+                (c, o) => (c.Id, c.Name, c.Age, o.Id, o.Amount))
             .Where(result => result.Amount > 100);
 
     public static ISqlQuery InnerJoinWithOrderBy()
@@ -316,7 +316,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
+                (c, o) => (c.Id, c.Name, o.Id, o.Amount))
             .OrderBy(result => (result.Name, Sort.Asc));
 
     // JOIN test cases - LEFT JOIN
@@ -326,7 +326,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount));
+                (c, o) => (c.Id, c.Name, o.Id, o.Amount));
 
     public static ISqlQuery LeftJoinWithSelect()
         => Db.Customers.From()
@@ -343,7 +343,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, c.Age, OrderId: o.OrderId, OrderAmount: o.Amount))
+                (c, o) => (c.Id, c.Name, c.Age, OrderId: o.Id, OrderAmount: o.Amount))
             .Where(result => result.Age < 65);
 
     public static ISqlQuery LeftJoinWithOrderBy()
@@ -352,7 +352,7 @@ public static class TestQueries
                 Db.Orders,
                 c => c.Id,
                 o => o.CustomerId,
-                (c, o) => (c.Id, c.Name, o.OrderId, o.Amount))
+                (c, o) => (c.Id, c.Name, o.Id, o.Amount))
             .OrderBy(result => ((result.Name, Sort.Asc), (result.Amount, Sort.Desc)));
 
     // Complex JOIN scenarios
@@ -394,7 +394,7 @@ public static class TestQueries
                 Db.Products,
                 joined => joined.Order.Amount, // Using Amount as a simple join key for testing
                 p => p.ProductId,
-                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.OrderId, p.ProductName));
+                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, p.ProductName));
 
     public static ISqlQuery MixedJoinTypesFusion()
         => Db.Customers.From()
@@ -407,7 +407,7 @@ public static class TestQueries
                 Db.Products,
                 joined => joined.Order.Amount,
                 p => p.ProductId,
-                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.OrderId, ProductName: p.ProductName));
+                (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, ProductName: p.ProductName));
 
     public static ISqlQuery JoinFusionWithWhere()
         => Db.Customers.From()

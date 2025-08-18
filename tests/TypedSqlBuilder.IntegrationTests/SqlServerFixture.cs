@@ -88,7 +88,7 @@ public class SqlServerFixture : IAsyncLifetime
 
         var createOrders = @"
             CREATE TABLE orders (
-                OrderId INT IDENTITY(1,1) PRIMARY KEY,
+                Id INT IDENTITY(1,1) PRIMARY KEY,
                 CustomerId INT,
                 Amount INT,
                 FOREIGN KEY (CustomerId) REFERENCES customers(Id)
@@ -128,7 +128,7 @@ public class SqlServerFixture : IAsyncLifetime
 
         var insertOrders = $@"
             SET IDENTITY_INSERT orders ON;
-            INSERT INTO orders (OrderId, CustomerId, Amount) VALUES
+            INSERT INTO orders (Id, CustomerId, Amount) VALUES
             {string.Join(",\n            ", TestDataConstants.OrderTuples)};
             SET IDENTITY_INSERT orders OFF;";
 

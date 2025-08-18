@@ -280,7 +280,7 @@ public class SqlServerQueryIntegrationTests : IClassFixture<SqlServerFixture>, I
         var results = (await connection.QueryAsync<dynamic>(sql, dapperParams)).ToList();
 
         Assert.True(results.Count > 0);
-        Assert.All(results, r => Assert.NotNull(r.Id));
+        Assert.All(results, r => Assert.NotNull(r.CustomerId));
         Assert.All(results, r => Assert.NotNull(r.Name));
         Assert.All(results, r => Assert.NotNull(r.OrderId));
         Assert.All(results, r => Assert.NotNull(r.Amount));

@@ -29,9 +29,9 @@ public static class TestDataConstants
     ];
 
     /// <summary>
-    /// Order data: (OrderId, CustomerId, Amount)
+    /// Order data: (Id, CustomerId, Amount)
     /// </summary>
-    public static readonly (int OrderId, int CustomerId, int Amount)[] Orders = 
+    public static readonly (int Id, int CustomerId, int Amount)[] Orders = 
     [
         (1, 1, 500),
         (2, 1, 150),
@@ -67,5 +67,5 @@ public static class TestDataConstants
     /// <summary>
     /// Generate order tuples as SQL strings
     /// </summary>
-    public static string[] OrderTuples => Orders.Select(o => $"({o.OrderId}, {o.CustomerId}, {o.Amount})").ToArray();
+    public static string[] OrderTuples => Orders.Select(o => $"({o.Id}, {o.CustomerId}, {o.Amount})").ToArray();
 }

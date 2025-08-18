@@ -88,7 +88,7 @@ public class PostgreSqlFixture : IAsyncLifetime
 
         var createOrders = @"
             CREATE TABLE orders (
-                orderid SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 customerid INT,
                 amount INT,
                 FOREIGN KEY (customerid) REFERENCES customers(id) ON DELETE CASCADE
@@ -119,9 +119,9 @@ public class PostgreSqlFixture : IAsyncLifetime
             SELECT setval(pg_get_serial_sequence('products', 'productid'), {TestDataConstants.Products.Length});";
 
         var insertOrders = $@"
-            INSERT INTO orders (orderid, customerid, amount) VALUES
+            INSERT INTO orders (id, customerid, amount) VALUES
             {string.Join(",\n            ", TestDataConstants.OrderTuples)};
-            SELECT setval(pg_get_serial_sequence('orders', 'orderid'), {TestDataConstants.Orders.Length});";
+            SELECT setval(pg_get_serial_sequence('orders', 'id'), {TestDataConstants.Orders.Length});";
 
         await connection.ExecuteAsync(insertCustomers);
         await connection.ExecuteAsync(insertProducts);

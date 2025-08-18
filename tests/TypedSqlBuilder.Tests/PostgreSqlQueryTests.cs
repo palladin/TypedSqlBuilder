@@ -516,7 +516,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         SELECT 
             a0.Id AS Id,
             a0.Name AS Name,
-            (a0.Age + :p0) AS prj0
+            (a0.Age + :p0) AS Proj0
         FROM 
             customers a0
         ORDER BY 
@@ -541,8 +541,8 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            ((a0.Id * :p0) + a0.Age) AS prj0,
-            (a0.Name || :p1) AS prj1
+            ((a0.Id * :p0) + a0.Age) AS Proj0,
+            (a0.Name || :p1) AS Proj1
         FROM 
             customers a0
         """;
@@ -854,9 +854,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -902,9 +902,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -927,8 +927,8 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            (a0.Id + :p1) AS prj0,
-            (a0.Name || :p2) AS prj1
+            (a0.Id + :p1) AS Proj0,
+            (a0.Name || :p2) AS Proj1
         FROM 
             customers a0
         WHERE 
@@ -958,7 +958,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         SELECT 
             a0.Id AS Id,
             a0.Name AS Name,
-            (a0.Age + :p2) AS prj0
+            (a0.Age + :p2) AS Proj0
         FROM 
             customers a0
         WHERE 
@@ -1442,10 +1442,10 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a1.Id AS Id,
+            a1.Id AS CustomerId,
             a1.Name AS Name,
             a1.Age AS Age,
-            a2.OrderId AS OrderId,
+            a2.Id AS OrderId,
             a2.Amount AS Amount
         FROM 
             (SELECT 
@@ -1480,7 +1480,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            (a0.Name || :p0) AS prj0,
+            (a0.Name || :p0) AS Proj0,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -1504,10 +1504,10 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a1.Id AS Id,
+            a1.Id AS CustomerId,
             a1.Name AS Name,
             a1.Age AS Age,
-            a2.OrderId AS OrderId,
+            a2.Id AS OrderId,
             a2.Amount AS Amount
         FROM 
             (SELECT 
@@ -1736,7 +1736,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
             customers a0
         WHERE 
             a0.Age > (SELECT 
-            SUM(a1.Age) AS prj0
+            SUM(a1.Age) AS Proj0
         FROM 
             customers a1)
         """;
@@ -1765,7 +1765,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
             customers a0
         WHERE 
             a0.Age > (SELECT 
-            SUM(a1.Age) AS prj0
+            SUM(a1.Age) AS Proj0
         FROM 
             customers a1)
         """;
@@ -1990,9 +1990,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -2017,9 +2017,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -2072,9 +2072,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a2.ProductName AS ProductName
         FROM 
             customers a0
@@ -2098,9 +2098,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            a0.Id AS Id,
+            a0.Id AS CustomerId,
             a0.Name AS Name,
-            a1.OrderId AS OrderId,
+            a1.Id AS OrderId,
             a2.ProductName AS ProductName
         FROM 
             customers a0
@@ -2161,7 +2161,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            COUNT(*) AS prj0
+            COUNT(*) AS Proj0
         FROM 
             customers a0
         WHERE 
@@ -2185,7 +2185,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            COUNT(*) AS prj0
+            COUNT(*) AS Proj0
         FROM 
             customers a0
         WHERE 
@@ -2209,7 +2209,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            COUNT(*) AS prj0
+            COUNT(*) AS Proj0
         FROM 
             customers a0
         """;
@@ -2230,7 +2230,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            COUNT(*) AS prj0
+            COUNT(*) AS Proj0
         FROM 
             customers a0
         """;
@@ -2251,7 +2251,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            AVG(a0.Amount) AS prj0
+            AVG(a0.Amount) AS Proj0
         FROM 
             orders a0
         """;
@@ -2272,7 +2272,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            MAX(a0.Amount) AS prj0
+            MAX(a0.Amount) AS Proj0
         FROM 
             orders a0
         """;
@@ -2293,7 +2293,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            MIN(a0.Amount) AS prj0
+            MIN(a0.Amount) AS Proj0
         FROM 
             orders a0
         """;
@@ -2314,7 +2314,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            SUM(a0.Amount) AS prj0
+            SUM(a0.Amount) AS Proj0
         FROM 
             orders a0
         """;
@@ -2335,7 +2335,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            SUM(a0.Age) AS prj0
+            SUM(a0.Age) AS Proj0
         FROM 
             customers a0
         """;
@@ -2356,7 +2356,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         // Assert
         var expectedSql = """
         SELECT 
-            SUM(a0.Age) AS prj0
+            SUM(a0.Age) AS Proj0
         FROM 
             customers a0
         """;
@@ -2378,7 +2378,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS prj0
+            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS Proj0
         FROM 
             customers a0
         """;
@@ -2402,7 +2402,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS prj0
+            CASE WHEN a0.Age > :p0 THEN :p1 ELSE :p2 END AS Proj0
         FROM 
             customers a0
         """;
@@ -2426,7 +2426,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            CASE WHEN a0.Age > :p0 THEN a0.IsActive ELSE false END AS prj0
+            CASE WHEN a0.Age > :p0 THEN a0.IsActive ELSE false END AS Proj0
         FROM 
             customers a0
         """;
@@ -2572,7 +2572,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            ABS(a0.Age) AS prj0
+            ABS(a0.Age) AS Proj0
         FROM 
             customers a0
         """;
@@ -2619,7 +2619,7 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            ABS((a0.Age - :p0)) AS prj0
+            ABS((a0.Age - :p0)) AS Proj0
         FROM 
             customers a0
         """;
@@ -2697,9 +2697,9 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         var expectedSql = """
         SELECT 
             a0.ProductName AS ProductName,
-            (a0.Price * :p0) AS prj0,
-            (a0.Price + :p1) AS prj1,
-            (a0.Price - :p2) AS prj2
+            (a0.Price * :p0) AS Proj0,
+            (a0.Price + :p1) AS Proj1,
+            (a0.Price - :p2) AS Proj2
         FROM 
             products a0
         """;

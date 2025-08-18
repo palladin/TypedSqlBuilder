@@ -221,6 +221,20 @@ internal static partial class SqlCompiler
     }
 
     /// <summary>
+    /// Generates a table-prefixed alias for a column to resolve naming conflicts.
+    /// Converts table names like "customers" to "Customer" and combines with column name.
+    /// </summary>
+    /// <param name="sqlColumn">The SQL column to generate an alias for</param>
+    /// <returns>A table-prefixed alias like "CustomerId"</returns>
+    private static string GenerateTablePrefixedAlias(ISqlColumn sqlColumn)
+    {
+        var tableName = sqlColumn.TableName;
+        var singularTable = tableName.TrimEnd('s'); // "customers" -> "customer"
+        var capitalizedTable = char.ToUpper(singularTable[0]) + singularTable[1..]; // "Customer"
+        return $"{capitalizedTable}{sqlColumn.ColumnName}"; // "CustomerId"
+    }
+
+    /// <summary>
     /// Compiles a tuple projection into a SELECT list with proper aliasing.
     /// Flattens nested tuples, generates appropriate field aliases, and updates projection aliases in context.
     /// </summary>
@@ -240,7 +254,10 @@ internal static partial class SqlCompiler
         // Only use provided aliases if the count matches exactly
         bool useProvidedAliases = !aliases.IsDefault && aliases.Length == flattenedExprs.Length;
 
-        // First pass: compile all expressions without updating projection aliases
+        // Track alias usage for O(1) conflict detection
+        var aliasTracker = new Dictionary<string, List<int>>(StringComparer.OrdinalIgnoreCase);
+
+        // Single pass: compile all expressions and track alias usage
         for (int i = 0; i < flattenedExprs.Length; i++)
         {
             var expr = flattenedExprs[i];
@@ -253,13 +270,43 @@ internal static partial class SqlCompiler
             {
                 fieldAlias = aliases[i]!;
             }
+            else if (expr is ISqlColumn sqlColumn)
+            {
+                var columnName = sqlColumn.ColumnName;
+                fieldAlias = columnName; // Start with column name, will resolve conflicts later
+            }
             else
             {
-                // Default alias behavior
-                fieldAlias = expr is ISqlColumn sqlColumn ? sqlColumn.ColumnName : $"prj{projectionCount++}";
+                fieldAlias = $"Proj{projectionCount++}";
             }
             
             items.Add((compiled, fieldAlias));
+            
+            // Track this alias usage
+            if (!aliasTracker.TryGetValue(fieldAlias, out var indices))
+            {
+                indices = new List<int>();
+                aliasTracker[fieldAlias] = indices;
+            }
+            indices.Add(i);
+        }
+        
+        // Resolve conflicts for aliases used multiple times
+        foreach (var (alias, indices) in aliasTracker)
+        {
+            if (indices.Count > 1)
+            {
+                // Multiple items use the same alias - apply table prefixing to resolve conflicts
+                foreach (var index in indices)
+                {
+                    if (flattenedExprs[index] is ISqlColumn sqlColumn)
+                    {
+                        var (projection, _) = items[index];
+                        var newAlias = GenerateTablePrefixedAlias(sqlColumn);
+                        items[index] = (projection, newAlias);
+                    }
+                }
+            }
         }
 
         // Second pass: update projection aliases after all expressions are compiled

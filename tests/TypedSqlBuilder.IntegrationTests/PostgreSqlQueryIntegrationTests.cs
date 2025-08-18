@@ -319,12 +319,18 @@ public class PostgreSqlQueryIntegrationTests : IClassFixture<PostgreSqlFixture>,
         var dapperParams = parameters.ToDapperParameters();
         var results = (await connection.QueryAsync<dynamic>(sql, dapperParams)).ToList();
 
+        // Debug: Print actual results
+        var debugResults = results.Select(r => new { 
+            Proj0 = r.proj0, 
+            Proj1 = r.proj1 as string 
+        }).ToList();
+
         // Assert - Should return computed expressions
         Assert.Equal(4, results.Count);
-        Assert.Contains(results, r => r.prj0 == 125 && r.prj1 == "John Doe - Customer"); // (1 * 100) + 25
-        Assert.Contains(results, r => r.prj0 == 230 && r.prj1 == "Jane Smith - Customer"); // (2 * 100) + 30
-        Assert.Contains(results, r => r.prj0 == 316 && r.prj1 == "Minor User - Customer"); // (3 * 100) + 16
-        Assert.Contains(results, r => r.prj0 == 465 && r.prj1 == "Senior User - Customer"); // (4 * 100) + 65
+        Assert.Contains(debugResults, r => r.Proj0 == 125 && r.Proj1 == "John Doe - Customer"); // (1 * 100) + 25
+        Assert.Contains(debugResults, r => r.Proj0 == 230 && r.Proj1 == "Jane Smith - Customer"); // (2 * 100) + 30
+        Assert.Contains(debugResults, r => r.Proj0 == 316 && r.Proj1 == "Minor User - Customer"); // (3 * 100) + 16
+        Assert.Contains(debugResults, r => r.Proj0 == 465 && r.Proj1 == "Senior User - Customer"); // (4 * 100) + 65
     }
 
     [Fact]

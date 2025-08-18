@@ -67,7 +67,7 @@ public abstract class SqliteIntegrationTestBase : IDisposable
         
         var createOrders = @"
             CREATE TABLE orders (
-                OrderId INTEGER PRIMARY KEY,
+                Id INTEGER PRIMARY KEY,
                 CustomerId INTEGER,
                 Amount INTEGER,
                 FOREIGN KEY (CustomerId) REFERENCES customers(Id)
@@ -89,7 +89,7 @@ public abstract class SqliteIntegrationTestBase : IDisposable
             {string.Join(",\n            ", TestDataConstants.SqliteProductTuples)}";
 
         var insertOrders = $@"
-            INSERT INTO orders (OrderId, CustomerId, Amount) VALUES
+            INSERT INTO orders (Id, CustomerId, Amount) VALUES
             {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
 
         _connection.Execute(insertCustomers);
