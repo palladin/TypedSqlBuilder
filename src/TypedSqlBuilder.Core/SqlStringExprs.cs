@@ -37,9 +37,21 @@ public class SqlStringColumn : SqlExprString, ISqlColumn
         ColumnName = columnName;        
     }
     
+    /// <summary>
+    /// Gets the name of the table this column belongs to.
+    /// </summary>
     public string TableName { get; }
+    
+    /// <summary>
+    /// Gets the name of the column within the table.
+    /// </summary>
     public string ColumnName { get; }    
 
+    /// <summary>
+    /// Deconstructs the column into its table name and column name components.
+    /// </summary>
+    /// <param name="tableNameOut">The name of the table</param>
+    /// <param name="columnNameOut">The name of the column</param>
     public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {
         tableNameOut = TableName;

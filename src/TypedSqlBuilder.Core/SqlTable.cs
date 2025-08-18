@@ -6,15 +6,44 @@ using System.Runtime.CompilerServices;
 
 namespace TypedSqlBuilder.Core;
 
+/// <summary>
+/// Abstract base class for SQL table representations.
+/// Provides the foundation for type-safe table definitions with strongly-typed column mappings.
+/// Implements ITuple to integrate with the tuple-based relational algebra system.
+/// </summary>
+/// <remarks>
+/// This class uses reflection to automatically populate columns based on properties decorated 
+/// with ColumnAttribute. Each property must be of a supported SQL expression type 
+/// (SqlIntColumn, SqlStringColumn, SqlBoolColumn) and must have both getter and setter.
+/// 
+/// The table structure is cached for performance, making subsequent instantiations of the 
+/// same table type efficient.
+/// </remarks>
 public abstract class SqlTable : ITuple
 {
     internal ImmutableArray<SqlExpr> Columns = ImmutableArray<SqlExpr>.Empty;
+    
+    /// <summary>
+    /// Gets the name of the SQL table.
+    /// </summary>
     public string TableName { get; private set; }
 
+    /// <summary>
+    /// Gets the column at the specified index for ITuple implementation.
+    /// </summary>
+    /// <param name="index">The zero-based index of the column</param>
+    /// <returns>The column expression at the specified index</returns>
     public object? this[int index] => Columns[index];
 
+    /// <summary>
+    /// Gets the number of columns in this table for ITuple implementation.
+    /// </summary>
     public int Length => Columns.Length;
 
+    /// <summary>
+    /// Initializes a new instance of the SqlTable class with the specified table name.
+    /// </summary>
+    /// <param name="tableName">The name of the SQL table</param>
     protected SqlTable(string tableName)
     {
         TableName = tableName;

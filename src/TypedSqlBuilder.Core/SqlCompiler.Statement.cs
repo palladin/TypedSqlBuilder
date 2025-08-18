@@ -82,6 +82,7 @@ internal static partial class SqlCompiler
     /// <param name="setClauses">The SET clauses to compile</param>
     /// <param name="table">The table being updated</param>
     /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
     /// <returns>The SQL string representation and updated context</returns>
     private static (string, Context) CompileSetClauses(ImmutableArray<SetClause> setClauses, SqlTable table, Context context, int scopeLevel)
     {
@@ -110,6 +111,7 @@ internal static partial class SqlCompiler
     /// <param name="valueClauses">The VALUE clauses to compile</param>
     /// <param name="table">The table being inserted into</param>
     /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
     /// <returns>The columns clause, values clause, and updated context</returns>
     private static (string, string, Context) CompileInsertValueClauses(ImmutableArray<ValueClause> valueClauses, SqlTable table, Context context, int scopeLevel)
     {

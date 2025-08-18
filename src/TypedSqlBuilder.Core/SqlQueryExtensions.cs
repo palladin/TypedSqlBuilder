@@ -324,12 +324,28 @@ public static class SqlQueryExtensions
         return new HavingClause<TSource>(query, predicate);
     }
 
+    /// <summary>
+    /// Adds ORDER BY clause to a grouped query with a single ordering key.
+    /// Enables sorting of grouped results by aggregate expressions or grouping keys.
+    /// </summary>
+    /// <typeparam name="TSource">The source tuple type</typeparam>
+    /// <param name="query">The grouped query to add ordering to</param>
+    /// <param name="keySelector">Function that selects the ordering key and direction using aggregate functions</param>
+    /// <returns>An ordered grouped query that can be further extended</returns>
     public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, (SqlExpr Key, Sort Direction)> keySelector)
         where TSource : ITuple
     {
         return new OrderByClause<TSource>(query, x => [keySelector(x, new SqlAggregateFunc())]);
     }
 
+    /// <summary>
+    /// Adds ORDER BY clause to a grouped query with two ordering keys.
+    /// Enables sorting of grouped results by multiple aggregate expressions or grouping keys.
+    /// </summary>
+    /// <typeparam name="TSource">The source tuple type</typeparam>
+    /// <param name="query">The grouped query to add ordering to</param>
+    /// <param name="keySelector">Function that selects two ordering keys and their directions using aggregate functions</param>
+    /// <returns>An ordered grouped query that can be further extended</returns>
     public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
         where TSource : ITuple
     {
@@ -340,6 +356,14 @@ public static class SqlQueryExtensions
         });
     }
 
+    /// <summary>
+    /// Adds ORDER BY clause to a grouped query with three ordering keys.
+    /// Enables sorting of grouped results by multiple aggregate expressions or grouping keys.
+    /// </summary>
+    /// <typeparam name="TSource">The source tuple type</typeparam>
+    /// <param name="query">The grouped query to add ordering to</param>
+    /// <param name="keySelector">Function that selects three ordering keys and their directions using aggregate functions</param>
+    /// <returns>An ordered grouped query that can be further extended</returns>
     public static ISqlOrderedGroupByQuery<TSource> OrderBy<TSource>(this ISqlGroupByQuery<TSource> query, Func<TSource, SqlAggregateFunc, ((SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction), (SqlExpr Key, Sort Direction))> keySelector)
         where TSource : ITuple
     {

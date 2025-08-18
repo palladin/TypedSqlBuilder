@@ -2,22 +2,6 @@ using System.Collections.Immutable;
 
 namespace TypedSqlBuilder.Core;
 
-/// <summary>
-/// Contains SQL integer expression implementations for the TypedSqlBuilder system.
-/// This file defines all the concrete classes that represent various integer operations
-/// and comparisons in SQL queries, providing type-safe expression building capabilities.
-/// 
-/// The classes in this file fall into several categories:
-/// - Value expressions: SqlIntValue (literal integers)
-/// - Unary operations: SqlIntMinus, SqlIntAbs (unary operators and functions)
-/// - Binary arithmetic: SqlIntAdd, SqlIntSub, SqlIntMult, SqlIntDiv (mathematical operations)
-/// - Comparison operations: SqlIntEquals, SqlIntNotEquals, SqlIntGreaterThan, SqlIntLessThan, SqlIntGreaterThanOrEqualTo, SqlIntLessThanOrEqualTo
-/// - Projection expressions: SqlIntProjection, SqlIntColumn (column references and projections)
-/// 
-/// All classes inherit from SqlExprInt which provides operator overloading for intuitive
-/// SQL expression building using standard C# operators (==, !=, +, -, *, /, >, <, etc.).
-/// </summary>
-
 // Integer expression implementations
 
 /// <summary>
@@ -180,9 +164,21 @@ public class SqlIntColumn : SqlExprInt, ISqlColumn
         ColumnName = columnName;        
     }
     
+    /// <summary>
+    /// Gets the name of the table this column belongs to.
+    /// </summary>
     public string TableName { get; }
+    
+    /// <summary>
+    /// Gets the name of the column within the table.
+    /// </summary>
     public string ColumnName { get; }    
     
+    /// <summary>
+    /// Deconstructs the column into its table name and column name components.
+    /// </summary>
+    /// <param name="tableNameOut">The name of the table</param>
+    /// <param name="columnNameOut">The name of the column</param>
     public void Deconstruct(out string tableNameOut, out string columnNameOut)
     {
         tableNameOut = TableName;

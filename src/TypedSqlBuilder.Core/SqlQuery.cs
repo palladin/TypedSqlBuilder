@@ -60,6 +60,12 @@ public interface ISqlGroupByQuery : ISqlQuery;
 public interface ISqlGroupByQuery<TSource> : ISqlGroupByQuery, ISqlQuery<TSource>
     where TSource : ITuple;
 
+/// <summary>
+/// Interface for SQL queries that include GROUP BY with ORDER BY clauses.
+/// Represents grouped queries with additional ordering on the grouped results.
+/// This enables queries that group data and then sort the groups themselves.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the ordered grouped query</typeparam>
 public interface ISqlOrderedGroupByQuery<TSource> : ISqlGroupByQuery<TSource>
     where TSource : ITuple;
 
@@ -110,6 +116,7 @@ internal record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQ
 /// </summary>
 /// <param name="Query">The source query</param>
 /// <param name="Selector">Function that transforms input tuples to output tuples</param>
+/// <param name="Aliases">Optional column aliases for the result</param>
 internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases) : ISqlQuery;
 
 /// <summary>
@@ -120,6 +127,7 @@ internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, Imm
 /// <typeparam name="TResult">The output tuple type after projection</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedSelector">Function that transforms source tuples to result tuples</param>
+/// <param name="Aliases">Optional column aliases for the result</param>
 internal record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases) 
     : SelectClause(TypedQuery, x => TypedSelector((TSource) x), Aliases), ISqlQuery<TResult>
     where TSource : ITuple
@@ -145,7 +153,12 @@ internal record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource
     : WhereClause(TypedQuery, x => TypedPredicate((TSource) x)), ISqlQuery<TSource>
     where TSource : ITuple;
 
-
+/// <summary>
+/// Abstract base class for SQL scalar queries that return single values.
+/// Extends SqlExprInt to enable scalar queries to be used as expressions in other queries.
+/// This allows subqueries that return single values to be embedded in larger expressions.
+/// </summary>
+/// <typeparam name="TExpr">The type of SQL expression this scalar query returns</typeparam>
 public abstract class SqlScalarQuery<TExpr> : SqlExprInt, ISqlScalarQuery<TExpr>
     where TExpr : SqlExpr
 {
@@ -241,8 +254,17 @@ internal class CountClause<TSource>(ISqlQuery<TSource> Query) : CountClause(Quer
     public void Deconstruct(out ISqlQuery<TSource> QueryOut) => QueryOut = Query;
 }
 
+/// <summary>
+/// Base interface for SQL queries that include an ORDER BY clause.
+/// Represents queries that have specified row ordering but maintain their source structure.
+/// </summary>
 public interface ISqlOrderedQuery : ISqlQuery;
 
+/// <summary>
+/// Generic interface for SQL queries that include an ORDER BY clause with typed source data.
+/// Enables strongly-typed ordering operations while preserving result type information.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the ordered query</typeparam>
 public interface ISqlOrderedQuery<TSource> : ISqlOrderedQuery, ISqlQuery<TSource>
     where TSource : ITuple;
 
@@ -271,7 +293,8 @@ internal record OrderByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSour
 /// Defines the grouping criteria for aggregating query results.
 /// </summary>
 /// <param name="Query">The source query to group</param>
-/// <param name="KeySelectors">Array of functions that extract grouping keys from input tuples</param>
+/// <param name="KeySelector">Function that extracts an array of grouping keys from input tuples</param>
+/// <param name="Predicate">Optional predicate function for HAVING clause filtering</param>
 internal record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlExpr>> KeySelector, Func<ITuple, SqlAggregateFunc, SqlExprBool>? Predicate) : ISqlGroupByQuery;
 
 /// <summary>
@@ -281,6 +304,7 @@ internal record GroupByClause(ISqlQuery Query, Func<ITuple, ImmutableArray<SqlEx
 /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedKeySelector">Function that extracts an array of grouping keys from source tuples</param>
+/// <param name="TypedPredicate">Optional strongly-typed predicate function for HAVING clause filtering</param>
 internal record GroupByClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource, ImmutableArray<SqlExpr>> TypedKeySelector,
                                                                     Func<TSource, SqlAggregateFunc, SqlExprBool>? TypedPredicate = null) 
     : GroupByClause(TypedQuery, x => TypedKeySelector((TSource)x), TypedPredicate is { } ? ((x, agg) => TypedPredicate((TSource)x, agg)) : null), ISqlGroupByQuery<TSource>
@@ -306,15 +330,46 @@ internal record HavingClause<TSource>(ISqlGroupByQuery<TSource> TypedGroupedQuer
     : HavingClause(TypedGroupedQuery, (x, agg) => TypedPredicate((TSource) x, agg)), ISqlGroupByHavingQuery<TSource>
     where TSource : ITuple;
 
-
+/// <summary>
+/// Enumeration of supported SQL JOIN types.
+/// Defines the different ways tables can be joined in SQL queries.
+/// </summary>
 public enum JoinType
 {
+    /// <summary>
+    /// INNER JOIN - Returns only rows that have matching values in both tables.
+    /// </summary>
     Inner,
+    
+    /// <summary>
+    /// LEFT OUTER JOIN - Returns all rows from the left table and matched rows from the right table.
+    /// </summary>
     Left,    
 }
 
+/// <summary>
+/// Base record representing a SQL JOIN clause for combining multiple tables.
+/// Handles the non-typed aspects of join operations.
+/// </summary>
+/// <param name="Outer">The outer (left) query being joined</param>
+/// <param name="JoinData">Array containing join specifications: join type, inner table, key selectors, result transformation, and column aliases</param>
 internal record JoinClause(ISqlQuery Outer, ImmutableArray<(JoinType JoinType, SqlTable Inner, Func<ITuple, SqlExpr> OuterKeySelector, Func<ITuple, SqlExpr> InnerKeySelector, Func<ITuple, ITuple, ITuple> ResultSelector, ImmutableArray<string?> Aliases)> JoinData) : ISqlQuery;
 
+/// <summary>
+/// Strongly-typed JOIN clause for combining queries with type safety.
+/// Provides compile-time verification of join keys and result structure.
+/// </summary>
+/// <typeparam name="TOuter">The tuple type of the outer (left) query</typeparam>
+/// <typeparam name="TInner">The tuple type of the inner (right) table</typeparam>
+/// <typeparam name="TKey">The type of the join key used for matching rows</typeparam>
+/// <typeparam name="TResult">The tuple type of the joined result</typeparam>
+/// <param name="JoinType">The type of join operation to perform</param>
+/// <param name="TypedOuter">The strongly-typed outer query</param>
+/// <param name="Inner">The inner table to join with</param>
+/// <param name="OuterKeySelector">Function to extract the join key from outer query rows</param>
+/// <param name="InnerKeySelector">Function to extract the join key from inner table rows</param>
+/// <param name="ResultSelector">Function to combine outer and inner rows into the result type</param>
+/// <param name="Aliases">Optional column aliases for the result</param>
 internal record JoinClause<TOuter, TInner, TKey, TResult>(JoinType JoinType, ISqlQuery<TOuter> TypedOuter, TInner Inner, Func<TOuter, TKey> OuterKeySelector, Func<TInner, TKey> InnerKeySelector, Func<TOuter, TInner, TResult> ResultSelector, ImmutableArray<string?> Aliases) 
     : JoinClause(TypedOuter, [(JoinType, Inner, x => OuterKeySelector((TOuter)x), x => InnerKeySelector((TInner)x), (x, y) => ResultSelector((TOuter)x, (TInner)y), Aliases)]), ISqlQuery<TResult>
         where TOuter : ITuple

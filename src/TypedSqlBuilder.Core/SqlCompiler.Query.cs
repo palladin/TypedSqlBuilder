@@ -14,26 +14,6 @@ namespace TypedSqlBuilder.Core;
 internal static partial class SqlCompiler
 {
     /// <summary>
-    /// Static cache for reflection results to avoid repeated reflection on the same table types.
-    /// Key: Table Type, Value: Array of PropertyInfo objects that represent SqlColumn properties.
-    /// </summary>
-    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _reflectionCache = new();
-
-    /// <summary>
-    /// Gets the SqlColumn properties for a given table type, using cached results when available.
-    /// </summary>
-    /// <param name="tableType">The SqlTable type to analyze</param>
-    /// <returns>Array of PropertyInfo objects representing SqlColumn properties</returns>
-    private static PropertyInfo[] GetTableProperties(Type tableType)
-    {
-        return _reflectionCache.GetOrAdd(tableType, type => 
-            type.GetProperties()
-                .Where(prop => prop.GetIndexParameters().Length == 0 && 
-                              typeof(ISqlColumn).IsAssignableFrom(prop.PropertyType))
-                .ToArray());
-    }
-
-    /// <summary>
     /// Helper method to generate indentation strings for SQL formatting.
     /// </summary>
     /// <param name="scopeLevel">The current scope level</param>
