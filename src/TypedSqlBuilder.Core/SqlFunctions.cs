@@ -258,9 +258,9 @@ public static class SqlFunc
     /// <param name="expr">The integer expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprInt expr, params ImmutableArray<SqlExprInt> values)
+    public static SqlExprBool In(this SqlExprInt expr, params SqlExprInt[] values)
     {
-        return new SqlInValues<SqlExprInt>(expr, values);
+        return new SqlInValues<SqlExprInt>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
@@ -270,9 +270,9 @@ public static class SqlFunc
     /// <param name="expr">The string expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprString expr, params ImmutableArray<SqlExprString> values)
+    public static SqlExprBool In(this SqlExprString expr, params SqlExprString[] values)
     {
-        return new SqlInValues<SqlExprString>(expr, values);
+        return new SqlInValues<SqlExprString>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
@@ -282,9 +282,9 @@ public static class SqlFunc
     /// <param name="expr">The boolean expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprBool expr, params ImmutableArray<SqlExprBool> values)
+    public static SqlExprBool In(this SqlExprBool expr, params SqlExprBool[] values)
     {
-        return new SqlInValues<SqlExprBool>(expr, values);
+        return new SqlInValues<SqlExprBool>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
@@ -330,9 +330,9 @@ public static class SqlFunc
     /// <param name="expr">The decimal expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprDecimal expr, params ImmutableArray<SqlExprDecimal> values)
+    public static SqlExprBool In(this SqlExprDecimal expr, params SqlExprDecimal[] values)
     {
-        return new SqlInValues<SqlExprDecimal>(expr, values);
+        return new SqlInValues<SqlExprDecimal>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
@@ -354,9 +354,9 @@ public static class SqlFunc
     /// <param name="expr">The DateTime expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprDateTime expr, params ImmutableArray<SqlExprDateTime> values)
+    public static SqlExprBool In(this SqlExprDateTime expr, params SqlExprDateTime[] values)
     {
-        return new SqlInValues<SqlExprDateTime>(expr, values);
+        return new SqlInValues<SqlExprDateTime>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
@@ -378,9 +378,9 @@ public static class SqlFunc
     /// <param name="expr">The GUID expression to test</param>
     /// <param name="values">The values to test against</param>
     /// <returns>A SQL boolean expression representing the IN operation</returns>
-    public static SqlExprBool In(this SqlExprGuid expr, params ImmutableArray<SqlExprGuid> values)
+    public static SqlExprBool In(this SqlExprGuid expr, params SqlExprGuid[] values)
     {
-        return new SqlInValues<SqlExprGuid>(expr, values);
+        return new SqlInValues<SqlExprGuid>(expr, values.ToImmutableArray());
     }
 
     /// <summary>
