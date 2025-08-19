@@ -30,6 +30,24 @@ var (sql, params)  =
 var customers = connection.Query<(int Id, string Name)>(sql, params);
 ```
 
+## How to Start
+
+The best way to get started with TypedSqlBuilder is to explore the working example in the `examples/Northwind.RetroConsole` directory. This retro-styled console application demonstrates the usage of TypedSqlBuilder with a full CRUD implementation using the classic Northwind database.
+
+<img src="docs/retro-console-screenshot.png" alt="Palladin Shop System - A retro demonstration of modern type-safe SQL building" width="600">
+
+To run the example:
+
+```bash
+cd examples/Northwind.RetroConsole
+dotnet run
+```
+
+The example showcases:
+- Complex queries with joins, filtering, and ordering
+- CRUD operations (Create, Read, Update, Delete)
+- Integration with SQLite using Dapper for data access
+
 ## Motivation
 
 TypedSqlBuilder is designed to bridge the gap between raw SQL and complex ORMs. It's intended to be used with simple ORMs like **Dapper**, bringing some of the familiar LINQ experience to SQL construction without the complexity and overhead of Entity Framework.
