@@ -23,11 +23,11 @@ public class Customer() : SqlTable("customers")
 
 // Build complex queries with fluent syntax
 var (sql, params)  =
-    TypedSql.From<Customer>()
-            .Where(c => c.Age > 18)
-            .OrderBy(c => (c.Name, Sort.Asc))
-            .Select(c => (c.Id, c.Name))
-            .ToSqlServerRaw();
+    Db.Customers.From()
+                .Where(c => c.Age > 18)
+                .OrderBy(c => (c.Name, Sort.Asc))
+                .Select(c => (c.Id, c.Name))
+                .ToSqlServerRaw();
 
 var customers = connection.Query<(int Id, string Name)>(sql, params);
 ```
