@@ -1,5 +1,7 @@
 # TypedSqlBuilder
 
+[![Build and Test](https://github.com/palladin/TypedSqlBuilder/actions/workflows/build.yml/badge.svg)](https://github.com/palladin/TypedSqlBuilder/actions/workflows/build.yml)
+
 A type-safe SQL expression builder DSL for C# that provides fluent syntax for constructing SQL expressions with compile-time type checking.
 
 ## Usage
