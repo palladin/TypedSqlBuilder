@@ -217,3 +217,35 @@ internal class SqlIntNull : SqlExprInt, ISqlNullValue
 {
     public static SqlIntNull Value => new();
 }
+
+/// <summary>
+/// Represents a SQL ROUND function for rounding decimal values to specified precision.
+/// Equivalent to: ROUND(value, precision)
+/// </summary>
+/// <param name="value">The decimal expression to round</param>
+/// <param name="precision">The number of decimal places</param>
+internal class SqlDecimalRound(SqlExprDecimal value, SqlExprInt precision) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExprDecimal valueOut, out SqlExprInt precisionOut) => 
+		(valueOut, precisionOut) = (value, precision);
+}
+
+/// <summary>
+/// Represents a SQL CEILING function for rounding up to nearest integer.
+/// Equivalent to: CEILING(value) or CEIL(value)
+/// </summary>
+/// <param name="value">The decimal expression to round up</param>
+internal class SqlDecimalCeiling(SqlExprDecimal value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL FLOOR function for rounding down to nearest integer.
+/// Equivalent to: FLOOR(value)
+/// </summary>
+/// <param name="value">The decimal expression to round down</param>
+internal class SqlDecimalFloor(SqlExprDecimal value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}

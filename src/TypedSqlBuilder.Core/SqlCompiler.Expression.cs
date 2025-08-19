@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Collections.Immutable;
@@ -149,7 +150,7 @@ internal static partial class SqlCompiler
             {
                 // PostgreSQL requires parentheses for chained comparisons like (a > b) = c
                 // SQL Server and SQLite handle this correctly without parentheses
-                var leftPrecedence = context.Dialect.Type == DatabaseType.PostgreSQL && 
+                var leftPrecedence = context.DatabaseType == DatabaseType.PostgreSQL && 
                                    GetPrecedence(left) == SqlPrecedence.Comparison 
                     ? SqlPrecedence.Comparison + 1  // Force parentheses for PostgreSQL comparison operations
                     : SqlPrecedence.Comparison;
@@ -229,7 +230,7 @@ internal static partial class SqlCompiler
             // Parameters
             case SqlParameterBool(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -355,7 +356,7 @@ internal static partial class SqlCompiler
             // Parameters
             case SqlParameterInt(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -439,6 +440,108 @@ internal static partial class SqlCompiler
             case SqlIntNull:
                 return ("NULL", context);
 
+            // String functions that return integers
+            case SqlStringLength(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                // Use LEN for SQL Server, LENGTH for others
+                var functionName = context.DatabaseType == DatabaseType.SqlServer ? "LEN" : "LENGTH";
+                return ($"{functionName}({valueSql})", valueCtx);
+            }
+
+            // Date functions that return integers
+            case SqlDateTimeYear(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"YEAR({valueSql})",
+                    DatabaseType.PostgreSQL => $"EXTRACT(YEAR FROM {valueSql})",
+                    DatabaseType.SQLite => $"CAST(strftime('%Y', {valueSql}) AS INTEGER)",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for YEAR function")
+                };
+                return (sql, valueCtx);
+            }
+
+            case SqlDateTimeMonth(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"MONTH({valueSql})",
+                    DatabaseType.PostgreSQL => $"EXTRACT(MONTH FROM {valueSql})",
+                    DatabaseType.SQLite => $"CAST(strftime('%m', {valueSql}) AS INTEGER)",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for MONTH function")
+                };
+                return (sql, valueCtx);
+            }
+
+            case SqlDateTimeDay(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"DAY({valueSql})",
+                    DatabaseType.PostgreSQL => $"EXTRACT(DAY FROM {valueSql})",
+                    DatabaseType.SQLite => $"CAST(strftime('%d', {valueSql}) AS INTEGER)",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for DAY function")
+                };
+                return (sql, valueCtx);
+            }
+
+            case SqlDateTimeDiff(var datepart, var startdate, var enddate):
+            {
+                var (startSql, startCtx) = Compile(startdate, context, scopeLevel);
+                var (endSql, endCtx) = Compile(enddate, startCtx, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"DATEDIFF({datepart}, {startSql}, {endSql})",
+                    DatabaseType.PostgreSQL => datepart.ToLowerInvariant() switch
+                    {
+                        "day" => $"EXTRACT(DAY FROM ({endSql} - {startSql}))",
+                        "month" => $"(EXTRACT(YEAR FROM {endSql}) - EXTRACT(YEAR FROM {startSql})) * 12 + (EXTRACT(MONTH FROM {endSql}) - EXTRACT(MONTH FROM {startSql}))",
+                        "year" => $"(EXTRACT(YEAR FROM {endSql}) - EXTRACT(YEAR FROM {startSql}))",
+                        _ => $"EXTRACT({datepart.ToUpper()} FROM ({endSql} - {startSql}))"
+                    },
+                    DatabaseType.SQLite => datepart.ToLowerInvariant() switch
+                    {
+                        "day" => $"CAST((julianday({endSql}) - julianday({startSql})) AS INTEGER)",
+                        "month" => $"CAST(((CAST(strftime('%Y', {endSql}) AS INTEGER) - CAST(strftime('%Y', {startSql}) AS INTEGER)) * 12 + (CAST(strftime('%m', {endSql}) AS INTEGER) - CAST(strftime('%m', {startSql}) AS INTEGER))) AS INTEGER)",
+                        "year" => $"CAST((CAST(strftime('%Y', {endSql}) AS INTEGER) - CAST(strftime('%Y', {startSql}) AS INTEGER)) AS INTEGER)",
+                        _ => $"CAST((julianday({endSql}) - julianday({startSql})) AS INTEGER)"
+                    },
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for DATEDIFF function")
+                };
+                return (sql, endCtx);
+            }
+
+            // Mathematical functions that return integers
+            case SqlDecimalCeiling(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"CEILING({valueSql})",
+                    DatabaseType.PostgreSQL => $"CEIL({valueSql})",
+                    DatabaseType.SQLite => $"CAST((CASE WHEN {valueSql} = CAST({valueSql} AS INTEGER) THEN {valueSql} ELSE CAST({valueSql} AS INTEGER) + 1 END) AS REAL)",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for CEILING function")
+                };
+                return (sql, valueCtx);
+            }
+
+            case SqlDecimalFloor(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"FLOOR({valueSql})",
+                    DatabaseType.PostgreSQL => $"FLOOR({valueSql})",
+                    DatabaseType.SQLite => $"CAST(CAST({valueSql} AS INTEGER) AS REAL)",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for FLOOR function")
+                };
+                return (sql, valueCtx);
+            }
+
             default:
                 throw new NotSupportedException($"Integer expression type {expr.GetType().Name} is not supported");
         }
@@ -470,15 +573,19 @@ internal static partial class SqlCompiler
                 var (rightSql, rightCtx) = CompileWithPrecedence(
                     right, leftCtx, scopeLevel, SqlPrecedence.Additive);
                 
-                return context.Dialect.UsesConcatFunction 
-                    ? ($"{context.Dialect.StringConcatOperator}({leftSql}, {rightSql})", rightCtx)
-                    : ($"{leftSql} {context.Dialect.StringConcatOperator} {rightSql}", rightCtx);
+                return context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => ($"CONCAT({leftSql}, {rightSql})", rightCtx),
+                    DatabaseType.SQLite => ($"{leftSql} || {rightSql}", rightCtx),
+                    DatabaseType.PostgreSQL => ($"{leftSql} || {rightSql}", rightCtx),
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for string concatenation")
+                };
             }
 
             // Parameters
             case SqlParameterString(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -497,6 +604,36 @@ internal static partial class SqlCompiler
             // NULL value
             case SqlStringNull:
                 return ("NULL", context);
+
+            // String functions
+            case SqlStringSubstring(var value, var start, var length):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var (startSql, startCtx) = Compile(start, valueCtx, scopeLevel);
+                var (lengthSql, lengthCtx) = Compile(length, startCtx, scopeLevel);
+                
+                // Use SUBSTR for SQLite, SUBSTRING for others
+                var functionName = context.DatabaseType == DatabaseType.SQLite ? "SUBSTR" : "SUBSTRING";
+                return ($"{functionName}({valueSql}, {startSql}, {lengthSql})", lengthCtx);
+            }
+
+            case SqlStringUpper(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                return ($"UPPER({valueSql})", valueCtx);
+            }
+
+            case SqlStringLower(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                return ($"LOWER({valueSql})", valueCtx);
+            }
+
+            case SqlStringTrim(var value):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                return ($"TRIM({valueSql})", valueCtx);
+            }
 
             default:
                 throw new NotSupportedException($"String expression type {expr.GetType().Name} is not supported");
@@ -568,7 +705,7 @@ internal static partial class SqlCompiler
             // Parameters
             case SqlParameterDecimal(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -613,6 +750,14 @@ internal static partial class SqlCompiler
             case SqlDecimalNull:
                 return ("NULL", context);
 
+            // Mathematical functions
+            case SqlDecimalRound(var value, var precision):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var (precisionSql, precisionCtx) = Compile(precision, valueCtx, scopeLevel);
+                return ($"ROUND({valueSql}, {precisionSql})", precisionCtx);
+            }
+
             default:
                 throw new NotSupportedException($"Decimal expression type {expr.GetType().Name} is not supported");
         }
@@ -639,7 +784,7 @@ internal static partial class SqlCompiler
             // Parameters
             case SqlParameterDateTime(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -658,6 +803,76 @@ internal static partial class SqlCompiler
             // NULL value
             case SqlDateTimeNull:
                 return ("NULL", context);
+
+            // Date/Time functions
+            case SqlDateTimeNow:
+            {
+                // Use GETDATE() for SQL Server, NOW() for PostgreSQL, and datetime('now') for SQLite
+                var functionName = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => "GETDATE()",
+                    DatabaseType.PostgreSQL => "NOW()",
+                    DatabaseType.SQLite => "datetime('now')",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for NOW function")
+                };
+                return (functionName, context);
+            }
+
+            case SqlDateTimeAdd(var datepart, var number, var date):
+            {
+                var (dateSql, dateCtx) = Compile(date, context, scopeLevel);
+                
+                // Handle different date addition syntax per database
+                string sql;
+                Context finalCtx;
+                
+                switch (context.DatabaseType)
+                {
+                    case DatabaseType.SqlServer:
+                        var (numberSql, numberCtx) = Compile(number, dateCtx, scopeLevel);
+                        sql = $"DATEADD({datepart}, {numberSql}, {dateSql})";
+                        finalCtx = numberCtx;
+                        break;
+                        
+                    case DatabaseType.PostgreSQL:
+                        // PostgreSQL INTERVAL requires direct value embedding, not parameters
+                        if (number is SqlIntValue(var intValue))
+                        {
+                            sql = $"({dateSql} + INTERVAL '{intValue} {datepart}')";
+                            finalCtx = dateCtx;
+                        }
+                        else
+                        {
+                            var (numberSql2, numberCtx2) = Compile(number, dateCtx, scopeLevel);
+                            sql = $"({dateSql} + ({numberSql2} * INTERVAL '1 {datepart}'))";
+                            finalCtx = numberCtx2;
+                        }
+                        break;
+                        
+                    case DatabaseType.SQLite:
+                        // SQLite datetime() requires direct value embedding  
+                        if (number is SqlIntValue(var intValue2))
+                        {
+                            sql = $"datetime({dateSql}, '+{intValue2} {datepart}')";
+                            finalCtx = dateCtx;
+                        }
+                        else
+                        {
+                            var (numberSql3, numberCtx3) = Compile(number, dateCtx, scopeLevel);
+                            sql = $"datetime({dateSql}, '+' || {numberSql3} || ' {datepart}')";
+                            finalCtx = numberCtx3;
+                        }
+                        break;
+                        
+                    default:
+                        var (numberSqlDef, numberCtxDef) = Compile(number, dateCtx, scopeLevel);
+                        sql = $"DATEADD({datepart}, {numberSqlDef}, {dateSql})";
+                        finalCtx = numberCtxDef;
+                        break;
+                }
+                
+                return (sql, finalCtx);
+            }
 
             default:
                 throw new NotSupportedException($"DateTime expression type {expr.GetType().Name} is not supported");
@@ -685,7 +900,7 @@ internal static partial class SqlCompiler
             // Parameters
             case SqlParameterGuid(var name):
             {
-                var paramKey = $"{context.Dialect.ParameterPrefix}{name}";
+                var paramKey = $"{context.ParameterPrefix}{name}";
                 var updatedContext = context.Parameters.ContainsKey(paramKey) 
                     ? context 
                     : context with { Parameters = context.Parameters.Add(paramKey, null!) };
@@ -732,10 +947,12 @@ internal static partial class SqlCompiler
         {
             // Boolean literals - handle dialect differences for true/false values
             case SqlBoolValue(var value):
-                return context.Dialect.Type switch
+                return context.DatabaseType switch
                 {
                     DatabaseType.PostgreSQL => (value ? "true" : "false", context),
-                    _ => context.GenerateParameter(value ? 1 : 0)
+                    DatabaseType.SqlServer => context.GenerateParameter(value ? 1 : 0),
+                    DatabaseType.SQLite => context.GenerateParameter(value ? 1 : 0),
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for boolean values")
                 };
             
             // String concatenation - handle dialect differences
@@ -744,9 +961,13 @@ internal static partial class SqlCompiler
                 var (leftSql, leftCtx) = CompileWithPrecedence(left, context, scopeLevel, SqlPrecedence.Additive);
                 var (rightSql, rightCtx) = CompileWithPrecedence(right, leftCtx, scopeLevel, SqlPrecedence.Additive);
                 
-                return context.Dialect.UsesConcatFunction 
-                    ? ($"{context.Dialect.StringConcatOperator}({leftSql}, {rightSql})", rightCtx)
-                    : ($"{leftSql} {context.Dialect.StringConcatOperator} {rightSql}", rightCtx);
+                return context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => ($"CONCAT({leftSql}, {rightSql})", rightCtx),
+                    DatabaseType.SQLite => ($"{leftSql} || {rightSql}", rightCtx),
+                    DatabaseType.PostgreSQL => ($"{leftSql} || {rightSql}", rightCtx),
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for string concatenation")
+                };
             }
         }
 

@@ -756,4 +756,154 @@ public static class TestQueries
     // Test Guid parameter
     public static ISqlQuery ParameterAsGuidParam()
         => Db.Products.From().Where(p => p.UniqueId == "targetId".AsGuidParam());
+
+    // ========== STRING FUNCTIONS TESTS ==========
+    
+    // Test SUBSTRING function
+    public static ISqlQuery StringSubstring()
+        => Db.Products.From()
+            .Select(p => p.ProductName.Substring(1, 5));
+
+    // Test UPPER function
+    public static ISqlQuery StringUpper()
+        => Db.Products.From()
+            .Select(p => p.ProductName.Upper());
+
+    // Test LOWER function
+    public static ISqlQuery StringLower()
+        => Db.Products.From()
+            .Select(p => p.ProductName.Lower());
+
+    // Test TRIM function
+    public static ISqlQuery StringTrim()
+        => Db.Products.From()
+            .Select(p => p.ProductName.Trim());
+
+    // Test LEN/LENGTH function
+    public static ISqlQuery StringLength()
+        => Db.Products.From()
+            .Select(p => p.ProductName.Length());
+
+    // Test string functions in WHERE clause
+    public static ISqlQuery StringFunctionsInWhere()
+        => Db.Customers.From()
+            .Where(c => c.Name.Upper() == "JOHN" && c.Name.Length() > 3)
+            .Select(c => (c.Id, c.Name));
+
+    // Test multiple string functions in SELECT
+    public static ISqlQuery StringFunctionsInSelect()
+        => Db.Customers.From()
+            .Select(c => (
+                c.Id, 
+                UpperName: c.Name.Upper(),
+                LowerName: c.Name.Lower(),
+                TrimmedName: c.Name.Trim(),
+                NameLength: c.Name.Length(),
+                FirstThree: c.Name.Substring(1, 3)
+            ));
+
+    // ========== DATE/TIME FUNCTIONS TESTS ==========
+    
+    // Test NOW()/GETDATE() function
+    public static ISqlQuery DateTimeNow()
+        => Db.Products.From()
+            .Select(p => SqlFunc.Now());
+
+    // Test YEAR function
+    public static ISqlQuery DateTimeYear()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.Year());
+
+    // Test MONTH function
+    public static ISqlQuery DateTimeMonth()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.Month());
+
+    // Test DAY function
+    public static ISqlQuery DateTimeDay()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.Day());
+
+    // Test DATEADD for days
+    public static ISqlQuery DateTimeAddDays()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.AddDays(30));
+
+    // Test DATEADD for months
+    public static ISqlQuery DateTimeAddMonths()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.AddMonths(6));
+
+    // Test DATEADD for years
+    public static ISqlQuery DateTimeAddYears()
+        => Db.Products.From()
+            .Select(p => p.CreatedDate.AddYears(1));
+
+    // Test DATEDIFF for days
+    public static ISqlQuery DateTimeDiffDays()
+        => Db.Products.From()
+            .Select(p => SqlFunc.DiffDays(p.CreatedDate, DateTime.Now));
+
+    // Test DATEDIFF for months
+    public static ISqlQuery DateTimeDiffMonths()
+        => Db.Products.From()
+            .Select(p => SqlFunc.DiffMonths(p.CreatedDate, DateTime.Now));
+
+    // Test DATEDIFF for years
+    public static ISqlQuery DateTimeDiffYears()
+        => Db.Products.From()
+            .Select(p => SqlFunc.DiffYears(p.CreatedDate, DateTime.Now));
+
+    // Test date functions in WHERE clause
+    public static ISqlQuery DateTimeFunctionsInWhere()
+        => Db.Products.From()
+            .Where(p => p.CreatedDate.Year() == 2024 && p.CreatedDate.Month() > 6)
+            .Select(p => (p.ProductId, p.CreatedDate));
+
+    // Test multiple date functions in SELECT
+    public static ISqlQuery DateTimeFunctionsInSelect()
+        => Db.Products.From()
+            .Select(p => (
+                p.ProductId,
+                CreatedYear: p.CreatedDate.Year(),
+                CreatedMonth: p.CreatedDate.Month(),
+                CreatedDay: p.CreatedDate.Day(),
+                NextWeek: p.CreatedDate.AddDays(7),
+                NextMonth: p.CreatedDate.AddMonths(1),
+                DaysAgo: SqlFunc.DiffDays(p.CreatedDate, SqlFunc.Now())
+            ));
+
+    // ========== MATHEMATICAL FUNCTIONS TESTS ==========
+    
+    // Test ROUND function
+    public static ISqlQuery DecimalRound()
+        => Db.Products.From()
+            .Select(p => p.Price.Round(2));
+
+    // Test CEILING function
+    public static ISqlQuery DecimalCeiling()
+        => Db.Products.From()
+            .Select(p => p.Price.Ceiling());
+
+    // Test FLOOR function
+    public static ISqlQuery DecimalFloor()
+        => Db.Products.From()
+            .Select(p => p.Price.Floor());
+
+    // Test math functions in WHERE clause
+    public static ISqlQuery MathFunctionsInWhere()
+        => Db.Products.From()
+            .Where(p => p.Price.Round(0) > 100 && p.Price.Ceiling() < 1000)
+            .Select(p => (p.ProductId, p.Price));
+
+    // Test multiple math functions in SELECT
+    public static ISqlQuery MathFunctionsInSelect()
+        => Db.Products.From()
+            .Select(p => (
+                p.ProductId,
+                OriginalPrice: p.Price,
+                RoundedPrice: p.Price.Round(2),
+                CeilingPrice: p.Price.Ceiling(),
+                FloorPrice: p.Price.Floor()
+            ));
 }

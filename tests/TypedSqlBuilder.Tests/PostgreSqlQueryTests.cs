@@ -3353,4 +3353,545 @@ public class PostgreSqlQueryTests : IQueryTestContract, IPostgreSqlDialectTestCo
         Assert.Empty(parameters);
         return Task.CompletedTask;
     }
+
+    [Fact]
+    public Task StringSubstring_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringSubstring();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            SUBSTRING(a0.ProductName, :p0, :p1) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(5, parameters[":p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringUpper_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringUpper();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            UPPER(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringLower_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLower();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            LOWER(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringTrim_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringTrim();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            TRIM(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringLength_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLength();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            LENGTH(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            UPPER(a0.Name) = :p0 AND LENGTH(a0.Name) > :p1
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal("JOHN", parameters[":p0"]);
+        Assert.Equal(3, parameters[":p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            UPPER(a0.Name) AS UpperName,
+            LOWER(a0.Name) AS LowerName,
+            TRIM(a0.Name) AS TrimmedName,
+            LENGTH(a0.Name) AS NameLength,
+            SUBSTRING(a0.Name, :p0, :p1) AS FirstThree
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters[":p0"]);
+        Assert.Equal(3, parameters[":p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeNow_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeNow();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            NOW() AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeYear_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeYear();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            EXTRACT(YEAR FROM a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeMonth_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeMonth();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            EXTRACT(MONTH FROM a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDay_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDay();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            EXTRACT(DAY FROM a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddDays();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            (a0.CreatedDate + INTERVAL '30 day') AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddMonths();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            (a0.CreatedDate + INTERVAL '6 month') AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddYears();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            (a0.CreatedDate + INTERVAL '1 year') AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffDays();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            EXTRACT(DAY FROM (:p0 - a0.CreatedDate)) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffMonths();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            (EXTRACT(YEAR FROM :p0) - EXTRACT(YEAR FROM a0.CreatedDate)) * 12 + (EXTRACT(MONTH FROM :p0) - EXTRACT(MONTH FROM a0.CreatedDate)) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffYears();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            (EXTRACT(YEAR FROM :p0) - EXTRACT(YEAR FROM a0.CreatedDate)) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.CreatedDate AS CreatedDate
+        FROM 
+            products a0
+        WHERE 
+            EXTRACT(YEAR FROM a0.CreatedDate) = :p0 AND EXTRACT(MONTH FROM a0.CreatedDate) > :p1
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(2024, parameters[":p0"]);
+        Assert.Equal(6, parameters[":p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            EXTRACT(YEAR FROM a0.CreatedDate) AS CreatedYear,
+            EXTRACT(MONTH FROM a0.CreatedDate) AS CreatedMonth,
+            EXTRACT(DAY FROM a0.CreatedDate) AS CreatedDay,
+            (a0.CreatedDate + INTERVAL '7 day') AS NextWeek,
+            (a0.CreatedDate + INTERVAL '1 month') AS NextMonth,
+            EXTRACT(DAY FROM (NOW() - a0.CreatedDate)) AS DaysAgo
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters); // No parameters expected for PostgreSQL as literals are embedded
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalRound_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalRound();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            ROUND(a0.Price, :p0) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(2, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalCeiling_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalCeiling();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            CEIL(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalFloor_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalFloor();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            FLOOR(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MathFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.Price AS Price
+        FROM 
+            products a0
+        WHERE 
+            ROUND(a0.Price, :p0) > :p1 AND CEIL(a0.Price) < :p2
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(0, parameters[":p0"]);
+        Assert.Equal(100m, parameters[":p1"]); // Decimal literal
+        Assert.Equal(1000, parameters[":p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MathFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.Price AS OriginalPrice,
+            ROUND(a0.Price, :p0) AS RoundedPrice,
+            CEIL(a0.Price) AS CeilingPrice,
+            FLOOR(a0.Price) AS FloorPrice
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(2, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
 }

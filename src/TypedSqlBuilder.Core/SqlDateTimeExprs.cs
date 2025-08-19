@@ -80,3 +80,68 @@ internal class SqlDateTimeNull : SqlExprDateTime, ISqlNullValue
 {
 	public static SqlDateTimeNull Value => new();
 }
+
+/// <summary>
+/// Represents a SQL GETDATE() or NOW() function for getting current date/time.
+/// Equivalent to: GETDATE() (SQL Server) or NOW() (PostgreSQL/MySQL)
+/// </summary>
+internal class SqlDateTimeNow : SqlExprDateTime
+{
+	public static SqlDateTimeNow Value => new();
+}
+
+/// <summary>
+/// Represents a SQL YEAR function for extracting year from date.
+/// Equivalent to: YEAR(date)
+/// </summary>
+/// <param name="value">The DateTime expression to extract year from</param>
+internal class SqlDateTimeYear(SqlExprDateTime value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprDateTime valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL MONTH function for extracting month from date.
+/// Equivalent to: MONTH(date)
+/// </summary>
+/// <param name="value">The DateTime expression to extract month from</param>
+internal class SqlDateTimeMonth(SqlExprDateTime value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprDateTime valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL DAY function for extracting day from date.
+/// Equivalent to: DAY(date)
+/// </summary>
+/// <param name="value">The DateTime expression to extract day from</param>
+internal class SqlDateTimeDay(SqlExprDateTime value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprDateTime valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL DATEADD function for adding time intervals to dates.
+/// Equivalent to: DATEADD(datepart, number, date)
+/// </summary>
+/// <param name="datepart">The part of date to add to (e.g., "day", "month", "year")</param>
+/// <param name="number">The number of units to add</param>
+/// <param name="date">The DateTime expression to add to</param>
+internal class SqlDateTimeAdd(string datepart, SqlExprInt number, SqlExprDateTime date) : SqlExprDateTime
+{
+	public void Deconstruct(out string datepartOut, out SqlExprInt numberOut, out SqlExprDateTime dateOut) => 
+		(datepartOut, numberOut, dateOut) = (datepart, number, date);
+}
+
+/// <summary>
+/// Represents a SQL DATEDIFF function for calculating difference between dates.
+/// Equivalent to: DATEDIFF(datepart, startdate, enddate)
+/// </summary>
+/// <param name="datepart">The part of date to calculate difference in (e.g., "day", "month", "year")</param>
+/// <param name="startdate">The start DateTime expression</param>
+/// <param name="enddate">The end DateTime expression</param>
+internal class SqlDateTimeDiff(string datepart, SqlExprDateTime startdate, SqlExprDateTime enddate) : SqlExprInt
+{
+	public void Deconstruct(out string datepartOut, out SqlExprDateTime startdateOut, out SqlExprDateTime enddateOut) => 
+		(datepartOut, startdateOut, enddateOut) = (datepart, startdate, enddate);
+}

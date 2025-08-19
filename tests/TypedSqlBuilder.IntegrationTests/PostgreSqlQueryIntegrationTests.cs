@@ -2338,4 +2338,436 @@ public class PostgreSqlQueryIntegrationTests : IClassFixture<PostgreSqlFixture>,
         Assert.NotNull(results);
         Assert.True(results.Count >= 0); // Should execute without error
     }
+
+    [Fact]
+    public async Task StringSubstring_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringSubstring();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringUpper_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringUpper();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringLower_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLower();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringTrim_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringTrim();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringLength_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLength();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInWhere();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task StringFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeNow_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeNow();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeYear_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeYear();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeMonth_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeMonth();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeDay_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDay();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeAddDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddDays();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeAddMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddMonths();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeAddYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddYears();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeDiffDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffDays();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeDiffMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffMonths();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeDiffYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffYears();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInWhere();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DateTimeFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DecimalRound_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalRound();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DecimalCeiling_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalCeiling();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task DecimalFloor_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalFloor();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task MathFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInWhere();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task MathFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
 }

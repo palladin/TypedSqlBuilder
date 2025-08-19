@@ -99,5 +99,58 @@ internal class SqlStringCase(SqlExprBool condition, SqlExprString trueValue, Sql
 /// </summary>
 internal class SqlStringNull : SqlExprString, ISqlNullValue
 {
-    public static SqlStringNull Value => new();
+	public static SqlStringNull Value => new();
+}
+
+/// <summary>
+/// Represents a SQL SUBSTRING function for extracting part of a string.
+/// Equivalent to: SUBSTRING(value, start, length)
+/// </summary>
+/// <param name="value">The string expression to extract from</param>
+/// <param name="start">The starting position (1-based)</param>
+/// <param name="length">The number of characters to extract</param>
+internal class SqlStringSubstring(SqlExprString value, SqlExprInt start, SqlExprInt length) : SqlExprString
+{
+	public void Deconstruct(out SqlExprString valueOut, out SqlExprInt startOut, out SqlExprInt lengthOut) => 
+		(valueOut, startOut, lengthOut) = (value, start, length);
+}
+
+/// <summary>
+/// Represents a SQL UPPER function for converting string to uppercase.
+/// Equivalent to: UPPER(value)
+/// </summary>
+/// <param name="value">The string expression to convert to uppercase</param>
+internal class SqlStringUpper(SqlExprString value) : SqlExprString
+{
+	public void Deconstruct(out SqlExprString valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL LOWER function for converting string to lowercase.
+/// Equivalent to: LOWER(value)
+/// </summary>
+/// <param name="value">The string expression to convert to lowercase</param>
+internal class SqlStringLower(SqlExprString value) : SqlExprString
+{
+	public void Deconstruct(out SqlExprString valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL TRIM function for removing whitespace from both ends.
+/// Equivalent to: TRIM(value)
+/// </summary>
+/// <param name="value">The string expression to trim</param>
+internal class SqlStringTrim(SqlExprString value) : SqlExprString
+{
+	public void Deconstruct(out SqlExprString valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL LEN/LENGTH function for getting string length.
+/// Equivalent to: LEN(value) or LENGTH(value)
+/// </summary>
+/// <param name="value">The string expression to get the length of</param>
+internal class SqlStringLength(SqlExprString value) : SqlExprInt
+{
+	public void Deconstruct(out SqlExprString valueOut) => valueOut = value;
 }

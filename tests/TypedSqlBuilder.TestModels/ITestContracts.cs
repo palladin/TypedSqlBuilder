@@ -144,6 +144,36 @@ public interface IQueryTestContract
     Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql();
     Task CaseGuidExpression_GeneratesCorrectSql();
     Task ParameterAsGuidParam_GeneratesCorrectSql();
+
+    // String Functions Tests
+    Task StringSubstring_GeneratesCorrectSql();
+    Task StringUpper_GeneratesCorrectSql();
+    Task StringLower_GeneratesCorrectSql();
+    Task StringTrim_GeneratesCorrectSql();
+    Task StringLength_GeneratesCorrectSql();
+    Task StringFunctionsInWhere_GeneratesCorrectSql();
+    Task StringFunctionsInSelect_GeneratesCorrectSql();
+
+    // Date/Time Functions Tests
+    Task DateTimeNow_GeneratesCorrectSql();
+    Task DateTimeYear_GeneratesCorrectSql();
+    Task DateTimeMonth_GeneratesCorrectSql();
+    Task DateTimeDay_GeneratesCorrectSql();
+    Task DateTimeAddDays_GeneratesCorrectSql();
+    Task DateTimeAddMonths_GeneratesCorrectSql();
+    Task DateTimeAddYears_GeneratesCorrectSql();
+    Task DateTimeDiffDays_GeneratesCorrectSql();
+    Task DateTimeDiffMonths_GeneratesCorrectSql();
+    Task DateTimeDiffYears_GeneratesCorrectSql();
+    Task DateTimeFunctionsInWhere_GeneratesCorrectSql();
+    Task DateTimeFunctionsInSelect_GeneratesCorrectSql();
+
+    // Mathematical Functions Tests
+    Task DecimalRound_GeneratesCorrectSql();
+    Task DecimalCeiling_GeneratesCorrectSql();
+    Task DecimalFloor_GeneratesCorrectSql();
+    Task MathFunctionsInWhere_GeneratesCorrectSql();
+    Task MathFunctionsInSelect_GeneratesCorrectSql();
 }
 
 /// <summary>

@@ -3459,4 +3459,550 @@ public class SqlServerQueryTests : IQueryTestContract, ISqlServerDialectTestCont
         Assert.Empty(parameters);
         return Task.CompletedTask;
     }
+
+    [Fact]
+    public Task StringSubstring_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringSubstring();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            SUBSTRING(a0.ProductName, @p0, @p1) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters["@p0"]);
+        Assert.Equal(5, parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringUpper_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringUpper();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            UPPER(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringLower_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLower();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            LOWER(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringTrim_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringTrim();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            TRIM(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringLength_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringLength();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            LEN(a0.ProductName) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            a0.Name AS Name
+        FROM 
+            customers a0
+        WHERE 
+            UPPER(a0.Name) = @p0 AND LEN(a0.Name) > @p1
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal("JOHN", parameters["@p0"]);
+        Assert.Equal(3, parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task StringFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.StringFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.Id AS Id,
+            UPPER(a0.Name) AS UpperName,
+            LOWER(a0.Name) AS LowerName,
+            TRIM(a0.Name) AS TrimmedName,
+            LEN(a0.Name) AS NameLength,
+            SUBSTRING(a0.Name, @p0, @p1) AS FirstThree
+        FROM 
+            customers a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(1, parameters["@p0"]);
+        Assert.Equal(3, parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeNow_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeNow();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            GETDATE() AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeYear_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeYear();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            YEAR(a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeMonth_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeMonth();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            MONTH(a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDay_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDay();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DAY(a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddDays();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEADD(day, @p0, a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(30, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddMonths();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEADD(month, @p0, a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(6, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeAddYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeAddYears();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEADD(year, @p0, a0.CreatedDate) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(1, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffDays_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffDays();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEDIFF(day, a0.CreatedDate, @p0) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffMonths_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffMonths();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEDIFF(month, a0.CreatedDate, @p0) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeDiffYears_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeDiffYears();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            DATEDIFF(year, a0.CreatedDate, @p0) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.CreatedDate AS CreatedDate
+        FROM 
+            products a0
+        WHERE 
+            YEAR(a0.CreatedDate) = @p0 AND MONTH(a0.CreatedDate) > @p1
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(2024, parameters["@p0"]);
+        Assert.Equal(6, parameters["@p1"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DateTimeFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DateTimeFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            YEAR(a0.CreatedDate) AS CreatedYear,
+            MONTH(a0.CreatedDate) AS CreatedMonth,
+            DAY(a0.CreatedDate) AS CreatedDay,
+            DATEADD(day, @p0, a0.CreatedDate) AS NextWeek,
+            DATEADD(month, @p1, a0.CreatedDate) AS NextMonth,
+            DATEDIFF(day, a0.CreatedDate, GETDATE()) AS DaysAgo
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(2, parameters.Count);
+        Assert.Equal(7, parameters["@p0"]); // AddDays(7)
+        Assert.Equal(1, parameters["@p1"]); // AddMonths(1)
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalRound_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalRound();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            ROUND(a0.Price, @p0) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(2, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalCeiling_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalCeiling();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            CEILING(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task DecimalFloor_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.DecimalFloor();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            FLOOR(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MathFunctionsInWhere_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInWhere();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.Price AS Price
+        FROM 
+            products a0
+        WHERE 
+            ROUND(a0.Price, @p0) > @p1 AND CEILING(a0.Price) < @p2
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(3, parameters.Count);
+        Assert.Equal(0, parameters["@p0"]);
+        Assert.Equal(100m, parameters["@p1"]); // Decimal literal
+        Assert.Equal(1000, parameters["@p2"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MathFunctionsInSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MathFunctionsInSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqlServerRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductId AS ProductId,
+            a0.Price AS OriginalPrice,
+            ROUND(a0.Price, @p0) AS RoundedPrice,
+            CEILING(a0.Price) AS CeilingPrice,
+            FLOOR(a0.Price) AS FloorPrice
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Single(parameters);
+        Assert.Equal(2, parameters["@p0"]);
+        return Task.CompletedTask;
+    }
 }

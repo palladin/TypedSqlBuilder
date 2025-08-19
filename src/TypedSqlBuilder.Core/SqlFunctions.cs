@@ -212,6 +212,218 @@ public static class SqlFunc
         return new SqlStringLike(value, pattern);
     }
 
+    // ========== STRING FUNCTIONS ==========
+    
+    /// <summary>
+    /// Creates a SQL SUBSTRING function for extracting part of a string.
+    /// Equivalent to: SUBSTRING(value, start, length)
+    /// </summary>
+    /// <param name="value">The string expression to extract from</param>
+    /// <param name="start">The starting position (1-based)</param>
+    /// <param name="length">The number of characters to extract</param>
+    /// <returns>A SQL string expression representing the substring</returns>
+    public static SqlExprString Substring(this SqlExprString value, SqlExprInt start, SqlExprInt length)
+    {
+        return new SqlStringSubstring(value, start, length);
+    }
+
+    /// <summary>
+    /// Creates a SQL UPPER function for converting string to uppercase.
+    /// Equivalent to: UPPER(value)
+    /// </summary>
+    /// <param name="value">The string expression to convert to uppercase</param>
+    /// <returns>A SQL string expression representing the uppercase string</returns>
+    public static SqlExprString Upper(this SqlExprString value)
+    {
+        return new SqlStringUpper(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL LOWER function for converting string to lowercase.
+    /// Equivalent to: LOWER(value)
+    /// </summary>
+    /// <param name="value">The string expression to convert to lowercase</param>
+    /// <returns>A SQL string expression representing the lowercase string</returns>
+    public static SqlExprString Lower(this SqlExprString value)
+    {
+        return new SqlStringLower(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL TRIM function for removing whitespace from both ends.
+    /// Equivalent to: TRIM(value)
+    /// </summary>
+    /// <param name="value">The string expression to trim</param>
+    /// <returns>A SQL string expression representing the trimmed string</returns>
+    public static SqlExprString Trim(this SqlExprString value)
+    {
+        return new SqlStringTrim(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL LEN/LENGTH function for getting string length.
+    /// Equivalent to: LEN(value) or LENGTH(value)
+    /// </summary>
+    /// <param name="value">The string expression to get the length of</param>
+    /// <returns>A SQL integer expression representing the string length</returns>
+    public static SqlExprInt Length(this SqlExprString value)
+    {
+        return new SqlStringLength(value);
+    }
+
+    // ========== DATE/TIME FUNCTIONS ==========
+    
+    /// <summary>
+    /// Gets the current date and time using SQL GETDATE() or NOW() function.
+    /// Equivalent to: GETDATE() (SQL Server) or NOW() (PostgreSQL/MySQL)
+    /// </summary>
+    /// <returns>A SQL DateTime expression representing the current date/time</returns>
+    public static SqlExprDateTime Now()
+    {
+        return SqlDateTimeNow.Value;
+    }
+
+    /// <summary>
+    /// Creates a SQL YEAR function for extracting year from date.
+    /// Equivalent to: YEAR(date)
+    /// </summary>
+    /// <param name="value">The DateTime expression to extract year from</param>
+    /// <returns>A SQL integer expression representing the year</returns>
+    public static SqlExprInt Year(this SqlExprDateTime value)
+    {
+        return new SqlDateTimeYear(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL MONTH function for extracting month from date.
+    /// Equivalent to: MONTH(date)
+    /// </summary>
+    /// <param name="value">The DateTime expression to extract month from</param>
+    /// <returns>A SQL integer expression representing the month</returns>
+    public static SqlExprInt Month(this SqlExprDateTime value)
+    {
+        return new SqlDateTimeMonth(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL DAY function for extracting day from date.
+    /// Equivalent to: DAY(date)
+    /// </summary>
+    /// <param name="value">The DateTime expression to extract day from</param>
+    /// <returns>A SQL integer expression representing the day</returns>
+    public static SqlExprInt Day(this SqlExprDateTime value)
+    {
+        return new SqlDateTimeDay(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEADD function for adding days to a date.
+    /// Equivalent to: DATEADD(day, number, date)
+    /// </summary>
+    /// <param name="date">The DateTime expression to add to</param>
+    /// <param name="days">The number of days to add</param>
+    /// <returns>A SQL DateTime expression representing the new date</returns>
+    public static SqlExprDateTime AddDays(this SqlExprDateTime date, SqlExprInt days)
+    {
+        return new SqlDateTimeAdd("day", days, date);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEADD function for adding months to a date.
+    /// Equivalent to: DATEADD(month, number, date)
+    /// </summary>
+    /// <param name="date">The DateTime expression to add to</param>
+    /// <param name="months">The number of months to add</param>
+    /// <returns>A SQL DateTime expression representing the new date</returns>
+    public static SqlExprDateTime AddMonths(this SqlExprDateTime date, SqlExprInt months)
+    {
+        return new SqlDateTimeAdd("month", months, date);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEADD function for adding years to a date.
+    /// Equivalent to: DATEADD(year, number, date)
+    /// </summary>
+    /// <param name="date">The DateTime expression to add to</param>
+    /// <param name="years">The number of years to add</param>
+    /// <returns>A SQL DateTime expression representing the new date</returns>
+    public static SqlExprDateTime AddYears(this SqlExprDateTime date, SqlExprInt years)
+    {
+        return new SqlDateTimeAdd("year", years, date);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEDIFF function for calculating difference in days between dates.
+    /// Equivalent to: DATEDIFF(day, startdate, enddate)
+    /// </summary>
+    /// <param name="startdate">The start DateTime expression</param>
+    /// <param name="enddate">The end DateTime expression</param>
+    /// <returns>A SQL integer expression representing the difference in days</returns>
+    public static SqlExprInt DiffDays(SqlExprDateTime startdate, SqlExprDateTime enddate)
+    {
+        return new SqlDateTimeDiff("day", startdate, enddate);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEDIFF function for calculating difference in months between dates.
+    /// Equivalent to: DATEDIFF(month, startdate, enddate)
+    /// </summary>
+    /// <param name="startdate">The start DateTime expression</param>
+    /// <param name="enddate">The end DateTime expression</param>
+    /// <returns>A SQL integer expression representing the difference in months</returns>
+    public static SqlExprInt DiffMonths(SqlExprDateTime startdate, SqlExprDateTime enddate)
+    {
+        return new SqlDateTimeDiff("month", startdate, enddate);
+    }
+
+    /// <summary>
+    /// Creates a SQL DATEDIFF function for calculating difference in years between dates.
+    /// Equivalent to: DATEDIFF(year, startdate, enddate)
+    /// </summary>
+    /// <param name="startdate">The start DateTime expression</param>
+    /// <param name="enddate">The end DateTime expression</param>
+    /// <returns>A SQL integer expression representing the difference in years</returns>
+    public static SqlExprInt DiffYears(SqlExprDateTime startdate, SqlExprDateTime enddate)
+    {
+        return new SqlDateTimeDiff("year", startdate, enddate);
+    }
+
+    // ========== MATHEMATICAL FUNCTIONS ==========
+    
+    /// <summary>
+    /// Creates a SQL ROUND function for rounding decimal values to specified precision.
+    /// Equivalent to: ROUND(value, precision)
+    /// </summary>
+    /// <param name="value">The decimal expression to round</param>
+    /// <param name="precision">The number of decimal places</param>
+    /// <returns>A SQL decimal expression representing the rounded value</returns>
+    public static SqlExprDecimal Round(this SqlExprDecimal value, SqlExprInt precision)
+    {
+        return new SqlDecimalRound(value, precision);
+    }
+
+    /// <summary>
+    /// Creates a SQL CEILING function for rounding up to nearest integer.
+    /// Equivalent to: CEILING(value) or CEIL(value)
+    /// </summary>
+    /// <param name="value">The decimal expression to round up</param>
+    /// <returns>A SQL integer expression representing the ceiling value</returns>
+    public static SqlExprInt Ceiling(this SqlExprDecimal value)
+    {
+        return new SqlDecimalCeiling(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL FLOOR function for rounding down to nearest integer.
+    /// Equivalent to: FLOOR(value)
+    /// </summary>
+    /// <param name="value">The decimal expression to round down</param>
+    /// <returns>A SQL integer expression representing the floor value</returns>
+    public static SqlExprInt Floor(this SqlExprDecimal value)
+    {
+        return new SqlDecimalFloor(value);
+    }
+
     /// <summary>
     /// Creates a SQL CASE expression for conditional string values.
     /// Equivalent to: CASE WHEN condition THEN trueValue ELSE falseValue END
