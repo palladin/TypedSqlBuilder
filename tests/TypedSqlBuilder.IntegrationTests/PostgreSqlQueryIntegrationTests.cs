@@ -2176,4 +2176,166 @@ public class PostgreSqlQueryIntegrationTests : IClassFixture<PostgreSqlFixture>,
         Assert.NotNull(results);
         Assert.True(results.Count >= 0); // Should execute without error
     }
+
+    [Fact]
+    public async Task SumPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.SumPrices();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task AvgPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AvgPrices();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task MinPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MinPrice();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task MaxPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MaxPrice();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task SumExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.SumExpensivePrices();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task AvgExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AvgExpensivePrices();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAggregatesSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task FromGroupByDecimalSumSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalSumSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
+
+    [Fact]
+    public async Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAvgSelect();
+        var (sql, parameters) = query.ToPostgreSqlRaw();
+
+        // Act - Execute query with Dapper against PostgreSQL
+        using var connection = _fixture.CreateConnection();
+        connection.Open();
+        var dapperParams = parameters.ToDapperParameters();
+        var results = (await connection.QueryAsync(sql, dapperParams)).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+    }
 }

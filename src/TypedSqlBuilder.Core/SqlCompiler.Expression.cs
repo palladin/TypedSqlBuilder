@@ -491,6 +491,31 @@ internal static partial class SqlCompiler
                 return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
             }
 
+            // Aggregate functions
+            case SqlDecimalSum(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"SUM({compiled})", ctx);
+            }
+
+            case SqlDecimalAvg(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"AVG({compiled})", ctx);
+            }
+
+            case SqlDecimalMin(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MIN({compiled})", ctx);
+            }
+
+            case SqlDecimalMax(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MAX({compiled})", ctx);
+            }
+
             // NULL value
             case SqlDecimalNull:
                 return ("NULL", context);

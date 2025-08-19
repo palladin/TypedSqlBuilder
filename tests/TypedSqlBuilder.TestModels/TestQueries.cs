@@ -213,6 +213,26 @@ public static class TestQueries
     public static ISqlScalarQuery<SqlExprInt> CountActiveCustomers()
         => Db.Customers.From().Where(c => c.Age >= 18).Count();
 
+    // Decimal Aggregate functions
+    public static ISqlScalarQuery<SqlExprDecimal> SumPrices()
+        => Db.Products.From().Select(p => p.Price).Sum();
+
+    public static ISqlScalarQuery<SqlExprDecimal> AvgPrices()
+        => Db.Products.From().Select(p => p.Price).Avg();
+
+    public static ISqlScalarQuery<SqlExprDecimal> MinPrice()
+        => Db.Products.From().Select(p => p.Price).Min();
+
+    public static ISqlScalarQuery<SqlExprDecimal> MaxPrice()
+        => Db.Products.From().Select(p => p.Price).Max();
+
+    // Decimal aggregates with WHERE clauses
+    public static ISqlScalarQuery<SqlExprDecimal> SumExpensivePrices()
+        => Db.Products.From().Where(p => p.Price > 100m).Select(p => p.Price).Sum();
+
+    public static ISqlScalarQuery<SqlExprDecimal> AvgExpensivePrices()
+        => Db.Products.From().Where(p => p.Price > 100m).Select(p => p.Price).Avg();
+
     // Test case for scalar queries used as expressions (should have parentheses)
     public static ISqlQuery FromWhereAgeGreaterThanAverageAge()
         => Db.Customers.From().Where(c => c.Age > Db.Customers.From().Select(x => x.Age).Sum());
@@ -513,6 +533,35 @@ public static class TestQueries
                 CustomerId: result.CustomerId,
                 AvgAmount: agg.Avg(result.Amount),
                 OrderCount: agg.Count()
+            ));
+
+    // Test for decimal aggregate functions in GROUP BY
+    public static ISqlQuery FromGroupByDecimalAggregatesSelect()
+        => Db.Products.From()
+            .GroupBy(p => p.ProductName)
+            .Select((result, agg) => (
+                ProductName: result.ProductName,
+                TotalPrice: agg.Sum(result.Price),
+                AvgPrice: agg.Avg(result.Price),
+                MinPrice: agg.Min(result.Price),
+                MaxPrice: agg.Max(result.Price),
+                ProductCount: agg.Count()
+            ));
+
+    public static ISqlQuery FromGroupByDecimalSumSelect()
+        => Db.Products.From()
+            .GroupBy(p => p.ProductName)
+            .Select((result, agg) => (
+                ProductName: result.ProductName,
+                TotalPrice: agg.Sum(result.Price)
+            ));
+
+    public static ISqlQuery FromGroupByDecimalAvgSelect()
+        => Db.Products.From()
+            .GroupBy(p => p.ProductName)
+            .Select((result, agg) => (
+                ProductName: result.ProductName,
+                AvgPrice: agg.Avg(result.Price)
             ));
 
     // Test extension methods for scalar aggregate queries

@@ -23,17 +23,6 @@ public class CustomerService
         return ExecuteQuery<Customer>(query);
     }
     
-    public List<Customer> SearchCustomers(string searchTerm)
-    {
-        var query = NorthwindDb.Customers.From()
-            .Where(c => c.CompanyName.Like($"%{searchTerm}%") ||
-                       c.ContactName.Like($"%{searchTerm}%") ||
-                       c.City.Like($"%{searchTerm}%") ||
-                       c.Country.Like($"%{searchTerm}%"))
-            .OrderBy(c => (c.CompanyName, Sort.Asc));
-            
-        return ExecuteQuery<Customer>(query);
-    }
     
     public List<Customer> SearchCustomersByExample(List<KeyValuePair<string, string>> searchCriteria)
     {

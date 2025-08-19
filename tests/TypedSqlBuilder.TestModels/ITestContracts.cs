@@ -85,6 +85,17 @@ public interface IQueryTestContract
     Task FromSelectAvg_GeneratesCorrectSql();
     Task FromSelectMin_GeneratesCorrectSql();
     Task FromSelectMax_GeneratesCorrectSql();
+    
+    // Decimal Aggregate Functions
+    Task SumPrices_GeneratesCorrectSql();
+    Task AvgPrices_GeneratesCorrectSql();
+    Task MinPrice_GeneratesCorrectSql();
+    Task MaxPrice_GeneratesCorrectSql();
+    Task SumExpensivePrices_GeneratesCorrectSql();
+    Task AvgExpensivePrices_GeneratesCorrectSql();
+    Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql();
+    Task FromGroupByDecimalSumSelect_GeneratesCorrectSql();
+    Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql();
     Task ParameterAsIntParam_GeneratesCorrectSql();
     Task ParameterAsStringParam_GeneratesCorrectSql();
     Task ParameterAsBoolParam_GeneratesCorrectSql();

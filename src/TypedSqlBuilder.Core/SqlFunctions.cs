@@ -70,6 +70,50 @@ public class SqlAggregateFunc
     {
         return new SqlIntMax(value);
     }
+
+    /// <summary>
+    /// Applies the SUM aggregate function to a decimal expression.
+    /// Computes the sum of all values in the current group.
+    /// </summary>
+    /// <param name="value">The decimal expression to sum</param>
+    /// <returns>A SQL decimal expression representing the sum</returns>
+    public SqlExprDecimal Sum(SqlExprDecimal value)
+    {
+        return new SqlDecimalSum(value);
+    }
+
+    /// <summary>
+    /// Applies the AVG aggregate function to a decimal expression.
+    /// Computes the average of all values in the current group.
+    /// </summary>
+    /// <param name="value">The decimal expression to average</param>
+    /// <returns>A SQL decimal expression representing the average</returns>
+    public SqlExprDecimal Avg(SqlExprDecimal value)
+    {
+        return new SqlDecimalAvg(value);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to a decimal expression.
+    /// Finds the minimum value in the current group.
+    /// </summary>
+    /// <param name="value">The decimal expression to find the minimum of</param>
+    /// <returns>A SQL decimal expression representing the minimum</returns>
+    public SqlExprDecimal Min(SqlExprDecimal value)
+    {
+        return new SqlDecimalMin(value);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to a decimal expression.
+    /// Finds the maximum value in the current group.
+    /// </summary>
+    /// <param name="value">The decimal expression to find the maximum of</param>
+    /// <returns>A SQL decimal expression representing the maximum</returns>
+    public SqlExprDecimal Max(SqlExprDecimal value)
+    {
+        return new SqlDecimalMax(value);
+    }
 }
 
 /// <summary>

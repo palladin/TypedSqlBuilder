@@ -21,38 +21,27 @@ public class ProductService
                 NorthwindDb.Categories,
                 p => p.CategoryID,
                 c => c.CategoryID,
-                (p, c) => (
-                    ProductID: p.ProductID,
-                    ProductName: p.ProductName,
-                    SupplierID: p.SupplierID,
-                    CategoryID: p.CategoryID,
-                    QuantityPerUnit: p.QuantityPerUnit,
-                    UnitPrice: p.UnitPrice,
-                    UnitsInStock: p.UnitsInStock,
-                    UnitsOnOrder: p.UnitsOnOrder,
-                    ReorderLevel: p.ReorderLevel,
-                    Discontinued: p.Discontinued,
-                    CategoryName: c.CategoryName
-                ))
+                (p, c) => (Product: p, Category: c))
             .LeftJoin(
                 NorthwindDb.Suppliers,
-                result => result.SupplierID,
+                result => result.Product.SupplierID,
                 s => s.SupplierID,
-                (result, s) => (
-                    ProductID: result.ProductID,
-                    ProductName: result.ProductName,
-                    SupplierID: result.SupplierID,
-                    CategoryID: result.CategoryID,
-                    QuantityPerUnit: result.QuantityPerUnit,
-                    UnitPrice: result.UnitPrice,
-                    UnitsInStock: result.UnitsInStock,
-                    UnitsOnOrder: result.UnitsOnOrder,
-                    ReorderLevel: result.ReorderLevel,
-                    Discontinued: result.Discontinued,
-                    CategoryName: result.CategoryName,
-                    SupplierName: s.CompanyName
-                ))
-            .OrderBy(result => (result.ProductName, Sort.Asc));
+                (result, s) => (result.Product, result.Category, Supplier: s))
+            .OrderBy(result => (result.Product.ProductName, Sort.Asc))
+            .Select(result => (
+                ProductID: result.Product.ProductID,
+                ProductName: result.Product.ProductName,
+                SupplierID: result.Product.SupplierID,
+                CategoryID: result.Product.CategoryID,
+                QuantityPerUnit: result.Product.QuantityPerUnit,
+                UnitPrice: result.Product.UnitPrice,
+                UnitsInStock: result.Product.UnitsInStock,
+                UnitsOnOrder: result.Product.UnitsOnOrder,
+                ReorderLevel: result.Product.ReorderLevel,
+                Discontinued: result.Product.Discontinued,
+                CategoryName: result.Category.CategoryName,
+                SupplierName: result.Supplier.CompanyName
+            ));
             
         return ExecuteQuery<Product>(query);
     }
@@ -65,38 +54,27 @@ public class ProductService
                 NorthwindDb.Categories,
                 p => p.CategoryID,
                 c => c.CategoryID,
-                (p, c) => (
-                    ProductID: p.ProductID,
-                    ProductName: p.ProductName,
-                    SupplierID: p.SupplierID,
-                    CategoryID: p.CategoryID,
-                    QuantityPerUnit: p.QuantityPerUnit,
-                    UnitPrice: p.UnitPrice,
-                    UnitsInStock: p.UnitsInStock,
-                    UnitsOnOrder: p.UnitsOnOrder,
-                    ReorderLevel: p.ReorderLevel,
-                    Discontinued: p.Discontinued,
-                    CategoryName: c.CategoryName
-                ))
+                (p, c) => (Product: p, Category: c))
             .LeftJoin(
                 NorthwindDb.Suppliers,
-                result => result.SupplierID,
+                result => result.Product.SupplierID,
                 s => s.SupplierID,
-                (result, s) => (
-                    ProductID: result.ProductID,
-                    ProductName: result.ProductName,
-                    SupplierID: result.SupplierID,
-                    CategoryID: result.CategoryID,
-                    QuantityPerUnit: result.QuantityPerUnit,
-                    UnitPrice: result.UnitPrice,
-                    UnitsInStock: result.UnitsInStock,
-                    UnitsOnOrder: result.UnitsOnOrder,
-                    ReorderLevel: result.ReorderLevel,
-                    Discontinued: result.Discontinued,
-                    CategoryName: result.CategoryName,
-                    SupplierName: s.CompanyName
-                ))
-            .OrderBy(result => (result.ProductName, Sort.Asc));
+                (result, s) => (result.Product, result.Category, Supplier: s))
+            .OrderBy(result => (result.Product.ProductName, Sort.Asc))
+            .Select(result => (
+                ProductID: result.Product.ProductID,
+                ProductName: result.Product.ProductName,
+                SupplierID: result.Product.SupplierID,
+                CategoryID: result.Product.CategoryID,
+                QuantityPerUnit: result.Product.QuantityPerUnit,
+                UnitPrice: result.Product.UnitPrice,
+                UnitsInStock: result.Product.UnitsInStock,
+                UnitsOnOrder: result.Product.UnitsOnOrder,
+                ReorderLevel: result.Product.ReorderLevel,
+                Discontinued: result.Product.Discontinued,
+                CategoryName: result.Category.CategoryName,
+                SupplierName: result.Supplier.CompanyName
+            ));
             
         return ExecuteQuery<Product>(query);
     }
@@ -117,6 +95,7 @@ public class ProductService
             .Where(result => result.Product.ProductName.Like($"%{searchTerm}%") ||
                             result.Category.CategoryName.Like($"%{searchTerm}%") ||
                             result.Supplier.CompanyName.Like($"%{searchTerm}%"))
+            .OrderBy(result => (result.Product.ProductName, Sort.Asc))
             .Select(result => (
                 ProductID: result.Product.ProductID,
                 ProductName: result.Product.ProductName,
@@ -130,8 +109,7 @@ public class ProductService
                 Discontinued: result.Product.Discontinued,
                 CategoryName: result.Category.CategoryName,
                 SupplierName: result.Supplier.CompanyName
-            ))
-            .OrderBy(result => (result.ProductName, Sort.Asc));
+            ));
             
         return ExecuteQuery<Product>(query);
     }
@@ -144,38 +122,27 @@ public class ProductService
                 NorthwindDb.Categories,
                 p => p.CategoryID,
                 c => c.CategoryID,
-                (p, c) => (
-                    ProductID: p.ProductID,
-                    ProductName: p.ProductName,
-                    SupplierID: p.SupplierID,
-                    CategoryID: p.CategoryID,
-                    QuantityPerUnit: p.QuantityPerUnit,
-                    UnitPrice: p.UnitPrice,
-                    UnitsInStock: p.UnitsInStock,
-                    UnitsOnOrder: p.UnitsOnOrder,
-                    ReorderLevel: p.ReorderLevel,
-                    Discontinued: p.Discontinued,
-                    CategoryName: c.CategoryName
-                ))
+                (p, c) => (Product: p, Category: c))
             .LeftJoin(
                 NorthwindDb.Suppliers,
-                result => result.SupplierID,
+                result => result.Product.SupplierID,
                 s => s.SupplierID,
-                (result, s) => (
-                    ProductID: result.ProductID,
-                    ProductName: result.ProductName,
-                    SupplierID: result.SupplierID,
-                    CategoryID: result.CategoryID,
-                    QuantityPerUnit: result.QuantityPerUnit,
-                    UnitPrice: result.UnitPrice,
-                    UnitsInStock: result.UnitsInStock,
-                    UnitsOnOrder: result.UnitsOnOrder,
-                    ReorderLevel: result.ReorderLevel,
-                    Discontinued: result.Discontinued,
-                    CategoryName: result.CategoryName,
-                    SupplierName: s.CompanyName
-                ))
-            .OrderBy(result => (result.UnitsInStock, Sort.Asc));
+                (result, s) => (result.Product, result.Category, Supplier: s))
+            .OrderBy(result => (result.Product.UnitsInStock, Sort.Asc))
+            .Select(result => (
+                ProductID: result.Product.ProductID,
+                ProductName: result.Product.ProductName,
+                SupplierID: result.Product.SupplierID,
+                CategoryID: result.Product.CategoryID,
+                QuantityPerUnit: result.Product.QuantityPerUnit,
+                UnitPrice: result.Product.UnitPrice,
+                UnitsInStock: result.Product.UnitsInStock,
+                UnitsOnOrder: result.Product.UnitsOnOrder,
+                ReorderLevel: result.Product.ReorderLevel,
+                Discontinued: result.Product.Discontinued,
+                CategoryName: result.Category.CategoryName,
+                SupplierName: result.Supplier.CompanyName
+            ));
             
         return ExecuteQuery<Product>(query);
     }

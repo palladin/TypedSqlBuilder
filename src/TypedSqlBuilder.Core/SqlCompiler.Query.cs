@@ -1002,6 +1002,34 @@ internal static partial class SqlCompiler
                 return (sql, ctx);
             }        
 
+            case SumSqlDecimalClause(var query):
+            {
+                var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDecimalSum((SqlExprDecimal)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(sumQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case AvgSqlDecimalClause(var query):
+            {
+                var avgQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDecimalAvg((SqlExprDecimal)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(avgQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MinSqlDecimalClause(var query):
+            {
+                var minQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDecimalMin((SqlExprDecimal)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(minQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MaxSqlDecimalClause(var query):
+            {
+                var maxQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDecimalMax((SqlExprDecimal)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(maxQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
             case CountClause(var query):
             {
                 var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()), []);

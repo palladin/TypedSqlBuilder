@@ -119,6 +119,46 @@ internal class SqlDecimalCase(SqlExprBool condition, SqlExprDecimal trueValue, S
 }
 
 /// <summary>
+/// Represents a SQL SUM() aggregate function in SQL expressions.
+/// This class applies the SQL SUM function to a decimal expression, summing all values.
+/// </summary>
+/// <param name="value">The decimal expression to apply the sum function to</param>
+internal class SqlDecimalSum(SqlExprDecimal value) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL AVG() aggregate function in SQL expressions.
+/// This class applies the SQL AVG function to a decimal expression, calculating the average value.
+/// </summary>
+/// <param name="value">The decimal expression to apply the average function to</param>
+internal class SqlDecimalAvg(SqlExprDecimal value) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL MIN() aggregate function in SQL expressions.
+/// This class applies the SQL MIN function to a decimal expression, finding the minimum value.
+/// </summary>
+/// <param name="value">The decimal expression to apply the minimum function to</param>
+internal class SqlDecimalMin(SqlExprDecimal value) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents a SQL MAX() aggregate function in SQL expressions.
+/// This class applies the SQL MAX function to a decimal expression, finding the maximum value.
+/// </summary>
+/// <param name="value">The decimal expression to apply the maximum function to</param>
+internal class SqlDecimalMax(SqlExprDecimal value) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExprDecimal valueOut) => valueOut = value;
+}
+
+/// <summary>
 /// Represents a SQL NULL value for decimal expressions.
 /// This class is used when setting decimal columns to NULL in SQL statements.
 /// </summary>

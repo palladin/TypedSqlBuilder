@@ -2096,4 +2096,157 @@ public class SqliteQueryIntegrationTests : SqliteIntegrationTestBase, IQueryTest
         Assert.True(results.Count >= 0); // Should execute without error
         return Task.CompletedTask; 
     }
+
+    [Fact]
+    public Task SumPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.SumPrices();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AvgPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AvgPrices();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MinPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MinPrice();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MaxPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.MaxPrice();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task SumExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.SumExpensivePrices();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AvgExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.AvgExpensivePrices();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAggregatesSelect();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalSumSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalSumSelect();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAvgSelect();
+        var (sql, parameters) = query.ToSqliteRaw();
+
+        // Act - Execute query with Dapper against SQLite
+        var dapperParams = parameters.ToDapperParameters();
+        var results = _connection.Query(sql, dapperParams).ToList();
+
+        // Assert - Should execute successfully and return results
+        Assert.NotNull(results);
+        Assert.True(results.Count >= 0); // Should execute without error
+        return Task.CompletedTask;
+    }
 }

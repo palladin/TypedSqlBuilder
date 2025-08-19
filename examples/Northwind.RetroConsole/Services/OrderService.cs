@@ -53,14 +53,6 @@ public class OrderService
             
         var orders = ExecuteQuery<Order>(query);
         
-        // Calculate totals for each order using raw SQL for now
-        foreach (var order in orders)
-        {
-            var sql = "SELECT COALESCE(SUM(UnitPrice * Quantity * (1 - Discount)), 0) FROM OrderDetails WHERE OrderID = @orderId";
-            var total = _db.Connection.QuerySingle<decimal>(sql, new { orderId = order.OrderID });
-            order.Total = total;
-        }
-        
         return orders;
     }
     
@@ -72,16 +64,17 @@ public class OrderService
                 NorthwindDb.Products,
                 od => od.ProductID,
                 p => p.ProductID,
-                (od, p) => (
-                    OrderID: od.OrderID,
-                    ProductID: od.ProductID,
-                    UnitPrice: od.UnitPrice,
-                    Quantity: od.Quantity,
-                    Discount: od.Discount,
-                    ProductName: p.ProductName,
-                    LineTotal: od.UnitPrice * 1.0m // od.Quantity * (1.0m - od.Discount) - simplified for demo
-                ))
-            .OrderBy(result => (result.ProductName, Sort.Asc));
+                (od, p) => (OrderDetail: od, Product: p))
+            .OrderBy(result => (result.Product.ProductName, Sort.Asc))
+            .Select(result => (
+                OrderID: result.OrderDetail.OrderID,
+                ProductID: result.OrderDetail.ProductID,
+                UnitPrice: result.OrderDetail.UnitPrice,
+                Quantity: result.OrderDetail.Quantity,
+                Discount: result.OrderDetail.Discount,
+                ProductName: result.Product.ProductName,
+                LineTotal: result.OrderDetail.Quantity * (1 - result.OrderDetail.Discount)
+            ));
             
         return ExecuteQuery<OrderDetail>(query);
     }
@@ -146,19 +139,14 @@ public class OrderService
                 ShippedDate: result.Order.ShippedDate,
                 Freight: result.Order.Freight,
                 CustomerName: result.Customer.CompanyName,
-                EmployeeName: result.Employee.FirstName + " " + result.Employee.LastName
+                EmployeeName: result.Employee.FirstName + " " + result.Employee.LastName,
+                Total: NorthwindDb.OrderDetails.From()
+                    .Where(od => od.OrderID == result.Order.OrderID)
+                    .Select(od => od.UnitPrice * od.Quantity * (1 - od.Discount)).Sum()
             ));
             
         var orders = ExecuteQuery<Order>(query);
-        
-        // Calculate totals for each order
-        foreach (var order in orders)
-        {
-            var sql = "SELECT COALESCE(SUM(UnitPrice * Quantity * (1 - Discount)), 0) FROM OrderDetails WHERE OrderID = @orderId";
-            var total = _db.Connection.QuerySingle<decimal>(sql, new { orderId = order.OrderID });
-            order.Total = total;
-        }
-        
+            
         return orders;
     }
     

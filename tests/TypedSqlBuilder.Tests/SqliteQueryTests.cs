@@ -3266,4 +3266,211 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         Assert.True(parameters.ContainsKey(":targetId"));
         return Task.CompletedTask;
     }
+
+    // Decimal Aggregate Tests
+    [Fact]
+    public Task SumPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var sumExpr = TestQueries.SumPrices();
+        
+        // Act
+        var (sql, parameters) = sumExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            SUM(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AvgPrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var avgExpr = TestQueries.AvgPrices();
+        
+        // Act
+        var (sql, parameters) = avgExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            AVG(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MinPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var minExpr = TestQueries.MinPrice();
+        
+        // Act
+        var (sql, parameters) = minExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            MIN(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task MaxPrice_GeneratesCorrectSql()
+    {
+        // Arrange
+        var maxExpr = TestQueries.MaxPrice();
+        
+        // Act
+        var (sql, parameters) = maxExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            MAX(a0.Price) AS Proj0
+        FROM 
+            products a0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAggregatesSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            SUM(a0.Price) AS TotalPrice,
+            AVG(a0.Price) AS AvgPrice,
+            MIN(a0.Price) AS MinPrice,
+            MAX(a0.Price) AS MaxPrice,
+            COUNT(*) AS ProductCount
+        FROM 
+            products a0
+        GROUP BY 
+            a0.ProductName
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task SumExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var sumExpr = TestQueries.SumExpensivePrices();
+        
+        // Act
+        var (sql, parameters) = sumExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            SUM(a0.Price) AS Proj0
+        FROM 
+            products a0
+        WHERE 
+            a0.Price > :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(100m, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task AvgExpensivePrices_GeneratesCorrectSql()
+    {
+        // Arrange
+        var avgExpr = TestQueries.AvgExpensivePrices();
+        
+        // Act
+        var (sql, parameters) = avgExpr.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            AVG(a0.Price) AS Proj0
+        FROM 
+            products a0
+        WHERE 
+            a0.Price > :p0
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(100m, parameters[":p0"]);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalSumSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalSumSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            SUM(a0.Price) AS TotalPrice
+        FROM 
+            products a0
+        GROUP BY 
+            a0.ProductName
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
+
+    [Fact]
+    public Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql()
+    {
+        // Arrange
+        var query = TestQueries.FromGroupByDecimalAvgSelect();
+        
+        // Act
+        var (sql, parameters) = query.ToSqliteRaw();
+        
+        // Assert
+        var expectedSql = """
+        SELECT 
+            a0.ProductName AS ProductName,
+            AVG(a0.Price) AS AvgPrice
+        FROM 
+            products a0
+        GROUP BY 
+            a0.ProductName
+        """;
+        Assert.Equal(expectedSql, sql);
+        Assert.Empty(parameters);
+        return Task.CompletedTask;
+    }
 }
