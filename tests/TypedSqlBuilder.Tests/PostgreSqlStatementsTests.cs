@@ -19,7 +19,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Id,
+                Age,
+                Name
+            )
+            VALUES 
+                (:p0, :p1, :p2)
+            """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(200, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
@@ -37,7 +45,14 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("INSERT INTO customers (Age, Name) VALUES (:p0, :p1)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Age,
+                Name
+            )
+            VALUES 
+                (:p0, :p1)
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(28, parameters[":p0"]);
         Assert.Equal("Partial Customer", parameters[":p1"]);
@@ -53,7 +68,13 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Age = :p0 WHERE customers.Id = :p1", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Age = :p0
+            WHERE 
+                customers.Id = :p1
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(26, parameters[":p0"]);
         Assert.Equal(200, parameters[":p1"]);
@@ -70,7 +91,14 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Age = :p0, Name = :p1 WHERE customers.Id = :p2", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Age = :p0,
+                Name = :p1
+            WHERE 
+                customers.Id = :p2
+            """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(27, parameters[":p0"]);
         Assert.Equal("John Smith", parameters[":p1"]);
@@ -88,7 +116,11 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Name = NULL", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Name = NULL
+            """, sql);
         Assert.Empty(parameters);
         return Task.CompletedTask;
     }
@@ -103,7 +135,13 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Name = NULL WHERE customers.Id = :p0", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Name = NULL
+            WHERE 
+                customers.Id = :p0
+            """, sql);
         Assert.Single(parameters);
         Assert.Equal(200, parameters[":p0"]);
         return Task.CompletedTask;
@@ -119,7 +157,11 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("DELETE FROM customers WHERE customers.Id = :p0", sql);
+        Assert.Equal("""
+            DELETE FROM customers
+            WHERE 
+                customers.Id = :p0
+            """, sql);
         Assert.Single(parameters);
         Assert.Equal(200, parameters[":p0"]);
         return Task.CompletedTask;
@@ -135,7 +177,9 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("DELETE FROM customers", sql);
+        Assert.Equal("""
+            DELETE FROM customers
+            """, sql);
         Assert.Empty(parameters);
         return Task.CompletedTask;
     }
@@ -150,7 +194,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (:p0, NULL, :p1)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Id,
+                Name,
+                Age
+            )
+            VALUES 
+                (:p0, NULL, :p1)
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(202, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);
@@ -167,7 +219,11 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("DELETE FROM customers WHERE (customers.Age < :p0) OR (customers.Name = :p1)", sql);
+        Assert.Equal("""
+            DELETE FROM customers
+            WHERE 
+                (customers.Age < :p0) OR (customers.Name = :p1)
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
         Assert.Equal("Temp", parameters[":p1"]);
@@ -184,7 +240,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Name, Age) VALUES (:p0, :p1, NULL)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Id,
+                Name,
+                Age
+            )
+            VALUES 
+                (:p0, :p1, NULL)
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(203, parameters[":p0"]);
         Assert.Equal("John", parameters[":p1"]);
@@ -201,7 +265,13 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Age = (customers.Age + :p0) WHERE (customers.Age >= :p1) AND (customers.Name != :p2)", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Age = (customers.Age + :p0)
+            WHERE 
+                (customers.Age >= :p1) AND (customers.Name != :p2)
+            """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(1, parameters[":p0"]);
         Assert.Equal(18, parameters[":p1"]);
@@ -219,7 +289,11 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Age = NULL", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Age = NULL
+            """, sql);
         Assert.Empty(parameters);
         return Task.CompletedTask;
     }
@@ -234,7 +308,12 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Name = :p0, Age = NULL", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Name = :p0,
+                Age = NULL
+            """, sql);
         Assert.Single(parameters);
         Assert.Equal("John", parameters[":p0"]);
         return Task.CompletedTask;
@@ -250,7 +329,14 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        var expectedSql = "INSERT INTO customers (Age, Name) VALUES (:p0, :p1)";
+        var expectedSql = """
+            INSERT INTO customers (
+                Age,
+                Name
+            )
+            VALUES 
+                (:p0, :p1)
+            """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(28, parameters[":p0"]);
@@ -270,7 +356,13 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("UPDATE customers SET Age = :p0 WHERE customers.Id = :p1", sql);
+        Assert.Equal("""
+            UPDATE customers
+            SET 
+                Age = :p0
+            WHERE 
+                customers.Id = :p1
+            """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(36, parameters[":p0"]);
         Assert.Equal(100, parameters[":p1"]);
@@ -287,7 +379,11 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("DELETE FROM customers WHERE customers.Id = :p0", sql);
+        Assert.Equal("""
+            DELETE FROM customers
+            WHERE 
+                customers.Id = :p0
+            """, sql);
         Assert.Single(parameters);
         Assert.Equal(100, parameters[":p0"]);
     }
@@ -305,7 +401,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
         
         // Assert
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Id,
+                Age,
+                Name
+            )
+            VALUES 
+                (:p0, :p1, :p2)
+            """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(100, parameters[":p0"]);
         Assert.Equal(35, parameters[":p1"]);
@@ -324,7 +428,16 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
 
         // Assert
-        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (:p0, :p1, :p2, :p3)", sql);
+        Assert.Equal("""
+            INSERT INTO products (
+                ProductName,
+                Price,
+                CreatedDate,
+                UniqueId
+            )
+            VALUES 
+                (:p0, :p1, :p2, :p3)
+            """, sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal("Test Product", parameters[":p0"]);
         Assert.Equal(99.99m, parameters[":p1"]);
@@ -343,7 +456,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
 
         // Assert
-        Assert.Equal("UPDATE products SET Price = :p0, CreatedDate = :p1, UniqueId = :p2 WHERE products.ProductId = :p3", sql);
+        Assert.Equal("""
+            UPDATE products
+            SET 
+                Price = :p0,
+                CreatedDate = :p1,
+                UniqueId = :p2
+            WHERE 
+                products.ProductId = :p3
+            """, sql);
         Assert.Equal(4, parameters.Count);
         Assert.Equal(119.99m, parameters[":p0"]); // Corrected values
         Assert.Equal(new DateTime(2024, 12, 25), parameters[":p1"]);
@@ -362,7 +483,16 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
 
         // Assert
-        Assert.Equal("INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES (:p0, NULL, NULL, NULL)", sql);
+        Assert.Equal("""
+            INSERT INTO products (
+                ProductName,
+                Price,
+                CreatedDate,
+                UniqueId
+            )
+            VALUES 
+                (:p0, NULL, NULL, NULL)
+            """, sql);
         Assert.Single(parameters); // Only non-NULL values are parameterized
         Assert.Equal("Null Test", parameters[":p0"]);
         return Task.CompletedTask;
@@ -378,7 +508,15 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         var (sql, parameters) = statement.ToPostgreSqlRaw();
 
         // Assert
-        Assert.Equal("UPDATE products SET Price = NULL, CreatedDate = NULL, UniqueId = NULL WHERE products.ProductId = :p0", sql);
+        Assert.Equal("""
+            UPDATE products
+            SET 
+                Price = NULL,
+                CreatedDate = NULL,
+                UniqueId = NULL
+            WHERE 
+                products.ProductId = :p0
+            """, sql);
         Assert.Single(parameters);
         Assert.Equal(101, parameters[":p0"]);
         return Task.CompletedTask;

@@ -608,7 +608,15 @@ public class SqliteStatementIntegrationTests : SqliteIntegrationTestBase, IState
 
         // Assert - should use : prefix in generated SQL
         Assert.Contains(":p", sql);
-        Assert.Equal("INSERT INTO customers (Id, Age, Name) VALUES (:p0, :p1, :p2)", sql);
+        Assert.Equal("""
+            INSERT INTO customers (
+                Id,
+                Age,
+                Name
+            )
+            VALUES 
+                (:p0, :p1, :p2)
+            """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(999, parameters[":p0"]);
         Assert.Equal(25, parameters[":p1"]);

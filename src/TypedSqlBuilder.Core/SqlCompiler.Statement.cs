@@ -20,16 +20,26 @@ internal static partial class SqlCompiler
     /// <returns>The SQL string representation and updated context</returns>
     internal static (string, Context) Compile(ISqlStatement statement, Context context, int scopeLevel)
     {
+        var (indent, subIndent) = GetIndentation(scopeLevel);
+        
         switch (statement)
         {
             // ========== DELETE STATEMENTS ==========
             case DeleteStatement(var table):
-                return ($"DELETE FROM {table.TableName}", context);
+                var deleteSql = $$"""
+                {{indent}}DELETE FROM {{table.TableName}}
+                """;
+                return (deleteSql, context);
 
             case DeleteWhereStatement(DeleteStatement(var table), var predicate):
             {                
                 var (whereClause, whereCtx) = Compile(predicate(table), context, scopeLevel);
-                return ($"DELETE FROM {table.TableName} WHERE {whereClause}", whereCtx);
+                var deleteWhereSql = $$"""
+                {{indent}}DELETE FROM {{table.TableName}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                """;
+                return (deleteWhereSql, whereCtx);
             }
 
             // ========== UPDATE STATEMENTS ==========
@@ -52,7 +62,12 @@ internal static partial class SqlCompiler
                 var (table, setClauses) = ExtractUpdateTableAndClauses(innerStatement);                
                 var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
                 var (setClauseSql, setCtx) = CompileSetClauses(newSetClauses, table, context, scopeLevel);
-                return ($"UPDATE {table.TableName} SET {setClauseSql}", setCtx);
+                var updateSql = $$"""
+                {{indent}}UPDATE {{table.TableName}}
+                {{indent}}SET 
+                {{subIndent}}{{setClauseSql}}
+                """;
+                return (updateSql, setCtx);
             }    
 
             // WHERE fusion for UPDATE: WHERE(UPDATE(...), predicate) or WHERE(SET(...), predicate)
@@ -61,14 +76,26 @@ internal static partial class SqlCompiler
                 var (table, setClauses) = ExtractUpdateTableAndClauses(updateStatement);                
                 var (setClauseSql, setCtx) = CompileSetClauses(setClauses, table, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(table), setCtx, scopeLevel);
-                return ($"UPDATE {table.TableName} SET {setClauseSql} WHERE {whereClause}", whereCtx);
+                var updateWhereSql = $$"""
+                {{indent}}UPDATE {{table.TableName}}
+                {{indent}}SET 
+                {{subIndent}}{{setClauseSql}}
+                {{indent}}WHERE 
+                {{subIndent}}{{whereClause}}
+                """;
+                return (updateWhereSql, whereCtx);
             }            // ========== STATEMENT FUSION PATTERNS ==========
             case ValueStatement(var innerStatement, var valueClause):
             {
                 var (table, valueClauses) = ExtractInsertTableAndClauses(innerStatement);
                 var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();                
                 var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(newValueClauses, table, context, scopeLevel);
-                return ($"INSERT INTO {table.TableName} ({columnsClause}) VALUES ({valuesClause})", valuesCtx);            
+                var insertSql = $$"""
+                {{indent}}INSERT INTO {{table.TableName}} ({{columnsClause}})
+                {{indent}}VALUES 
+                {{subIndent}}({{valuesClause}})
+                """;
+                return (insertSql, valuesCtx);            
             }            
 
             default:
@@ -102,6 +129,13 @@ internal static partial class SqlCompiler
             ctx = valueCtx;
         }
 
+        // For multiple SET clauses, join them with proper line breaks and indentation
+        if (items.Count > 1)
+        {
+            var (indent, subIndent) = GetIndentation(scopeLevel);
+            return (string.Join($",\n{subIndent}", items), ctx);
+        }
+        
         return (string.Join(", ", items), ctx);
     }    
 
@@ -133,7 +167,12 @@ internal static partial class SqlCompiler
             ctx = valueCtx;
         }
 
-        return (string.Join(", ", columns), string.Join(", ", valuesSql), ctx);
+        // Always format columns with proper line breaks and indentation for consistency        
+        var (indent, subIndent) = GetIndentation(scopeLevel);
+        string columnsClause = $"\n{subIndent}{string.Join($",\n{subIndent}", columns)}\n{indent}";        
+        string valuesClause = string.Join(", ", valuesSql);
+
+        return (columnsClause, valuesClause, ctx);
     }
 
     /// <summary>
