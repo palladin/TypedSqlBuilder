@@ -222,7 +222,7 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         Assert.Equal("""
             DELETE FROM customers
             WHERE 
-                (customers.Age < :p0) OR (customers.Name = :p1)
+                customers.Age < :p0 OR customers.Name = :p1
             """, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(18, parameters[":p0"]);
@@ -268,9 +268,9 @@ public class PostgreSqlStatementsTests : IStatementTestContract
         Assert.Equal("""
             UPDATE customers
             SET 
-                Age = (customers.Age + :p0)
+                Age = customers.Age + :p0
             WHERE 
-                (customers.Age >= :p1) AND (customers.Name != :p2)
+                customers.Age >= :p1 AND customers.Name != :p2
             """, sql);
         Assert.Equal(3, parameters.Count);
         Assert.Equal(1, parameters[":p0"]);

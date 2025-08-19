@@ -6,11 +6,88 @@ using System.Text.RegularExpressions;
 namespace TypedSqlBuilder.Core;
 
 /// <summary>
+/// Precedence constants for SQL expressions.
+/// Higher values bind tighter (following standard SQL precedence).
+/// Based on: 1=Parentheses, 2=Unary, 3=Multiplicative, 4=Additive, 5=StringConcat, 6=Comparison, 7=NOT, 8=AND, 9=OR
+/// </summary>
+internal static class SqlPrecedence
+{
+    public const int Primary = 10;         // Literals, columns, function calls (parentheses level)
+    public const int UnaryMath = 9;        // +, - (unary), ~ (bitwise NOT), ABS()
+    public const int Multiplicative = 8;   // *, /, %
+    public const int Additive = 7;         // +, - (binary arithmetic)
+    public const int StringConcat = 6;     // || (string concatenation)
+    public const int Comparison = 5;       // =, !=, <, >, <=, >=, LIKE, IN, IS NULL, BETWEEN
+    public const int LogicalNot = 4;       // NOT (logical)
+    public const int LogicalAnd = 3;       // AND
+    public const int LogicalOr = 2;        // OR (lowest precedence)
+    public const int Lowest = 0;           // Used as initial context
+}
+
+
+
+/// <summary>
 /// SQL Compiler - Expression compilation methods.
 /// This partial class contains all methods related to compiling SQL expressions (SqlExpr and its derivatives).
 /// </summary>
 internal static partial class SqlCompiler
 {
+    /// <summary>
+    /// Gets the precedence of a SQL expression by pattern matching.
+    /// Follows standard SQL precedence rules.
+    /// </summary>
+    private static int GetPrecedence(SqlExpr expr) => expr switch
+    {
+        // Boolean expressions
+        SqlBoolNot _ => SqlPrecedence.LogicalNot,
+        SqlBoolAnd _ => SqlPrecedence.LogicalAnd,
+        SqlBoolOr _ => SqlPrecedence.LogicalOr,
+        SqlBoolValue _ or SqlBoolColumn _ => SqlPrecedence.Primary,
+        
+        // Integer expressions
+        SqlIntMinus _ or SqlIntAbs _ => SqlPrecedence.UnaryMath,
+        SqlIntMult _ or SqlIntDiv _ => SqlPrecedence.Multiplicative,
+        SqlIntAdd _ or SqlIntSub _ => SqlPrecedence.Additive,
+        SqlIntValue _ or SqlIntColumn _ => SqlPrecedence.Primary,
+        
+        // Comparison expressions
+        SqlEquals _ or SqlNotEquals _ or SqlGreaterThan _ or SqlLessThan _ 
+        or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ or SqlStringLike _ => SqlPrecedence.Comparison,
+        
+        // String expressions
+        SqlStringConcat _ => SqlPrecedence.StringConcat,
+        SqlStringValue _ or SqlStringColumn _ => SqlPrecedence.Primary,
+        
+        // Decimal expressions
+        SqlDecimalMinus _ => SqlPrecedence.UnaryMath,
+        SqlDecimalMult _ or SqlDecimalDiv _ => SqlPrecedence.Multiplicative,
+        SqlDecimalAdd _ or SqlDecimalSub _ => SqlPrecedence.Additive,
+        SqlDecimalValue _ or SqlDecimalColumn _ => SqlPrecedence.Primary,
+        
+        // Default for other expressions (functions, aggregates, etc.)
+        _ => SqlPrecedence.Primary
+    };
+
+    /// <summary>
+    /// Compiles a sub-expression with appropriate parentheses based on precedence.
+    /// </summary>
+    private static (string, Context) CompileWithPrecedence(
+        SqlExpr expr, 
+        Context context, 
+        int scopeLevel, 
+        int minPrecedence)
+    {
+        var (sql, newContext) = Compile(expr, context, scopeLevel);
+        
+        // Wrap in parentheses if this expression's precedence is too low
+        if (GetPrecedence(expr) < minPrecedence)
+        {
+            sql = $"({sql})";
+        }
+        
+        return (sql, newContext);
+    }
+
     /// <summary>
     /// Compiles boolean expressions to SQL string representation.
     /// </summary>
@@ -32,22 +109,27 @@ internal static partial class SqlCompiler
             // Logical operations
             case SqlBoolNot(var operand):
             {
-                var (compiled, ctx) = Compile(operand, context, scopeLevel);
-                return ($"NOT ({compiled})", ctx);
+                var (compiled, ctx) = CompileWithPrecedence(
+                    operand, context, scopeLevel, SqlPrecedence.LogicalNot);
+                return ($"NOT {compiled}", ctx);
             }
 
             case SqlBoolAnd(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql}) AND ({rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.LogicalAnd);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.LogicalAnd);
+                return ($"{leftSql} AND {rightSql}", rightCtx);
             }
 
             case SqlBoolOr(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql}) OR ({rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.LogicalOr);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.LogicalOr);
+                return ($"{leftSql} OR {rightSql}", rightCtx);
             }
 
             // Generic equality/inequality comparisons - handles ALL types (Bool, Int, String)
@@ -65,23 +147,18 @@ internal static partial class SqlCompiler
 
             case SqlEquals(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                // PostgreSQL requires parentheses for chained comparisons like (a > b) = c
+                // SQL Server and SQLite handle this correctly without parentheses
+                var leftPrecedence = context.Dialect.Type == DatabaseType.PostgreSQL && 
+                                   GetPrecedence(left) == SqlPrecedence.Comparison 
+                    ? SqlPrecedence.Comparison + 1  // Force parentheses for PostgreSQL comparison operations
+                    : SqlPrecedence.Comparison;
                 
-                // Add parentheses around comparison operations to ensure correct precedence
-                var leftWithParens = left switch
-                {
-                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({leftSql})",
-                    _ => leftSql
-                };
-                
-                var rightWithParens = right switch
-                {
-                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({rightSql})",
-                    _ => rightSql
-                };
-                
-                return ($"{leftWithParens} = {rightWithParens}", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, leftPrecedence);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison);
+                return ($"{leftSql} = {rightSql}", rightCtx);
             }
 
             case SqlNotEquals(var leftExpr, ISqlNullValue _):
@@ -98,57 +175,53 @@ internal static partial class SqlCompiler
 
             case SqlNotEquals(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                
-                // Add parentheses around comparison operations to ensure correct precedence
-                var leftWithParens = left switch
-                {
-                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({leftSql})",
-                    _ => leftSql
-                };
-                
-                var rightWithParens = right switch
-                {
-                    SqlGreaterThan _ or SqlLessThan _ or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ => $"({rightSql})",
-                    _ => rightSql
-                };
-                
-                return ($"{leftWithParens} != {rightWithParens}", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison);
+                return ($"{leftSql} != {rightSql}", rightCtx);
             }
 
             case SqlGreaterThan(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison);
                 return ($"{leftSql} > {rightSql}", rightCtx);
             }
 
             case SqlLessThan(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison);
                 return ($"{leftSql} < {rightSql}", rightCtx);
             }
 
             case SqlGreaterThanOrEqualTo(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison); 
                 return ($"{leftSql} >= {rightSql}", rightCtx);
             }
 
             case SqlLessThanOrEqualTo(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Comparison); 
                 return ($"{leftSql} <= {rightSql}", rightCtx);
             }
 
             // String pattern matching
             case SqlStringLike(var value, var pattern):
             {
-                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var (valueSql, valueCtx) = CompileWithPrecedence(value, context, scopeLevel, SqlPrecedence.Comparison);
                 var (patternParam, patternCtx) = valueCtx.GenerateParameter(pattern);
                 return ($"{valueSql} LIKE {patternParam}", patternCtx);
             }
@@ -231,7 +304,8 @@ internal static partial class SqlCompiler
             // Unary operations
             case SqlIntMinus(var operand):
             {
-                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                var (compiled, ctx) = CompileWithPrecedence(
+                    operand, context, scopeLevel, SqlPrecedence.UnaryMath);
                 return ($"-{compiled}", ctx);
             }
 
@@ -244,30 +318,38 @@ internal static partial class SqlCompiler
             // Binary arithmetic operations
             case SqlIntAdd(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} + {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} + {rightSql}", rightCtx);
             }
 
             case SqlIntSub(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} - {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} - {rightSql}", rightCtx);
             }
 
             case SqlIntMult(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} * {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} * {rightSql}", rightCtx);
             }
 
             case SqlIntDiv(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} / {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} / {rightSql}", rightCtx);
             }            
 
             // Parameters
@@ -383,12 +465,14 @@ internal static partial class SqlCompiler
             // String concatenation - now handled in main Compile method for dialect differences
             case SqlStringConcat(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
                 
                 return context.Dialect.UsesConcatFunction 
                     ? ($"{context.Dialect.StringConcatOperator}({leftSql}, {rightSql})", rightCtx)
-                    : ($"({leftSql} {context.Dialect.StringConcatOperator} {rightSql})", rightCtx);
+                    : ($"{leftSql} {context.Dialect.StringConcatOperator} {rightSql}", rightCtx);
             }
 
             // Parameters
@@ -440,36 +524,45 @@ internal static partial class SqlCompiler
             // Arithmetic operations
             case SqlDecimalAdd(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} + {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} + {rightSql}", rightCtx);
             }
 
             case SqlDecimalSub(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} - {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive); 
+                return ($"{leftSql} - {rightSql}", rightCtx);
             }
 
             case SqlDecimalMinus(var operand):
             {
-                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                var (compiled, ctx) = CompileWithPrecedence(
+                    operand, context, scopeLevel, SqlPrecedence.UnaryMath);
                 return ($"-{compiled}", ctx);
             }
 
             case SqlDecimalMult(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} * {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} * {rightSql}", rightCtx);
             }
 
             case SqlDecimalDiv(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
-                return ($"({leftSql} / {rightSql})", rightCtx);
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative); 
+                return ($"{leftSql} / {rightSql}", rightCtx);
             }
 
             // Parameters
@@ -648,12 +741,12 @@ internal static partial class SqlCompiler
             // String concatenation - handle dialect differences
             case SqlStringConcat(var left, var right):
             {
-                var (leftSql, leftCtx) = Compile(left, context, scopeLevel);
-                var (rightSql, rightCtx) = Compile(right, leftCtx, scopeLevel);
+                var (leftSql, leftCtx) = CompileWithPrecedence(left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(right, leftCtx, scopeLevel, SqlPrecedence.Additive);
                 
                 return context.Dialect.UsesConcatFunction 
                     ? ($"{context.Dialect.StringConcatOperator}({leftSql}, {rightSql})", rightCtx)
-                    : ($"({leftSql} {context.Dialect.StringConcatOperator} {rightSql})", rightCtx);
+                    : ($"{leftSql} {context.Dialect.StringConcatOperator} {rightSql}", rightCtx);
             }
         }
 

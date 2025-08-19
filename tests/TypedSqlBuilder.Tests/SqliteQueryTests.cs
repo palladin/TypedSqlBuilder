@@ -174,7 +174,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name != :p1)
+            a0.Age > :p0 AND a0.Name != :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -247,8 +247,8 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         // Assert - SQLite uses || for string concatenation instead of CONCAT
         var expectedSql = """
         SELECT 
-            (a0.Id + :p1) AS Proj0,
-            (a0.Name || :p2) AS Proj1
+            a0.Id + :p1 AS Proj0,
+            a0.Name || :p2 AS Proj1
         FROM 
             customers a0
         WHERE 
@@ -308,7 +308,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            ((a0.Age > :p0) AND (a0.Age < :p1)) OR (a0.Name = :p2)
+            a0.Age > :p0 AND a0.Age < :p1 OR a0.Name = :p2
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(3, parameters.Count);
@@ -330,8 +330,8 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         // Assert - SQLite uses || for string concatenation instead of CONCAT
         var expectedSql = """
         SELECT 
-            ((a0.Id * :p0) + a0.Age) AS Proj0,
-            (a0.Name || :p1) AS Proj1
+            a0.Id * :p0 + a0.Age AS Proj0,
+            a0.Name || :p1 AS Proj1
         FROM 
             customers a0
         """;
@@ -361,7 +361,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name != :p1)
+            a0.Age > :p0 AND a0.Name != :p1
         ORDER BY 
             a0.Age ASC
         """;
@@ -386,11 +386,11 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         SELECT 
             a0.Id AS Id,
             a0.Name AS Name,
-            (a0.Age + :p2) AS Proj0
+            a0.Age + :p2 AS Proj0
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name != :p1)
+            a0.Age > :p0 AND a0.Name != :p1
         ORDER BY 
             a0.Age ASC
         """;
@@ -421,7 +421,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name = :p1)
+            a0.Age > :p0 AND a0.Name = :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -443,12 +443,12 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         var expectedSql = """
         SELECT 
             a0.Id AS CustomerId,
-            (a0.Name || :p2) AS CustomerInfo,
-            (a0.Age + :p3) AS AdjustedAge
+            a0.Name || :p2 AS CustomerInfo,
+            a0.Age + :p3 AS AdjustedAge
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Name != :p1)
+            a0.Age >= :p0 AND a0.Name != :p1
         ORDER BY 
             a0.Name ASC
         """;
@@ -506,7 +506,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Age <= :p1)
+            a0.Age >= :p0 AND a0.Age <= :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -528,7 +528,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         var expectedSql = """
         SELECT 
             a0.Id AS OriginalId,
-            ((a0.Id * :p1) + a0.Age) AS ModifiedId,
+            a0.Id * :p1 + a0.Age AS ModifiedId,
             a0.Name AS CustomerName
         FROM 
             customers a0
@@ -556,7 +556,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         SELECT 
             a0.Id AS Id,
             a0.Name AS Name,
-            (a0.Age + :p0) AS Proj0
+            a0.Age + :p0 AS Proj0
         FROM 
             customers a0
         ORDER BY 
@@ -584,7 +584,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Name != :p1)
+            a0.Age >= :p0 AND a0.Name != :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters[":p0"]);
@@ -612,7 +612,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name != :p1)
+            a0.Age > :p0 AND a0.Name != :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters[":p0"]);
@@ -639,7 +639,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND ((a0.Name != :p1) AND (a0.Age < :p2))
+            a0.Age > :p0 AND a0.Name != :p1 AND a0.Age < :p2
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(18, parameters[":p0"]);
@@ -665,7 +665,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Name != :p1)
+            a0.Age >= :p0 AND a0.Name != :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters[":p0"]);
@@ -692,7 +692,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name != :p1)
+            a0.Age > :p0 AND a0.Name != :p1
         ORDER BY 
             a0.Name ASC
         """;
@@ -981,7 +981,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Name IS NULL) AND (a0.Age IS NOT NULL)
+            a0.Name IS NULL AND a0.Age IS NOT NULL
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Empty(parameters);
@@ -1264,7 +1264,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a1
         WHERE 
-            a1.Name = (a0.Name || :p0))
+            a1.Name = a0.Name || :p0)
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
@@ -1289,7 +1289,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             (SELECT 
                 a0.Id AS Id,
-                (a0.Age + :p0) AS NewAge
+                a0.Age + :p0 AS NewAge
             FROM 
                 customers a0) a1
         """;
@@ -1706,7 +1706,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         // Assert
         var expectedSql = """
         SELECT 
-            (a0.Name || :p0) AS Proj0,
+            a0.Name || :p0 AS Proj0,
             a1.Amount AS Amount
         FROM 
             customers a0
@@ -1987,16 +1987,16 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
             a0.Name AS CustomerName,
             COUNT(*) AS TotalOrders,
             SUM(a1.Amount) AS TotalSpent,
-            (SUM(a1.Amount) / COUNT(*)) AS AvgOrderValue
+            SUM(a1.Amount) / COUNT(*) AS AvgOrderValue
         FROM 
             customers a0
         INNER JOIN orders a1 ON a0.Id = a1.CustomerId
         WHERE 
-            (a0.Age >= :p0) AND (a1.Amount > :p1)
+            a0.Age >= :p0 AND a1.Amount > :p1
         GROUP BY 
             a0.Id, a0.Name
         HAVING 
-            (COUNT(*) > :p2) AND (SUM(a1.Amount) > :p3)
+            COUNT(*) > :p2 AND SUM(a1.Amount) > :p3
         ORDER BY 
             SUM(a1.Amount) DESC, COUNT(*) ASC
         """;
@@ -2242,7 +2242,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) = :isAdult
+            a0.Age > :p0 = :isAdult
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -2349,7 +2349,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age > :p0) AND (a0.Name = :p1)
+            a0.Age > :p0 AND a0.Name = :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -2423,7 +2423,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         SELECT 
             a0.Id AS Id,
             a0.Name AS Name,
-            (a0.Age + :p0) AS Proj0
+            a0.Age + :p0 AS Proj0
         FROM 
             customers a0
         ORDER BY 
@@ -2451,7 +2451,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Name != :p1)
+            a0.Age >= :p0 AND a0.Name != :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(21, parameters[":p0"]);
@@ -2476,7 +2476,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         FROM 
             customers a0
         WHERE 
-            (a0.Age >= :p0) AND (a0.Age <= :p1)
+            a0.Age >= :p0 AND a0.Age <= :p1
         """;
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
@@ -2739,7 +2739,7 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         var expectedSql = """
         SELECT 
             a0.Id AS Id,
-            ABS((a0.Age - :p0)) AS Proj0
+            ABS(a0.Age - :p0) AS Proj0
         FROM 
             customers a0
         """;
@@ -2817,9 +2817,9 @@ public class SqliteQueryTests : IQueryTestContract, ISqliteDialectTestContract
         var expectedSql = """
         SELECT 
             a0.ProductName AS ProductName,
-            (a0.Price * :p0) AS Proj0,
-            (a0.Price + :p1) AS Proj1,
-            (a0.Price - :p2) AS Proj2
+            a0.Price * :p0 AS Proj0,
+            a0.Price + :p1 AS Proj1,
+            a0.Price - :p2 AS Proj2
         FROM 
             products a0
         """;

@@ -49,7 +49,7 @@ public static class TestDataConstants
     /// </summary>
     public static string[] ProductTuples => Products.Select(p => 
         $"({p.ProductId}, '{p.ProductName}', " +
-        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2") : "NULL")}, " +
+        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
         $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
         $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"
     ).ToArray();
@@ -59,7 +59,7 @@ public static class TestDataConstants
     /// </summary>
     public static string[] SqliteProductTuples => Products.Select(p => 
         $"({p.ProductId}, '{p.ProductName}', " +
-        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2") : "NULL")}, " +
+        $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
         $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
         $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"
     ).ToArray();
