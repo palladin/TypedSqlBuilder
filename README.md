@@ -50,6 +50,14 @@ The example showcases:
 - CRUD operations (Create, Read, Update, Delete)
 - Integration with SQLite using Dapper for data access
 
+## Installation
+
+Install TypedSqlBuilder via NuGet:
+
+```bash
+dotnet add package TypedSqlBuilder
+```
+
 ## Motivation
 
 TypedSqlBuilder is designed to bridge the gap between raw SQL and complex ORMs. It's intended to be used with simple ORMs like **Dapper**, bringing some of the familiar LINQ experience to SQL construction without the complexity and overhead of Entity Framework.

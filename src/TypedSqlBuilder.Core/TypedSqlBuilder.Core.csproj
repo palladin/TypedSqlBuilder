@@ -7,6 +7,28 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>TypedSqlBuilder</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Palladin</Authors>
+    <Company>Palladin</Company>
+    <Description>A type-safe SQL expression builder DSL for C# that provides fluent syntax for constructing SQL expressions with compile-time type checking. Perfect companion for Dapper and other lightweight ORMs.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/palladin/TypedSqlBuilder</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/palladin/TypedSqlBuilder</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>sql;dapper;query-builder;type-safe;orm;database;linq;sqlserver;sqlite;postgresql</PackageTags>
+    <PackageReleaseNotes>Initial release of TypedSqlBuilder - A type-safe SQL expression builder for C#</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
