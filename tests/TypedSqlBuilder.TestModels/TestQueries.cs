@@ -395,9 +395,7 @@ public static class TestQueries
                 (c, o) => (c.Id, c.Name, c.Age, o.Amount))
             .GroupBy(result => result.Id)
             .Select((result, agg) => (
-                CustomerId: result.Id,
-                CustomerName: result.Name,
-                CustomerAge: result.Age,
+                CustomerId: result.Id,                
                 OrderCount: agg.Count(),
                 TotalSpent: agg.Sum(result.Amount)
             ));

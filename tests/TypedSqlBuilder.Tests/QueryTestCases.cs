@@ -2006,8 +2006,6 @@ public static class QueryTestCases
             new((DatabaseType.SqlServer, "LeftJoinWithAggregates_GeneratesCorrectSql"), ("""
             SELECT 
                 a0.Id AS CustomerId,
-                a0.Name AS CustomerName,
-                a0.Age AS CustomerAge,
                 COUNT(*) AS OrderCount,
                 SUM(a1.Amount) AS TotalSpent
             FROM 
@@ -2019,8 +2017,6 @@ public static class QueryTestCases
             new((DatabaseType.SQLite, "LeftJoinWithAggregates_GeneratesCorrectSql"), ("""
             SELECT 
                 a0.Id AS CustomerId,
-                a0.Name AS CustomerName,
-                a0.Age AS CustomerAge,
                 COUNT(*) AS OrderCount,
                 SUM(a1.Amount) AS TotalSpent
             FROM 
@@ -2032,8 +2028,6 @@ public static class QueryTestCases
             new((DatabaseType.PostgreSQL, "LeftJoinWithAggregates_GeneratesCorrectSql"), ("""
             SELECT 
                 a0.Id AS CustomerId,
-                a0.Name AS CustomerName,
-                a0.Age AS CustomerAge,
                 COUNT(*) AS OrderCount,
                 SUM(a1.Amount) AS TotalSpent
             FROM 

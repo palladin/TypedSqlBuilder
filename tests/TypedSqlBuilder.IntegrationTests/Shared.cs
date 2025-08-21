@@ -38,21 +38,3 @@ public class OrderDto
     public int Amount { get; set; }
 }
 
-/// <summary>
-/// Shared extension methods for integration test helpers
-/// </summary>
-public static class IntegrationTestExtensions
-{
-    /// <summary>
-    /// Converts SQL builder parameters to Dapper parameters
-    /// </summary>
-    public static DynamicParameters ToDapperParameters(this IReadOnlyDictionary<string, object> parameters)
-    {
-        var dapperParams = new DynamicParameters();
-        foreach (var param in parameters)
-        {
-            dapperParams.Add(param.Key, param.Value);
-        }
-        return dapperParams;
-    }
-}

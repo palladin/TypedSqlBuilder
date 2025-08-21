@@ -183,12 +183,10 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            // Clean up any existing customers that match our test condition to ensure test isolation
-            await ExecuteStatementAsync(connection, transaction, TestStatements.DeleteConditional(), databaseType);
-
+            
             // Clean up any test customers in our range first and insert test data
             var setupSql = $@"
-                DELETE FROM customers WHERE Id >= 500 AND Id <= 510;
+                DELETE FROM customers WHERE Age < 18 OR Name = 'Temp';
                 INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
                     (500, 'Minor Customer', 17, {GetBooleanValue(databaseType)}),
                     (501, 'Temp', 25, {GetBooleanValue(databaseType)}),
