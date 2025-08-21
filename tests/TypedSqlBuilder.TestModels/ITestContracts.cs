@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using TypedSqlBuilder.Core;
 
 namespace TypedSqlBuilder.TestModels;
 
@@ -8,203 +9,203 @@ namespace TypedSqlBuilder.TestModels;
 /// Uses Task return type to support both sync (unit tests) and async (integration tests) implementations
 /// </summary>
 public interface IQueryTestContract
-{
-    // All 87 query test methods from SQL Server (baseline)
-    Task From_GeneratesCorrectSql();
-    Task FromStatic_GeneratesCorrectSql();
-    Task FromSelect_GeneratesCorrectSql();
-    Task FromSelectSingle_GeneratesCorrectSql();
-    Task FromWhereInt_GeneratesCorrectSql();
-    Task FromWhereString_GeneratesCorrectSql();
-    Task FromWhereMultiple_GeneratesCorrectSql();
-    Task FromOrderByAsc_GeneratesCorrectSql();
-    Task FromOrderByDesc_GeneratesCorrectSql();
-    Task FromWhereSelectOrderBy_GeneratesCorrectSql();
-    Task FromWhereSelect_GeneratesCorrectSql();
-    Task FromWhereOr_GeneratesCorrectSql();
-    Task FromSelectExpression_GeneratesCorrectSql();
-    Task FromWhereOrderBy_GeneratesCorrectSql();
-    Task FromWhereOrderBySelect_GeneratesCorrectSql();
-    Task FromWhereSelectNamed_GeneratesCorrectSql();
-    Task FromWhereFusionTwo_GeneratesCorrectSql();
-    Task FromWhereFusionThree_GeneratesCorrectSql();
-    Task FromWhereFusionWithSelect_GeneratesCorrectSql();
-    Task FromWhereFusionWithOrderBy_GeneratesCorrectSql();
-    Task FromOrderByThenBy_GeneratesCorrectSql();
-    Task FromOrderByThenByDescending_GeneratesCorrectSql();
-    Task FromOrderByDescendingThenBy_GeneratesCorrectSql();
-    Task FromOrderByMultiple_GeneratesCorrectSql();
-    Task FromWhereOrderByThenBy_GeneratesCorrectSql();
-    Task FromOrderByThenBySelect_GeneratesCorrectSql();
-    Task FromWhereIsNull_GeneratesCorrectSql();
-    Task FromWhereIsNotNull_GeneratesCorrectSql();
-    Task FromWhereIsNullCombined_GeneratesCorrectSql();
-    Task SumAges_GeneratesCorrectSql();
-    Task CountCustomers_GeneratesCorrectSql();
-    Task CountActiveCustomers_GeneratesCorrectSql();
-    Task SumAgesWithDb_GeneratesCorrectSql();
-    Task CountCustomersWithDb_GeneratesCorrectSql();
-    Task CountActiveCustomersWithDb_GeneratesCorrectSql();
-    Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql();
-    Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql();
-    Task FromWhereAgeIn_GeneratesCorrectSql();
-    Task FromWhereAgeInSubquery_GeneratesCorrectSql();
-    Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql();
-    Task FromSubquery_GeneratesCorrectSql();
-    Task FromWhereSelectWhereFromNested_GeneratesCorrectSql();
-    Task FromWhereSelectWhereNested_GeneratesCorrectSql();
-    Task FromGroupBySelect_GeneratesCorrectSql();
-    Task FromGroupByMultipleSelect_GeneratesCorrectSql();
-    Task FromGroupByHavingSelect_GeneratesCorrectSql();
-    Task FromWhereGroupBySelect_GeneratesCorrectSql();
-    Task FromWhereIsNullInt_GeneratesCorrectSql();
-    Task FromWhereIsNotNullInt_GeneratesCorrectSql();
-    Task InnerJoinBasic_GeneratesCorrectSql();
-    Task InnerJoinWithSelect_GeneratesCorrectSql();
-    Task InnerJoinWithWhere_GeneratesCorrectSql();
-    Task InnerJoinWithOrderBy_GeneratesCorrectSql();
-    Task LeftJoinBasic_GeneratesCorrectSql();
-    Task LeftJoinWithSelect_GeneratesCorrectSql();
-    Task LeftJoinWithWhere_GeneratesCorrectSql();
-    Task LeftJoinWithOrderBy_GeneratesCorrectSql();
-    Task InnerJoinWithGroupBy_GeneratesCorrectSql();
-    Task LeftJoinWithAggregates_GeneratesCorrectSql();
-    Task MultipleInnerJoinsFusion_GeneratesCorrectSql();
-    Task MixedJoinTypesFusion_GeneratesCorrectSql();
-    Task JoinFusionWithWhere_GeneratesCorrectSql();
-    Task FromGroupByOrderBySelect_GeneratesCorrectSql();
-    Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql();
-    Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql();
-    Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql();
-    Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql();
-    Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql();
-    Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql();
-    Task FromGroupByMinMaxSelect_GeneratesCorrectSql();
-    Task FromGroupByAvgSelect_GeneratesCorrectSql();
-    Task FromSelectSum_GeneratesCorrectSql();
-    Task FromSelectAvg_GeneratesCorrectSql();
-    Task FromSelectMin_GeneratesCorrectSql();
-    Task FromSelectMax_GeneratesCorrectSql();
+{ 
+    Task From_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromStatic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectSingle_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereInt_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereString_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereMultiple_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByAsc_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByDesc_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOr_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectNamed_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereFusionTwo_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereFusionThree_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereFusionWithSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereFusionWithOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByThenBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByThenByDescending_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByDescendingThenBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByMultiple_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOrderByThenBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByThenBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereIsNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereIsNotNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereIsNullCombined_GeneratesCorrectSql(DatabaseType databaseType);
+    Task SumAges_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CountCustomers_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CountActiveCustomers_GeneratesCorrectSql(DatabaseType databaseType);
+    Task SumAgesWithDb_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CountCustomersWithDb_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CountActiveCustomersWithDb_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAgeIn_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAgeInSubquery_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAgeInSubqueryWithClosure_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSubquery_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectWhereFromNested_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectWhereNested_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByMultipleSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByHavingSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereGroupBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereIsNullInt_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereIsNotNullInt_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InnerJoinBasic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InnerJoinWithSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InnerJoinWithWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InnerJoinWithOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LeftJoinBasic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LeftJoinWithSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LeftJoinWithWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LeftJoinWithOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InnerJoinWithGroupBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LeftJoinWithAggregates_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MultipleInnerJoinsFusion_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MixedJoinTypesFusion_GeneratesCorrectSql(DatabaseType databaseType);
+    Task JoinFusionWithWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByOrderByMultipleSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByOrderByThreeKeysSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByMultipleOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByHavingOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ComplexJoinWhereGroupByHavingOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ComplexLeftJoinWhereGroupByOrderBySelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByMinMaxSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByAvgSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectSum_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectAvg_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectMin_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectMax_GeneratesCorrectSql(DatabaseType databaseType);
     
     // Decimal Aggregate Functions
-    Task SumPrices_GeneratesCorrectSql();
-    Task AvgPrices_GeneratesCorrectSql();
-    Task MinPrice_GeneratesCorrectSql();
-    Task MaxPrice_GeneratesCorrectSql();
-    Task SumExpensivePrices_GeneratesCorrectSql();
-    Task AvgExpensivePrices_GeneratesCorrectSql();
-    Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql();
-    Task FromGroupByDecimalSumSelect_GeneratesCorrectSql();
-    Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql();
-    Task ParameterAsIntParam_GeneratesCorrectSql();
-    Task ParameterAsStringParam_GeneratesCorrectSql();
-    Task ParameterAsBoolParam_GeneratesCorrectSql();
-    Task BoolColumnDirectComparison_GeneratesCorrectSql();
-    Task BoolColumnLiteralTrue_GeneratesCorrectSql();
-    Task BoolColumnLiteralFalse_GeneratesCorrectSql();
-    Task FromOrderByMultipleOrderBySelect_GeneratesCorrectSql();
-    Task FromProductWhereSelect_GeneratesCorrectSql();
-    Task FromSelectOrderBy_GeneratesCorrectSql();
-    Task FromWhereAnd_GeneratesCorrectSql();
-    Task FromWhereAndSelect_GeneratesCorrectSql();
-    Task FromWhereSelectParameterized_GeneratesCorrectSql();
-    Task CaseStringExpression_GeneratesCorrectSql();
-    Task CaseIntExpression_GeneratesCorrectSql();
-    Task CaseBoolExpression_GeneratesCorrectSql();
-    Task CaseInWhere_GeneratesCorrectSql();
-    Task LikeWildcard_GeneratesCorrectSql();
-    Task LikeSingleChar_GeneratesCorrectSql();
-    Task LikeBothWildcards_GeneratesCorrectSql();
-    Task LikeExact_GeneratesCorrectSql();
-    Task AbsColumn_GeneratesCorrectSql();
-    Task AbsInWhere_GeneratesCorrectSql();
-    Task AbsExpression_GeneratesCorrectSql();
-    Task AbsParameter_GeneratesCorrectSql();
+    Task SumPrices_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AvgPrices_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MinPrice_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MaxPrice_GeneratesCorrectSql(DatabaseType databaseType);
+    Task SumExpensivePrices_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AvgExpensivePrices_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByDecimalAggregatesSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByDecimalSumSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromGroupByDecimalAvgSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsIntParam_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsStringParam_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsBoolParam_GeneratesCorrectSql(DatabaseType databaseType);
+    Task BoolColumnDirectComparison_GeneratesCorrectSql(DatabaseType databaseType);
+    Task BoolColumnLiteralTrue_GeneratesCorrectSql(DatabaseType databaseType);
+    Task BoolColumnLiteralFalse_GeneratesCorrectSql(DatabaseType databaseType);    
+    Task FromProductWhereSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAnd_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereAndSelect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectParameterized_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseStringExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseIntExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseBoolExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseInWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LikeWildcard_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LikeSingleChar_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LikeBothWildcards_GeneratesCorrectSql(DatabaseType databaseType);
+    Task LikeExact_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AbsColumn_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AbsInWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AbsExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task AbsParameter_GeneratesCorrectSql(DatabaseType databaseType);
     
     // New column types tests - Decimal
-    Task FromWhereDecimalComparison_GeneratesCorrectSql();
-    Task FromSelectDecimalArithmetic_GeneratesCorrectSql();
-    Task FromWhereDecimalIsNull_GeneratesCorrectSql();
-    Task FromWhereDecimalIsNotNull_GeneratesCorrectSql();
-    Task CaseDecimalExpression_GeneratesCorrectSql();
-    Task ParameterAsDecimalParam_GeneratesCorrectSql();
+    Task FromWhereDecimalComparison_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectDecimalArithmetic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereDecimalIsNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereDecimalIsNotNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseDecimalExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsDecimalParam_GeneratesCorrectSql(DatabaseType databaseType);
     
     // New column types tests - DateTime
-    Task FromWhereCreatedDateComparison_GeneratesCorrectSql();
-    Task FromWhereCreatedDateIsNull_GeneratesCorrectSql();
-    Task FromWhereCreatedDateIsNotNull_GeneratesCorrectSql();
-    Task FromSelectCreatedDateMinMax_GeneratesCorrectSql();
-    Task CaseDateTimeExpression_GeneratesCorrectSql();
-    Task ParameterAsDateTimeParam_GeneratesCorrectSql();
+    Task FromWhereCreatedDateComparison_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereCreatedDateIsNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereCreatedDateIsNotNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectCreatedDateMinMax_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseDateTimeExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsDateTimeParam_GeneratesCorrectSql(DatabaseType databaseType);
     
     // New column types tests - Guid
-    Task FromWhereUniqueIdEquals_GeneratesCorrectSql();
-    Task FromWhereUniqueIdNotEquals_GeneratesCorrectSql();
-    Task FromWhereUniqueIdIsNull_GeneratesCorrectSql();
-    Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql();
-    Task CaseGuidExpression_GeneratesCorrectSql();
-    Task ParameterAsGuidParam_GeneratesCorrectSql();
+    Task FromWhereUniqueIdEquals_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereUniqueIdNotEquals_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereUniqueIdIsNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereUniqueIdIsNotNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CaseGuidExpression_GeneratesCorrectSql(DatabaseType databaseType);
+    Task ParameterAsGuidParam_GeneratesCorrectSql(DatabaseType databaseType);
 
     // String Functions Tests
-    Task StringSubstring_GeneratesCorrectSql();
-    Task StringUpper_GeneratesCorrectSql();
-    Task StringLower_GeneratesCorrectSql();
-    Task StringTrim_GeneratesCorrectSql();
-    Task StringLength_GeneratesCorrectSql();
-    Task StringFunctionsInWhere_GeneratesCorrectSql();
-    Task StringFunctionsInSelect_GeneratesCorrectSql();
+    Task StringSubstring_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringUpper_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringLower_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringTrim_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringLength_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringFunctionsInWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task StringFunctionsInSelect_GeneratesCorrectSql(DatabaseType databaseType);
 
     // Date/Time Functions Tests
-    Task DateTimeNow_GeneratesCorrectSql();
-    Task DateTimeYear_GeneratesCorrectSql();
-    Task DateTimeMonth_GeneratesCorrectSql();
-    Task DateTimeDay_GeneratesCorrectSql();
-    Task DateTimeAddDays_GeneratesCorrectSql();
-    Task DateTimeAddMonths_GeneratesCorrectSql();
-    Task DateTimeAddYears_GeneratesCorrectSql();
-    Task DateTimeDiffDays_GeneratesCorrectSql();
-    Task DateTimeDiffMonths_GeneratesCorrectSql();
-    Task DateTimeDiffYears_GeneratesCorrectSql();
-    Task DateTimeFunctionsInWhere_GeneratesCorrectSql();
-    Task DateTimeFunctionsInSelect_GeneratesCorrectSql();
+    Task DateTimeNow_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeYear_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeMonth_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeDay_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeAddDays_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeAddMonths_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeAddYears_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeDiffDays_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeDiffMonths_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeDiffYears_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeFunctionsInWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DateTimeFunctionsInSelect_GeneratesCorrectSql(DatabaseType databaseType);
 
     // Mathematical Functions Tests
-    Task DecimalRound_GeneratesCorrectSql();
-    Task DecimalCeiling_GeneratesCorrectSql();
-    Task DecimalFloor_GeneratesCorrectSql();
-    Task MathFunctionsInWhere_GeneratesCorrectSql();
-    Task MathFunctionsInSelect_GeneratesCorrectSql();
+    Task DecimalRound_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DecimalCeiling_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DecimalFloor_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MathFunctionsInWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task MathFunctionsInSelect_GeneratesCorrectSql(DatabaseType databaseType);
 }
+
 
 /// <summary>
 /// Complete contract interface ensuring consistent statement test coverage across all database dialects
-/// This represents all 14 statement test methods that must be implemented by all dialect-specific test classes
+/// This represents all statement test methods that must be implemented by all dialect-specific test classes
 /// Uses Task return type to support both sync (unit tests) and async (integration tests) implementations
 /// </summary>
 public interface IStatementTestContract
 {
-    // All 14 statement test methods from SQL Server (baseline)
-    Task InsertBasic_GeneratesCorrectSql();
-    Task UpdateBasic_GeneratesCorrectSql();
-    Task DeleteBasic_GeneratesCorrectSql();
-    Task DeleteAll_GeneratesCorrectSql();
-    Task UpdateConditional_GeneratesCorrectSql();
-    Task InsertPartial_GeneratesCorrectSql();
-    Task UpdateMultiple_GeneratesCorrectSql();
-    Task DeleteConditional_GeneratesCorrectSql();
-    Task UpdateSetNull_GeneratesCorrectSql();
-    Task UpdateSetNullMixed_GeneratesCorrectSql();
-    Task UpdateSetNullInt_GeneratesCorrectSql();
-    Task UpdateSetNullWhere_GeneratesCorrectSql();
-    Task InsertWithNull_GeneratesCorrectSql();
-    Task InsertWithNullInt_GeneratesCorrectSql();
-    
+    // All statement test methods from SQL Server (baseline)
+    Task InsertBasic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateBasic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DeleteBasic_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DeleteAll_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateConditional_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateMultiple_GeneratesCorrectSql(DatabaseType databaseType);
+    Task DeleteConditional_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateSetNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateSetNullMixed_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateSetNullInt_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateSetNullWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InsertWithNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InsertWithNullInt_GeneratesCorrectSql(DatabaseType databaseType);
+
     // New column types statement tests
-    Task InsertWithNewColumns_GeneratesCorrectSql();
-    Task UpdateWithNewColumns_GeneratesCorrectSql();
-    Task InsertWithNewColumnsNull_GeneratesCorrectSql();
-    Task UpdateSetNewColumnsNull_GeneratesCorrectSql();
+    Task InsertWithNewColumns_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateWithNewColumns_GeneratesCorrectSql(DatabaseType databaseType);
+    Task InsertWithNewColumnsNull_GeneratesCorrectSql(DatabaseType databaseType);
+    Task UpdateSetNewColumnsNull_GeneratesCorrectSql(DatabaseType databaseType);
 }
+
+
 
 /// <summary>
 /// Contract interface for SQL Server-specific dialect features
@@ -213,7 +214,7 @@ public interface IStatementTestContract
 public interface ISqlServerDialectTestContract
 {
     // SQL Server-specific tests
-    Task SqlServer_UsesAtSymbolPrefix();
+
 }
 
 /// <summary>
@@ -223,7 +224,7 @@ public interface ISqlServerDialectTestContract
 public interface ISqliteDialectTestContract
 {
     // SQLite-specific tests
-    Task Sqlite_UsesColonPrefix();
+
 }
 
 /// <summary>

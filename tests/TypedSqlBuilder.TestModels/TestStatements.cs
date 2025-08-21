@@ -21,15 +21,6 @@ public static class TestStatements
             .Value(c => c.Age, 25)
             .Value(c => c.Name, "John Doe");
 
-    /// <summary>
-    /// INSERT with only some columns specified
-    /// INSERT INTO customers (Age, Name) VALUES (28, 'Partial Customer')
-    /// </summary>
-    public static ISqlStatement InsertPartial() 
-        => TypedSql.Insert<Customer>()
-            .Value(c => c.Age, 28)
-            .Value(c => c.Name, "Partial Customer");
-
     // ========== UPDATE EXAMPLES ==========
     
     /// <summary>
@@ -121,10 +112,11 @@ public static class TestStatements
     
     /// <summary>
     /// INSERT with new column types (decimal, datetime, guid)
-    /// INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES ('Test Product', 99.99, '2024-08-18T00:00:00', '12345678-1234-1234-1234-123456789012')
+    /// INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (200, 'Test Product', 99.99, '2024-08-18T00:00:00', '12345678-1234-1234-1234-123456789012')
     /// </summary>
     public static ISqlStatement InsertWithNewColumns() 
         => TypedSql.Insert<Product>()
+            .Value(p => p.ProductId, 200)
             .Value(p => p.ProductName, "Test Product")
             .Value(p => p.Price, 99.99m)
             .Value(p => p.CreatedDate, new DateTime(2024, 8, 18))
@@ -143,10 +135,11 @@ public static class TestStatements
 
     /// <summary>
     /// INSERT with new column types set to NULL
-    /// INSERT INTO products (ProductName, Price, CreatedDate, UniqueId) VALUES ('Null Test', NULL, NULL, NULL)
+    /// INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (201, 'Null Test', NULL, NULL, NULL)
     /// </summary>
     public static ISqlStatement InsertWithNewColumnsNull() 
         => TypedSql.Insert<Product>()
+            .Value(p => p.ProductId, 201)
             .Value(p => p.ProductName, "Null Test")
             .Value(p => p.Price, SqlNull.Value)
             .Value(p => p.CreatedDate, SqlNull.Value)

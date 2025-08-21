@@ -339,7 +339,7 @@ public static class SqlQueryExtensions
         where TSource : ITuple
     {
         return new OrderByClause<TSource>(query, x => [keySelector(x)]);
-    }    
+    }
 
     /// <summary>
     /// Sorts the query result by multiple keys with their respective directions.
@@ -361,7 +361,7 @@ public static class SqlQueryExtensions
             var (key1, key2) = keySelector(x);
             return [key1, key2];
         });
-    }    
+    }
 
     /// <summary>
     /// Sorts the query result by three keys with their respective directions.
@@ -383,7 +383,7 @@ public static class SqlQueryExtensions
             var (key1, key2, key3) = keySelector(x);
             return [key1, key2, key3];
         });
-    }    
+    }
 
     /// <summary>
     /// Groups query results by a single key expression.
@@ -420,7 +420,8 @@ public static class SqlQueryExtensions
     public static ISqlGroupByQuery<TSource> GroupBy<TSource>(this ISqlQuery<TSource> query, Func<TSource, (SqlExpr, SqlExpr)> keySelector)
         where TSource : ITuple
     {
-        return new GroupByClause<TSource>(query, x => {
+        return new GroupByClause<TSource>(query, x =>
+        {
             var (key1, key2) = keySelector(x);
             return [key1, key2];
         });
@@ -545,9 +546,9 @@ public static class SqlQueryExtensions
         where TOuter : ITuple
         where TInner : SqlTable, new()
         where TKey : SqlExpr
-        where TResult : ITuple        
+        where TResult : ITuple
     {
-        var names = GetTupleElementNames(resultSelector); 
+        var names = GetTupleElementNames(resultSelector);
         return new JoinClause<TOuter, TInner, TKey, TResult>(JoinType.Inner, outer, new TInner(), outerKeySelector, innerKeySelector, resultSelector, names);
     }
 
@@ -579,9 +580,9 @@ public static class SqlQueryExtensions
         where TOuter : ITuple
         where TInner : SqlTable, new()
         where TKey : SqlExpr
-        where TResult : ITuple        
+        where TResult : ITuple
     {
-        var names = GetTupleElementNames(resultSelector); 
+        var names = GetTupleElementNames(resultSelector);
         return new JoinClause<TOuter, TInner, TKey, TResult>(JoinType.Left, outer, new TInner(), outerKeySelector, innerKeySelector, resultSelector, names);
     }
 
@@ -737,4 +738,45 @@ public static class SqlQueryExtensions
         var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
         return (sql, resultContext.Parameters);
     }
+
+    /// <summary>
+    /// Converts a scalar query to raw SQL and parameters for the specified database type.
+    /// </summary>
+    /// <param name="scalarQuery">The scalar query to convert</param>
+    /// <param name="databaseType">The target database type (SqlServer, SQLite, or PostgreSQL)</param>
+    /// <returns>A tuple containing the raw SQL string and parameters dictionary</returns>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlScalarQuery scalarQuery, DatabaseType databaseType)
+    {
+        var context = new Context { DatabaseType = databaseType };
+        var (sql, resultContext) = SqlCompiler.Compile(scalarQuery, context, 0);
+        return (sql, resultContext.Parameters);
+    }
+
+    /// <summary>
+    /// Converts a query to raw SQL and parameters for the specified database type.
+    /// </summary>
+    /// <param name="query">The query to convert</param>
+    /// <param name="databaseType">The target database type (SqlServer, SQLite, or PostgreSQL)</param>
+    /// <returns>A tuple containing the raw SQL string and parameters dictionary</returns>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlQuery query, DatabaseType databaseType)
+    {
+        var context = new Context { DatabaseType = databaseType };
+        var (sql, _, resultContext) = SqlCompiler.Compile(query, context, 0);
+        return (sql, resultContext.Parameters);
+    }
+
+    /// <summary>
+    /// Converts a statement to raw SQL and parameters for the specified database type.
+    /// </summary>
+    /// <param name="statement">The statement to convert</param>
+    /// <param name="databaseType">The target database type (SqlServer, SQLite, or PostgreSQL)</param>
+    /// <returns>A tuple containing the raw SQL string and parameters dictionary</returns>
+    public static (string SqlRaw, ImmutableDictionary<string, object> Parameters) ToSqlRaw(this ISqlStatement statement, DatabaseType databaseType)
+    {
+        var context = new Context { DatabaseType = databaseType };
+        var (sql, resultContext) = SqlCompiler.Compile(statement, context, 0);
+        return (sql, resultContext.Parameters);
+    }
+
+    
 }

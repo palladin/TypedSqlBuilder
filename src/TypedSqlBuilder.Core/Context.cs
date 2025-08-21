@@ -6,10 +6,21 @@ namespace TypedSqlBuilder.Core;
 /// <summary>
 /// Represents the different SQL database types supported by the compiler.
 /// </summary>
-internal enum DatabaseType
+public enum DatabaseType
 {
+    /// <summary>
+    /// SQLite database engine
+    /// </summary>
     SQLite,
+    
+    /// <summary>
+    /// Microsoft SQL Server database engine
+    /// </summary>
     SqlServer,
+    
+    /// <summary>
+    /// PostgreSQL database engine
+    /// </summary>
     PostgreSQL
 }
 

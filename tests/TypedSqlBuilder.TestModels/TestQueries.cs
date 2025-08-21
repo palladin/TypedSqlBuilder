@@ -603,13 +603,13 @@ public static class TestQueries
     public static ISqlQuery BoolColumnLiteralTrue()
         => Db.Customers.From()
             .Where(c => c.IsActive == true)
-            .Select(c => (c.Id, c.Name, c.IsActive));
+            .Select(c => (c.Id, c.Name, c.Age, c.IsActive));
 
     // Test boolean column with literal false
     public static ISqlQuery BoolColumnLiteralFalse()
         => Db.Customers.From()
             .Where(c => c.IsActive == false)
-            .Select(c => (c.Id, c.Name, c.IsActive));
+            .Select(c => (c.Id, c.Name, c.Age, c.IsActive));
 
     // Test Case function with string values
     public static ISqlQuery CaseStringExpression()
