@@ -24,7 +24,22 @@ internal static partial class SqlCompiler
         var subIndent = new string(' ', (scopeLevel + 1) * 4);
         return (indent, subIndent);
     }
+
     /// <summary>
+    /// Quotes an identifier using database-specific quoting rules.
+    /// </summary>
+    /// <param name="identifier">The identifier to quote</param>
+    /// <param name="dbType">The database type to determine quoting style</param>
+    /// <returns>The quoted identifier</returns>
+    private static string QuoteIdentifier(string identifier, DatabaseType dbType) =>
+        dbType switch
+        {
+            DatabaseType.SqlServer => $"[{identifier}]",
+            DatabaseType.PostgreSQL => $"\"{identifier}\"",
+            DatabaseType.SQLite => $"\"{identifier}\"",
+            _ => throw new NotSupportedException($"Database type {dbType} is not supported for identifier quoting")
+        };
+            
     /// Normalizes a SQL query by applying fusion rules until a fixpoint is reached.
     /// Moves all fusion logic from extension methods to centralized normalization.
     /// Handles WHERE clause fusion, ORDER BY fusion, and SELECT composition.
@@ -36,16 +51,16 @@ internal static partial class SqlCompiler
         // Phase 1: Apply fusion rules until fixpoint
         var current = query;
         bool changed;
-        
+
         do
         {
             (current, changed) = ApplyNormalizationRules(current);
-        } 
+        }
         while (changed);
 
         // Phase 2: Apply canonical form normalization
         current = ApplyCanonicalForm(current);
-        
+
         return current;
     }
 
@@ -321,7 +336,8 @@ internal static partial class SqlCompiler
         var projectionLines = items.Select((item, index) => 
         {
             var comma = index < items.Count - 1 ? "," : "";
-            return $"{subIndent}{item.Projection} AS {item.Alias}{comma}";
+            var quotedAlias = QuoteIdentifier(item.Alias, context.DatabaseType);
+            return $"{subIndent}{item.Projection} AS {quotedAlias}{comma}";
         });
         
         return (string.Join("\n", projectionLines), ctx);
@@ -902,7 +918,9 @@ internal static partial class SqlCompiler
         {            
             var newContext = UpdateProjectionAliases(fromTable.Table, context);
             var aliasIndex = newContext.AliasIndex;
-            return ($"{fromTable.Table.TableName} a{aliasIndex}", fromTable.Table, newContext);
+            var quotedTableName = QuoteIdentifier(fromTable.Table.TableName, context.DatabaseType);
+            var quotedAlias = QuoteIdentifier($"a{aliasIndex}", context.DatabaseType);
+            return ($"{quotedTableName} {quotedAlias}", fromTable.Table, newContext);
         }
         if (query is FromSubQueryClause(var subQuery))
         {
@@ -910,7 +928,8 @@ internal static partial class SqlCompiler
             var (subQuerySql, tuple, subQueryCtx) = Compile(subQuery, context, scopeLevel + 1);
             var newContext = UpdateProjectionAliases(tuple, subQueryCtx);
             var aliasIndex = newContext.AliasIndex;
-            return ($"({subQuerySql.TrimStart()}) a{aliasIndex}", tuple, newContext);
+            var quotedAlias = QuoteIdentifier($"a{aliasIndex}", context.DatabaseType);
+            return ($"({subQuerySql.TrimStart()}) {quotedAlias}", tuple, newContext);
         }
         else
         {
@@ -918,7 +937,8 @@ internal static partial class SqlCompiler
             var (currentQuerySql, currentTuple, currentContext) = Compile(query, context, scopeLevel + 1);
             var newContext = UpdateProjectionAliases(currentTuple, currentContext);
             var aliasIndex = newContext.AliasIndex;
-            return ($"({currentQuerySql.TrimStart()}) a{aliasIndex}", currentTuple, newContext);
+            var quotedAlias = QuoteIdentifier($"a{aliasIndex}", context.DatabaseType);
+            return ($"({currentQuerySql.TrimStart()}) {quotedAlias}", currentTuple, newContext);
         }
     }
 
@@ -952,7 +972,9 @@ internal static partial class SqlCompiler
             };
 
             // Add this join clause
-            joinClauses.Add($"{joinTypeSql} {inner.TableName} a{innerAliasIndex} ON {outerKeySql} = {innerKeySql}");
+            var quotedTableName = QuoteIdentifier(inner.TableName, innerKeyCtx.DatabaseType);
+            var quotedAlias = QuoteIdentifier($"a{innerAliasIndex}", innerKeyCtx.DatabaseType);
+            joinClauses.Add($"{joinTypeSql} {quotedTableName} {quotedAlias} ON {outerKeySql} = {innerKeySql}");
 
             // Update the current tuple by applying the result selector
             currentTuple = resultSelector(currentTuple, inner);

@@ -931,8 +931,10 @@ internal static partial class SqlCompiler
     {
         if (context.ProjectionAliases.TryGetValue(expr, out var alias))
         {
-            // If the expression has a projection alias, use it directly
-            return ($"{alias.Name}.{alias.Field}", context);
+            // If the expression has a projection alias, use it directly with quoted identifiers
+            var quotedTableAlias = QuoteIdentifier(alias.Name, context.DatabaseType);
+            var quotedField = QuoteIdentifier(alias.Field, context.DatabaseType);
+            return ($"{quotedTableAlias}.{quotedField}", context);
         }
 
         // Handle dialect-specific expressions first
@@ -974,7 +976,11 @@ internal static partial class SqlCompiler
                 return ($"({sql})", ctx);
             }
             case ISqlColumn column:
-                return ($"{column.TableName}.{column.ColumnName}", context);
+            {
+                var quotedTableAlias = QuoteIdentifier(column.TableName, context.DatabaseType);
+                var quotedColumnName = QuoteIdentifier(column.ColumnName, context.DatabaseType);
+                return ($"{quotedTableAlias}.{quotedColumnName}", context);
+            }
 
             case SqlExprBool boolExpr:
                 return CompileExprBool(boolExpr, context, scopeLevel);

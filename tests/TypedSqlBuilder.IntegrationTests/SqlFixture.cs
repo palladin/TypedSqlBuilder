@@ -93,88 +93,88 @@ public class SqlFixture : IAsyncLifetime
         {
             case DatabaseType.SqlServer:
                 createCustomers = @"
-                    CREATE TABLE customers (
-                        Id INT PRIMARY KEY,
-                        Age INT,
-                        Name NVARCHAR(255),
-                        IsActive BIT DEFAULT 1
+                    CREATE TABLE [customers] (
+                        [Id] INT PRIMARY KEY,
+                        [Age] INT,
+                        [Name] NVARCHAR(255),
+                        [IsActive] BIT DEFAULT 1
                     )";
 
                 createProducts = @"
-                    CREATE TABLE products (
-                        Id INT PRIMARY KEY,
-                        ProductName NVARCHAR(255),
-                        Price DECIMAL(18,2),
-                        CreatedDate DATETIME2,
-                        UniqueId UNIQUEIDENTIFIER
+                    CREATE TABLE [products] (
+                        [Id] INT PRIMARY KEY,
+                        [ProductName] NVARCHAR(255),
+                        [Price] DECIMAL(18,2),
+                        [CreatedDate] DATETIME2,
+                        [UniqueId] UNIQUEIDENTIFIER
                     )";
 
                 createOrders = @"
-                    CREATE TABLE orders (
-                        Id INT PRIMARY KEY,
-                        CustomerId INT,
-                        ProductId INT,
-                        Amount INT,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
-                        FOREIGN KEY (ProductId) REFERENCES products(Id)
+                    CREATE TABLE [orders] (
+                        [Id] INT PRIMARY KEY,
+                        [CustomerId] INT,
+                        [ProductId] INT,
+                        [Amount] INT,
+                        FOREIGN KEY ([CustomerId]) REFERENCES [customers]([Id]),
+                        FOREIGN KEY ([ProductId]) REFERENCES [products]([Id])
                     )";
                 break;
 
             case DatabaseType.PostgreSQL:
                 createCustomers = @"
-                    CREATE TABLE customers (
-                        Id INT PRIMARY KEY,
-                        Age INT,
-                        Name VARCHAR(255),
-                        IsActive BOOLEAN DEFAULT TRUE
+                    CREATE TABLE ""customers"" (
+                        ""Id"" INT PRIMARY KEY,
+                        ""Age"" INT,
+                        ""Name"" VARCHAR(255),
+                        ""IsActive"" BOOLEAN DEFAULT TRUE
                     )";
 
                 createProducts = @"
-                    CREATE TABLE products (
-                        Id INT PRIMARY KEY,
-                        ProductName VARCHAR(255),
-                        Price DECIMAL(18,2),
-                        CreatedDate TIMESTAMP,
-                        UniqueId UUID
+                    CREATE TABLE ""products"" (
+                        ""Id"" INT PRIMARY KEY,
+                        ""ProductName"" VARCHAR(255),
+                        ""Price"" DECIMAL(18,2),
+                        ""CreatedDate"" TIMESTAMP,
+                        ""UniqueId"" UUID
                     )";
 
                 createOrders = @"
-                    CREATE TABLE orders (
-                        Id INT PRIMARY KEY,
-                        CustomerId INT,
-                        ProductId INT,
-                        Amount INT,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
-                        FOREIGN KEY (ProductId) REFERENCES products(Id)
+                    CREATE TABLE ""orders"" (
+                        ""Id"" INT PRIMARY KEY,
+                        ""CustomerId"" INT,
+                        ""ProductId"" INT,
+                        ""Amount"" INT,
+                        FOREIGN KEY (""CustomerId"") REFERENCES ""customers""(""Id""),
+                        FOREIGN KEY (""ProductId"") REFERENCES ""products""(""Id"")
                     )";
                 break;
 
             case DatabaseType.SQLite:
                 createCustomers = @"
-                    CREATE TABLE customers (
-                        Id INTEGER PRIMARY KEY,
-                        Age INTEGER,
-                        Name TEXT,
-                        IsActive INTEGER DEFAULT 1
+                    CREATE TABLE ""customers"" (
+                        ""Id"" INTEGER PRIMARY KEY,
+                        ""Age"" INTEGER,
+                        ""Name"" TEXT,
+                        ""IsActive"" INTEGER DEFAULT 1
                     )";
 
                 createProducts = @"
-                    CREATE TABLE products (
-                        Id INTEGER PRIMARY KEY,
-                        ProductName TEXT,
-                        Price REAL,
-                        CreatedDate TEXT,
-                        UniqueId TEXT
+                    CREATE TABLE ""products"" (
+                        ""Id"" INTEGER PRIMARY KEY,
+                        ""ProductName"" TEXT,
+                        ""Price"" REAL,
+                        ""CreatedDate"" TEXT,
+                        ""UniqueId"" TEXT
                     )";
 
                 createOrders = @"
-                    CREATE TABLE orders (
-                        Id INTEGER PRIMARY KEY,
-                        CustomerId INTEGER,
-                        ProductId INTEGER,
-                        Amount INTEGER,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
-                        FOREIGN KEY (ProductId) REFERENCES products(Id)
+                    CREATE TABLE ""orders"" (
+                        ""Id"" INTEGER PRIMARY KEY,
+                        ""CustomerId"" INTEGER,
+                        ""ProductId"" INTEGER,
+                        ""Amount"" INTEGER,
+                        FOREIGN KEY (""CustomerId"") REFERENCES ""customers""(""Id""),
+                        FOREIGN KEY (""ProductId"") REFERENCES ""products""(""Id"")
                     )";
                 break;
 
@@ -233,17 +233,55 @@ public class SqlFixture : IAsyncLifetime
                 throw new ArgumentOutOfRangeException(nameof(databaseType), databaseType, null);
         }
 
-        var insertCustomers = $@"            
-            INSERT INTO customers (Id, Age, Name, IsActive) VALUES 
-            {customerTuples}";
+        string insertCustomers, insertProducts, insertOrders;
 
-        var insertProducts = $@"            
-            INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES
-            {productTuples}";
+        switch (databaseType)
+        {
+            case DatabaseType.SqlServer:
+                insertCustomers = $@"            
+                    INSERT INTO [customers] ([Id], [Age], [Name], [IsActive]) VALUES 
+                    {customerTuples}";
 
-        var insertOrders = $@"            
-            INSERT INTO orders (Id, CustomerId, ProductId, Amount) VALUES
-            {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
+                insertProducts = $@"            
+                    INSERT INTO [products] ([Id], [ProductName], [Price], [CreatedDate], [UniqueId]) VALUES
+                    {productTuples}";
+
+                insertOrders = $@"            
+                    INSERT INTO [orders] ([Id], [CustomerId], [ProductId], [Amount]) VALUES
+                    {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
+                break;
+
+            case DatabaseType.PostgreSQL:
+                insertCustomers = $@"            
+                    INSERT INTO ""customers"" (""Id"", ""Age"", ""Name"", ""IsActive"") VALUES 
+                    {customerTuples}";
+
+                insertProducts = $@"            
+                    INSERT INTO ""products"" (""Id"", ""ProductName"", ""Price"", ""CreatedDate"", ""UniqueId"") VALUES
+                    {productTuples}";
+
+                insertOrders = $@"            
+                    INSERT INTO ""orders"" (""Id"", ""CustomerId"", ""ProductId"", ""Amount"") VALUES
+                    {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
+                break;
+
+            case DatabaseType.SQLite:
+                insertCustomers = $@"            
+                    INSERT INTO ""customers"" (""Id"", ""Age"", ""Name"", ""IsActive"") VALUES 
+                    {customerTuples}";
+
+                insertProducts = $@"            
+                    INSERT INTO ""products"" (""Id"", ""ProductName"", ""Price"", ""CreatedDate"", ""UniqueId"") VALUES
+                    {productTuples}";
+
+                insertOrders = $@"            
+                    INSERT INTO ""orders"" (""Id"", ""CustomerId"", ""ProductId"", ""Amount"") VALUES
+                    {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(databaseType), databaseType, null);
+        }
 
         await connection.ExecuteAsync(insertCustomers);
         await connection.ExecuteAsync(insertProducts);

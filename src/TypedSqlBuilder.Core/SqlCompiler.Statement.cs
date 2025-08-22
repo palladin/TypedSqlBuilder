@@ -26,16 +26,18 @@ internal static partial class SqlCompiler
         {
             // ========== DELETE STATEMENTS ==========
             case DeleteStatement(var table):
+                var quotedTableName = QuoteIdentifier(table.TableName, context.DatabaseType);
                 var deleteSql = $$"""
-                {{indent}}DELETE FROM {{table.TableName}}
+                {{indent}}DELETE FROM {{quotedTableName}}
                 """;
                 return (deleteSql, context);
 
             case DeleteWhereStatement(DeleteStatement(var table), var predicate):
             {                
                 var (whereClause, whereCtx) = Compile(predicate(table), context, scopeLevel);
+                var quotedDeleteTableName = QuoteIdentifier(table.TableName, context.DatabaseType);
                 var deleteWhereSql = $$"""
-                {{indent}}DELETE FROM {{table.TableName}}
+                {{indent}}DELETE FROM {{quotedDeleteTableName}}
                 {{indent}}WHERE 
                 {{subIndent}}{{whereClause}}
                 """;
@@ -62,8 +64,9 @@ internal static partial class SqlCompiler
                 var (table, setClauses) = ExtractUpdateTableAndClauses(innerStatement);                
                 var newSetClauses = setClauses.Append(setClause).ToImmutableArray();
                 var (setClauseSql, setCtx) = CompileSetClauses(newSetClauses, table, context, scopeLevel);
+                var quotedUpdateTableName = QuoteIdentifier(table.TableName, setCtx.DatabaseType);
                 var updateSql = $$"""
-                {{indent}}UPDATE {{table.TableName}}
+                {{indent}}UPDATE {{quotedUpdateTableName}}
                 {{indent}}SET 
                 {{subIndent}}{{setClauseSql}}
                 """;
@@ -76,8 +79,9 @@ internal static partial class SqlCompiler
                 var (table, setClauses) = ExtractUpdateTableAndClauses(updateStatement);                
                 var (setClauseSql, setCtx) = CompileSetClauses(setClauses, table, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(table), setCtx, scopeLevel);
+                var quotedUpdateWhereTableName = QuoteIdentifier(table.TableName, whereCtx.DatabaseType);
                 var updateWhereSql = $$"""
-                {{indent}}UPDATE {{table.TableName}}
+                {{indent}}UPDATE {{quotedUpdateWhereTableName}}
                 {{indent}}SET 
                 {{subIndent}}{{setClauseSql}}
                 {{indent}}WHERE 
@@ -90,8 +94,9 @@ internal static partial class SqlCompiler
                 var (table, valueClauses) = ExtractInsertTableAndClauses(innerStatement);
                 var newValueClauses = valueClauses.Append(valueClause).ToImmutableArray();                
                 var (columnsClause, valuesClause, valuesCtx) = CompileInsertValueClauses(newValueClauses, table, context, scopeLevel);
+                var quotedInsertTableName = QuoteIdentifier(table.TableName, valuesCtx.DatabaseType);
                 var insertSql = $$"""
-                {{indent}}INSERT INTO {{table.TableName}} ({{columnsClause}})
+                {{indent}}INSERT INTO {{quotedInsertTableName}} ({{columnsClause}})
                 {{indent}}VALUES 
                 {{subIndent}}({{valuesClause}})
                 """;
@@ -121,7 +126,7 @@ internal static partial class SqlCompiler
             var column = setClause.ColumnSelector(table);
             var columnSql = 
                 column is ISqlColumn sqlColumn ?
-                    sqlColumn.ColumnName :
+                    QuoteIdentifier(sqlColumn.ColumnName, ctx.DatabaseType) :
                     throw new NotSupportedException($"Column must implement ISqlColumn");
 
             var (valueSql, valueCtx) = Compile(setClause.Value, ctx, scopeLevel);
@@ -159,7 +164,10 @@ internal static partial class SqlCompiler
             var (valueSql, valueCtx) = SqlCompiler.Compile(valueClause.Value, ctx, scopeLevel);
 
             if (column is ISqlColumn sqlColumn)
-                columns.Add(sqlColumn.ColumnName);
+            {
+                var quotedColumnName = QuoteIdentifier(sqlColumn.ColumnName, ctx.DatabaseType);
+                columns.Add(quotedColumnName);
+            }
             else
                 throw new NotSupportedException($"Column must implement ISqlColumn");
             

@@ -31,13 +31,201 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
     }
 
     /// <summary>
+    /// Get database-specific SELECT customer by ID SQL
+    /// </summary>
+    private static string GetSelectCustomerByIdSql(DatabaseType databaseType, int id)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT * FROM [customers] WHERE [Id] = {id}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT * FROM \"customers\" WHERE \"Id\" = {id}",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific SELECT all customers SQL
+    /// </summary>
+    private static string GetSelectAllCustomersSql(DatabaseType databaseType)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => "SELECT * FROM [customers] ORDER BY [Id]",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => "SELECT * FROM \"customers\" ORDER BY \"Id\"",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific COUNT customers SQL
+    /// </summary>
+    private static string GetCountCustomersSql(DatabaseType databaseType)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => "SELECT COUNT(*) FROM [customers]",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => "SELECT COUNT(*) FROM \"customers\"",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific COUNT customers by ID SQL
+    /// </summary>
+    private static string GetCountCustomersByIdSql(DatabaseType databaseType, int id)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT COUNT(*) FROM [customers] WHERE [Id] = {id}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT COUNT(*) FROM \"customers\" WHERE \"Id\" = {id}",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific DELETE FROM orders SQL
+    /// </summary>
+    private static string GetDeleteOrdersSql(DatabaseType databaseType)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => "DELETE FROM [orders]",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => "DELETE FROM \"orders\"",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific INSERT customer SQL
+    /// </summary>
+    private static string GetInsertCustomerSql(DatabaseType databaseType, int id, string name, int age, bool isActive = true)
+    {
+        var boolValue = GetBooleanValue(databaseType, isActive);
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES ({id}, '{name}', {age}, {boolValue})",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"INSERT INTO \"customers\" (\"Id\", \"Name\", \"Age\", \"IsActive\") VALUES ({id}, '{name}', {age}, {boolValue})",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific SELECT products SQL
+    /// </summary>
+    private static string GetSelectProductsSql(DatabaseType databaseType, string whereClause = "")
+    {
+        var where = string.IsNullOrEmpty(whereClause) ? "" : $" WHERE {whereClause}";
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT * FROM [products]{where}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT * FROM \"products\"{where}",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific DELETE conditional SQL for the conditional delete test
+    /// </summary>
+    private static string GetDeleteConditionalSetupSql(DatabaseType databaseType)
+    {
+        var boolValue = GetBooleanValue(databaseType);
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $@"
+                DELETE FROM [customers] WHERE [Age] < 18 OR [Name] = 'Temp';
+                INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES 
+                    (500, 'Minor Customer', 17, {boolValue}),
+                    (501, 'Temp', 25, {boolValue}),
+                    (502, 'Adult Customer', 30, {boolValue}),
+                    (503, 'Another Minor', 16, {boolValue});",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $@"
+                DELETE FROM ""customers"" WHERE ""Age"" < 18 OR ""Name"" = 'Temp';
+                INSERT INTO ""customers"" (""Id"", ""Name"", ""Age"", ""IsActive"") VALUES 
+                    (500, 'Minor Customer', 17, {boolValue}),
+                    (501, 'Temp', 25, {boolValue}),
+                    (502, 'Adult Customer', 30, {boolValue}),
+                    (503, 'Another Minor', 16, {boolValue});",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific SELECT customers in range SQL
+    /// </summary>
+    private static string GetSelectCustomersInRangeSql(DatabaseType databaseType, int minId, int maxId)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT * FROM [customers] WHERE [Id] >= {minId} AND [Id] <= {maxId}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT * FROM \"customers\" WHERE \"Id\" >= {minId} AND \"Id\" <= {maxId}",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific SELECT product by name SQL
+    /// </summary>
+    private static string GetSelectProductByNameSql(DatabaseType databaseType, string productName)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT * FROM [products] WHERE [ProductName] = '{productName}'",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT * FROM \"products\" WHERE \"ProductName\" = '{productName}'",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific SELECT product by ID SQL
+    /// </summary>
+    private static string GetSelectProductByIdSql(DatabaseType databaseType, int id)
+    {
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"SELECT * FROM [products] WHERE [Id] = {id}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"SELECT * FROM \"products\" WHERE \"Id\" = {id}",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
+    /// Get database-specific INSERT product SQL
+    /// </summary>
+    private static string GetInsertProductSql(DatabaseType databaseType, int id, string productName, 
+        decimal? price = null, DateTime? createdDate = null, string? uniqueId = null)
+    {
+        var priceValue = price?.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) ?? "NULL";
+        var dateValue = createdDate?.ToString("yyyy-MM-dd") ?? "NULL";
+        var guidValue = uniqueId != null ? $"'{uniqueId}'" : "NULL";
+        
+        if (createdDate.HasValue && dateValue != "NULL")
+        {
+            dateValue = $"'{dateValue}'";
+        }
+
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => $"INSERT INTO [products] ([Id], [ProductName], [Price], [CreatedDate], [UniqueId]) VALUES ({id}, '{productName}', {priceValue}, {dateValue}, {guidValue})",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"INSERT INTO \"products\" (\"Id\", \"ProductName\", \"Price\", \"CreatedDate\", \"UniqueId\") VALUES ({id}, '{productName}', {priceValue}, {dateValue}, {guidValue})",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+    }
+
+    /// <summary>
     /// Clean up both orders and customers tables to ensure test isolation
     /// </summary>
-    private static string GetCleanupSql()
+    private static string GetCleanupSql(DatabaseType databaseType)
     {
-        return @"
-            DELETE FROM orders;
-            DELETE FROM customers;";
+        return databaseType switch
+        {
+            DatabaseType.SqlServer => @"
+                DELETE FROM [orders];
+                DELETE FROM [customers];",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => @"
+                DELETE FROM ""orders"";
+                DELETE FROM ""customers"";",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
     }
 
     /// <summary>
@@ -49,9 +237,17 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         var values = string.Join(",\n                        ", 
             customers.Select(c => $"({c.Id}, '{c.Name}', {c.Age}, {boolValue})"));
         
-        return $@"{GetCleanupSql()}
-                    INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
-                        {values};";
+        var insertSql = databaseType switch
+        {
+            DatabaseType.SqlServer => $@"INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES 
+                        {values};",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $@"INSERT INTO ""customers"" (""Id"", ""Name"", ""Age"", ""IsActive"") VALUES 
+                        {values};",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+        };
+
+        return $@"{GetCleanupSql(databaseType)}
+                    {insertSql}";
     }
 
     /// <summary>
@@ -101,7 +297,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the insert worked
             var insertedCustomer = await connection.QuerySingleAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+                GetSelectCustomerByIdSql(databaseType, 200), transaction: transaction);
             Assert.Equal("John Doe", insertedCustomer.Name);
             Assert.Equal(25, insertedCustomer.Age);
         }, databaseType);
@@ -119,11 +315,11 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         {
             // Verify customers exist before deletion
             var initialCustomerCount = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers", transaction: transaction);
+                GetCountCustomersSql(databaseType), transaction: transaction);
             Assert.True(initialCustomerCount > 0, "Should have customers before deletion");
 
             // First delete orders to avoid foreign key constraint violations
-            await connection.ExecuteAsync("DELETE FROM orders", transaction: transaction);
+            await connection.ExecuteAsync(GetDeleteOrdersSql(databaseType), transaction: transaction);
 
             // Act - Now delete all customers
             var deletedRows = await ExecuteStatementAsync(connection, transaction, TestStatements.DeleteAll(), databaseType);
@@ -134,7 +330,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify all customers were deleted
             var finalCustomerCount = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers", transaction: transaction);
+                GetCountCustomersSql(databaseType), transaction: transaction);
             Assert.Equal(0, finalCustomerCount);
         }, databaseType);
     }
@@ -150,15 +346,15 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         {
             // Verify customer with Id = 200 doesn't exist initially (from our previous test)
             var initialCustomerCount = await connection.QuerySingleOrDefaultAsync<int?>(
-                "SELECT COUNT(*) FROM customers WHERE Id = 200", transaction: transaction) ?? 0;
+                GetCountCustomersByIdSql(databaseType, 200), transaction: transaction) ?? 0;
             
             // Insert a test customer with Id = 200 first - use proper boolean values for each database
-            var insertSql = $"INSERT INTO customers (Id, Age, Name, IsActive) VALUES (200, 30, 'Test Customer', {GetBooleanValue(databaseType)})";
+            var insertSql = GetInsertCustomerSql(databaseType, 200, "Test Customer", 30);
             await connection.ExecuteAsync(insertSql, transaction: transaction);
 
             // Verify the customer was inserted
             var customerExists = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers WHERE Id = 200", transaction: transaction);
+                GetCountCustomersByIdSql(databaseType, 200), transaction: transaction);
             Assert.Equal(1, customerExists);
 
             // Act
@@ -169,7 +365,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the customer was deleted
             var finalCustomerCount = await connection.QuerySingleAsync<int>(
-                "SELECT COUNT(*) FROM customers WHERE Id = 200", transaction: transaction);
+                GetCountCustomersByIdSql(databaseType, 200), transaction: transaction);
             Assert.Equal(0, finalCustomerCount);
         }, databaseType);
     }
@@ -183,16 +379,8 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         // Use transaction to ensure test isolation while executing real SQL
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
-            
             // Clean up any test customers in our range first and insert test data
-            var setupSql = $@"
-                DELETE FROM customers WHERE Age < 18 OR Name = 'Temp';
-                INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
-                    (500, 'Minor Customer', 17, {GetBooleanValue(databaseType)}),
-                    (501, 'Temp', 25, {GetBooleanValue(databaseType)}),
-                    (502, 'Adult Customer', 30, {GetBooleanValue(databaseType)}),
-                    (503, 'Another Minor', 16, {GetBooleanValue(databaseType)});";
-            
+            var setupSql = GetDeleteConditionalSetupSql(databaseType);
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Execute the delete statement
@@ -203,7 +391,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(3, rowsAffected);
 
             // Verify remaining customers
-            var verifySql = "SELECT * FROM customers WHERE Id >= 500 AND Id <= 510";
+            var verifySql = GetSelectCustomersInRangeSql(databaseType, 500, 510);
             var remainingCustomers = await connection.QueryAsync<CustomerDto>(verifySql, transaction: transaction);
 
             var customerList = remainingCustomers.ToList();
@@ -231,7 +419,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the insert worked - should have new columns set to NULL
             var insertedProduct = await connection.QuerySingleAsync<ProductDto>(
-                "SELECT * FROM products WHERE ProductName = 'Null Test'", transaction: transaction);
+                GetSelectProductByNameSql(databaseType, "Null Test"), transaction: transaction);
             Assert.Equal("Null Test", insertedProduct.ProductName);
             Assert.Equal(201, insertedProduct.Id);
             Assert.Null(insertedProduct.Price); // Should be null
@@ -256,7 +444,8 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(1, insertedRows);
 
             // Verify the inserted product (handle database-specific GUID types)
-            var insertedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE Id = 200");
+            var insertedProduct = await QueryProductAsync(connection, transaction, databaseType, 
+                GetSelectProductByIdSql(databaseType, 200));
             
             Assert.Equal(200, insertedProduct.Id);
             Assert.Equal("Test Product", insertedProduct.ProductName);
@@ -283,7 +472,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the inserted customer
             var insertedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 203", transaction: transaction);
+                GetSelectCustomerByIdSql(databaseType, 203), transaction: transaction);
 
             Assert.NotNull(insertedCustomer);
             Assert.Equal(203, insertedCustomer.Id);
@@ -309,7 +498,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the inserted customer
             var insertedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 202", transaction: transaction);
+                GetSelectCustomerByIdSql(databaseType, 202), transaction: transaction);
 
             Assert.NotNull(insertedCustomer);
             Assert.Equal(202, insertedCustomer.Id);
@@ -328,7 +517,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first
-            var setupSql = $"INSERT INTO customers (Id, Name, Age, IsActive) VALUES (200, 'Test User', 25, {GetBooleanValue(databaseType)})";
+            var setupSql = GetInsertCustomerSql(databaseType, 200, "Test User", 25);
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -339,7 +528,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the update worked
             var updatedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+                GetSelectCustomerByIdSql(databaseType, 200), transaction: transaction);
 
             Assert.NotNull(updatedCustomer);
             Assert.Equal(200, updatedCustomer.Id);
@@ -373,7 +562,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(2, updatedRows);
 
             // Verify the updates worked correctly
-            var customers = (await connection.QueryAsync<CustomerDto>("SELECT * FROM customers ORDER BY Id", transaction: transaction)).ToList();
+            var customers = (await connection.QueryAsync<CustomerDto>(GetSelectAllCustomersSql(databaseType), transaction: transaction)).ToList();
 
             Assert.Equal(4, customers.Count);
             
@@ -409,7 +598,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first
-            var setupSql = $"INSERT INTO customers (Id, Name, Age, IsActive) VALUES (200, 'Original Name', 25, {GetBooleanValue(databaseType)})";
+            var setupSql = GetInsertCustomerSql(databaseType, 200, "Original Name", 25);
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -420,7 +609,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
 
             // Verify the update worked
             var updatedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(
-                "SELECT * FROM customers WHERE Id = 200", transaction: transaction);
+                GetSelectCustomerByIdSql(databaseType, 200), transaction: transaction);
 
             Assert.NotNull(updatedCustomer);
             Assert.Equal(200, updatedCustomer.Id);
@@ -439,7 +628,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first with some values in the new columns
-            var setupSql = "INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (101, 'Test Product', 99.99, '2024-01-01', '11111111-2222-3333-4444-555555555555')";
+            var setupSql = GetInsertProductSql(databaseType, 101, "Test Product", 99.99m, new DateTime(2024, 1, 1), "11111111-2222-3333-4444-555555555555");
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -451,7 +640,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             // Verify the update worked (handle database-specific GUID types)
             if (databaseType == DatabaseType.SQLite)
             {
-                var updatedProduct = await connection.QueryFirstOrDefaultAsync<SqliteProductDto>("SELECT * FROM products WHERE Id = 101", transaction: transaction);
+                var updatedProduct = await connection.QueryFirstOrDefaultAsync<SqliteProductDto>(GetSelectProductByIdSql(databaseType, 101), transaction: transaction);
                 Assert.NotNull(updatedProduct);
                 Assert.Equal(101, updatedProduct.Id);
                 Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
@@ -461,7 +650,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             }
             else
             {
-                var updatedProduct = await connection.QueryFirstOrDefaultAsync<ProductDto>("SELECT * FROM products WHERE Id = 101", transaction: transaction);
+                var updatedProduct = await connection.QueryFirstOrDefaultAsync<ProductDto>(GetSelectProductByIdSql(databaseType, 101), transaction: transaction);
                 Assert.NotNull(updatedProduct);
                 Assert.Equal(101, updatedProduct.Id);
                 Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
@@ -482,12 +671,21 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup controlled test data first
-            var cleanupSql = GetCleanupSql();
-            var setupSql = $@"{cleanupSql}
-                INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
+            var cleanupSql = GetCleanupSql(databaseType);
+            var insertSql = databaseType switch
+            {
+                DatabaseType.SqlServer => $@"INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES 
                     (700, 'Customer 1', 25, {GetBooleanValue(databaseType)}),
                     (701, 'Customer 2', 30, {GetBooleanValue(databaseType)}),
-                    (702, 'Customer 3', 35, {GetBooleanValue(databaseType)});";
+                    (702, 'Customer 3', 35, {GetBooleanValue(databaseType)});",
+                DatabaseType.PostgreSQL or DatabaseType.SQLite => $@"INSERT INTO ""customers"" (""Id"", ""Name"", ""Age"", ""IsActive"") VALUES 
+                    (700, 'Customer 1', 25, {GetBooleanValue(databaseType)}),
+                    (701, 'Customer 2', 30, {GetBooleanValue(databaseType)}),
+                    (702, 'Customer 3', 35, {GetBooleanValue(databaseType)});",
+                _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+            };
+            var setupSql = $@"{cleanupSql}
+                {insertSql}";
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -497,7 +695,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(3, updatedRows);
 
             // Verify all customers have Age set to NULL
-            var customers = (await connection.QueryAsync<CustomerDto>("SELECT * FROM customers ORDER BY Id", transaction: transaction)).ToList();
+            var customers = (await connection.QueryAsync<CustomerDto>(GetSelectAllCustomersSql(databaseType), transaction: transaction)).ToList();
 
             Assert.Equal(3, customers.Count);
             
@@ -525,12 +723,21 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup controlled test data first
-            var cleanupSql = GetCleanupSql();
-            var setupSql = $@"{cleanupSql}
-                INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
+            var cleanupSql = GetCleanupSql(databaseType);
+            var insertSql = databaseType switch
+            {
+                DatabaseType.SqlServer => $@"INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES 
                     (800, 'Original Name 1', 25, {GetBooleanValue(databaseType)}),
                     (801, 'Original Name 2', 30, {GetBooleanValue(databaseType)}),
-                    (802, 'Original Name 3', 35, {GetBooleanValue(databaseType)});";
+                    (802, 'Original Name 3', 35, {GetBooleanValue(databaseType)});",
+                DatabaseType.PostgreSQL or DatabaseType.SQLite => $@"INSERT INTO ""customers"" (""Id"", ""Name"", ""Age"", ""IsActive"") VALUES 
+                    (800, 'Original Name 1', 25, {GetBooleanValue(databaseType)}),
+                    (801, 'Original Name 2', 30, {GetBooleanValue(databaseType)}),
+                    (802, 'Original Name 3', 35, {GetBooleanValue(databaseType)});",
+                _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+            };
+            var setupSql = $@"{cleanupSql}
+                {insertSql}";
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -540,7 +747,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(3, updatedRows);
 
             // Verify all customers have Name="John" and Age=NULL
-            var customers = (await connection.QueryAsync<CustomerDto>("SELECT * FROM customers ORDER BY Id", transaction: transaction)).ToList();
+            var customers = (await connection.QueryAsync<CustomerDto>(GetSelectAllCustomersSql(databaseType), transaction: transaction)).ToList();
 
             Assert.Equal(3, customers.Count);
             
@@ -568,8 +775,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first
-            var setupSql = $"INSERT INTO customers (Id, Name, Age, IsActive) VALUES (200, 'Original Name', 25, {GetBooleanValue(databaseType)})";
-            await connection.ExecuteAsync(setupSql, transaction: transaction);
+            await connection.ExecuteAsync(GetInsertCustomerSql(databaseType, 200, "Original Name", 25, true), transaction: transaction);
 
             // Act
             var updatedRows = await ExecuteStatementAsync(connection, transaction, TestStatements.UpdateSetNullWhere(), databaseType);
@@ -578,8 +784,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(1, updatedRows);
 
             // Verify the update worked
-            var verifySql = "SELECT * FROM customers WHERE Id = 200";
-            var updatedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(verifySql, transaction: transaction);
+            var updatedCustomer = await connection.QueryFirstOrDefaultAsync<CustomerDto>(GetSelectCustomerByIdSql(databaseType, 200), transaction: transaction);
 
             Assert.NotNull(updatedCustomer);
             Assert.Equal(200, updatedCustomer.Id);
@@ -598,12 +803,21 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup controlled test data first
-            var cleanupSql = GetCleanupSql();
-            var setupSql = $@"{cleanupSql}
-                INSERT INTO customers (Id, Name, Age, IsActive) VALUES 
+            var cleanupSql = GetCleanupSql(databaseType);
+            var insertSql = databaseType switch
+            {
+                DatabaseType.SqlServer => $@"INSERT INTO [customers] ([Id], [Name], [Age], [IsActive]) VALUES 
                     (900, 'Customer A', 25, {GetBooleanValue(databaseType)}),
                     (901, 'Customer B', 30, {GetBooleanValue(databaseType)}),
-                    (902, 'Customer C', 35, {GetBooleanValue(databaseType)});";
+                    (902, 'Customer C', 35, {GetBooleanValue(databaseType)});",
+                DatabaseType.PostgreSQL or DatabaseType.SQLite => $@"INSERT INTO ""customers"" (""Id"", ""Name"", ""Age"", ""IsActive"") VALUES 
+                    (900, 'Customer A', 25, {GetBooleanValue(databaseType)}),
+                    (901, 'Customer B', 30, {GetBooleanValue(databaseType)}),
+                    (902, 'Customer C', 35, {GetBooleanValue(databaseType)});",
+                _ => throw new ArgumentOutOfRangeException(nameof(databaseType))
+            };
+            var setupSql = $@"{cleanupSql}
+                {insertSql}";
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -613,7 +827,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(3, updatedRows);
 
             // Verify all customers have Name set to NULL
-            var customers = (await connection.QueryAsync<CustomerDto>("SELECT * FROM customers ORDER BY Id", transaction: transaction)).ToList();
+            var customers = (await connection.QueryAsync<CustomerDto>(GetSelectAllCustomersSql(databaseType), transaction: transaction)).ToList();
 
             Assert.Equal(3, customers.Count);
             
@@ -641,8 +855,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first with some initial values in the new columns
-            var setupSql = "INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (100, 'Test Product', 50.00, '2024-01-01', '00000000-1111-2222-3333-444444444444')";
-            await connection.ExecuteAsync(setupSql, transaction: transaction);
+            await connection.ExecuteAsync(GetInsertProductSql(databaseType, 100, "Test Product", 50.00m, DateTime.Parse("2024-01-01"), "00000000-1111-2222-3333-444444444444"), transaction: transaction);
 
             // Act
             var updatedRows = await ExecuteStatementAsync(connection, transaction, TestStatements.UpdateWithNewColumns(), databaseType);
@@ -651,7 +864,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(1, updatedRows);
 
             // Verify the update worked (handle database-specific GUID types)
-            var updatedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE Id = 100");
+            var updatedProduct = await QueryProductAsync(connection, transaction, databaseType, GetSelectProductByIdSql(databaseType, 100));
 
             Assert.Equal(100, updatedProduct.Id);
             Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
