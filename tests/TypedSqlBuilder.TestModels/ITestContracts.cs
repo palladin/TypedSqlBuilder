@@ -41,10 +41,7 @@ public interface IQueryTestContract
     Task FromWhereIsNullCombined_GeneratesCorrectSql(DatabaseType databaseType);
     Task SumAges_GeneratesCorrectSql(DatabaseType databaseType);
     Task CountCustomers_GeneratesCorrectSql(DatabaseType databaseType);
-    Task CountActiveCustomers_GeneratesCorrectSql(DatabaseType databaseType);
-    Task SumAgesWithDb_GeneratesCorrectSql(DatabaseType databaseType);
-    Task CountCustomersWithDb_GeneratesCorrectSql(DatabaseType databaseType);
-    Task CountActiveCustomersWithDb_GeneratesCorrectSql(DatabaseType databaseType);
+    Task CountActiveCustomers_GeneratesCorrectSql(DatabaseType databaseType);    
     Task FromWhereAgeGreaterThanSum_GeneratesCorrectSql(DatabaseType databaseType);
     Task FromWhereAgeGreaterThanAverageAge_GeneratesCorrectSql(DatabaseType databaseType);
     Task FromWhereAgeIn_GeneratesCorrectSql(DatabaseType databaseType);

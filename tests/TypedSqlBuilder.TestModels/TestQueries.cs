@@ -190,15 +190,6 @@ public static class TestQueries
             .Where(c => c.Name == SqlNull.Value && c.Age != SqlNull.Value);
 
     // Scalar aggregate queries 
-    public static ISqlScalarQuery<SqlExprInt> SumAgesWithDb()
-        => Db.Customers.From().Select(c => c.Age).Sum();
-
-    public static ISqlScalarQuery<SqlExprInt> CountCustomersWithDb()
-        => Db.Customers.From().Count();
-
-    public static ISqlScalarQuery<SqlExprInt> CountActiveCustomersWithDb()
-        => Db.Customers.From().Where(c => c.Age >= 18).Count();
-
     public static ISqlQuery FromWhereAgeGreaterThanSum()
         => Db.Customers.From()
             .Where(c => c.Age > Db.Customers.From().Select(x => x.Age).Sum());

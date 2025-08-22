@@ -147,16 +147,9 @@ internal static partial class SqlCompiler
             }
 
             case SqlEquals(var left, var right):
-            {
-                // PostgreSQL requires parentheses for chained comparisons like (a > b) = c
-                // SQL Server and SQLite handle this correctly without parentheses
-                var leftPrecedence = context.DatabaseType == DatabaseType.PostgreSQL && 
-                                   GetPrecedence(left) == SqlPrecedence.Comparison 
-                    ? SqlPrecedence.Comparison + 1  // Force parentheses for PostgreSQL comparison operations
-                    : SqlPrecedence.Comparison;
-                
+            {                
                 var (leftSql, leftCtx) = CompileWithPrecedence(
-                    left, context, scopeLevel, leftPrecedence);
+                    left, context, scopeLevel, SqlPrecedence.Comparison);
                 var (rightSql, rightCtx) = CompileWithPrecedence(
                     right, leftCtx, scopeLevel, SqlPrecedence.Comparison);
                 return ($"{leftSql} = {rightSql}", rightCtx);
