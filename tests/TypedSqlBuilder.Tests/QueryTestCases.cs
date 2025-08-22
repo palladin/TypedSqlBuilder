@@ -881,7 +881,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "DateTimeFunctionsInSelect_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             YEAR(a0.CreatedDate) AS CreatedYear,
             MONTH(a0.CreatedDate) AS CreatedMonth,
             DAY(a0.CreatedDate) AS CreatedDay,
@@ -893,7 +893,7 @@ public static class QueryTestCases
         """, ["@p0", "@p1"])),
             new((DatabaseType.SQLite, "DateTimeFunctionsInSelect_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             CAST(strftime('%Y', a0.CreatedDate) AS INTEGER) AS CreatedYear,
             CAST(strftime('%m', a0.CreatedDate) AS INTEGER) AS CreatedMonth,
             CAST(strftime('%d', a0.CreatedDate) AS INTEGER) AS CreatedDay,
@@ -905,7 +905,7 @@ public static class QueryTestCases
         """, [])),
             new((DatabaseType.PostgreSQL, "DateTimeFunctionsInSelect_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             EXTRACT(YEAR FROM a0.CreatedDate) AS CreatedYear,
             EXTRACT(MONTH FROM a0.CreatedDate) AS CreatedMonth,
             EXTRACT(DAY FROM a0.CreatedDate) AS CreatedDay,
@@ -921,7 +921,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "DateTimeFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.CreatedDate AS CreatedDate
             FROM 
                 products a0
@@ -930,7 +930,7 @@ public static class QueryTestCases
             """, ["@p0", "@p1"])),
             new((DatabaseType.SQLite, "DateTimeFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.CreatedDate AS CreatedDate
             FROM 
                 products a0
@@ -939,7 +939,7 @@ public static class QueryTestCases
             """, [":p0", ":p1"])),
             new((DatabaseType.PostgreSQL, "DateTimeFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.CreatedDate AS CreatedDate
             FROM 
                 products a0
@@ -989,7 +989,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "FromWhereUniqueIdEquals_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1001,7 +1001,7 @@ public static class QueryTestCases
             """, ["@p0"])),
             new((DatabaseType.SQLite, "FromWhereUniqueIdEquals_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1013,7 +1013,7 @@ public static class QueryTestCases
             """, [":p0"])),
             new((DatabaseType.PostgreSQL, "FromWhereUniqueIdEquals_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1029,7 +1029,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "FromWhereUniqueIdIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1041,7 +1041,7 @@ public static class QueryTestCases
             """, [])),
             new((DatabaseType.SQLite, "FromWhereUniqueIdIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1053,7 +1053,7 @@ public static class QueryTestCases
             """, [])),
             new((DatabaseType.PostgreSQL, "FromWhereUniqueIdIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1069,7 +1069,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "FromWhereUniqueIdIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1081,7 +1081,7 @@ public static class QueryTestCases
             """, [])),
             new((DatabaseType.SQLite, "FromWhereUniqueIdIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1093,7 +1093,7 @@ public static class QueryTestCases
             """, [])),
             new((DatabaseType.PostgreSQL, "FromWhereUniqueIdIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1109,7 +1109,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "FromWhereUniqueIdNotEquals_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             a0.ProductName AS ProductName,
             a0.Price AS Price,
             a0.CreatedDate AS CreatedDate,
@@ -1121,7 +1121,7 @@ public static class QueryTestCases
         """, ["@p0"])),
             new((DatabaseType.SQLite, "FromWhereUniqueIdNotEquals_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             a0.ProductName AS ProductName,
             a0.Price AS Price,
             a0.CreatedDate AS CreatedDate,
@@ -1133,7 +1133,7 @@ public static class QueryTestCases
         """, [":p0"])),
             new((DatabaseType.PostgreSQL, "FromWhereUniqueIdNotEquals_GeneratesCorrectSql"), ("""
         SELECT 
-            a0.ProductId AS ProductId,
+            a0.Id AS Id,
             a0.ProductName AS ProductName,
             a0.Price AS Price,
             a0.CreatedDate AS CreatedDate,
@@ -1513,7 +1513,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "MathFunctionsInSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS OriginalPrice,
                 ROUND(a0.Price, @p0) AS RoundedPrice,
                 CEILING(a0.Price) AS CeilingPrice,
@@ -1523,7 +1523,7 @@ public static class QueryTestCases
             """, ["@p0"])),
             new((DatabaseType.SQLite, "MathFunctionsInSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS OriginalPrice,
                 ROUND(a0.Price, :p0) AS RoundedPrice,
                 CAST((CASE WHEN a0.Price = CAST(a0.Price AS INTEGER) THEN a0.Price ELSE CAST(a0.Price AS INTEGER) + 1 END) AS REAL) AS CeilingPrice,
@@ -1533,7 +1533,7 @@ public static class QueryTestCases
             """, [":p0"])),
             new((DatabaseType.PostgreSQL, "MathFunctionsInSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS OriginalPrice,
                 ROUND(a0.Price, :p0) AS RoundedPrice,
                 CEIL(a0.Price) AS CeilingPrice,
@@ -1547,7 +1547,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "MathFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS Price
             FROM 
                 products a0
@@ -1556,7 +1556,7 @@ public static class QueryTestCases
             """, ["@p0", "@p1", "@p2"])),
             new((DatabaseType.SQLite, "MathFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS Price
             FROM 
                 products a0
@@ -1565,7 +1565,7 @@ public static class QueryTestCases
             """, [":p0", ":p1", ":p2"])),
             new((DatabaseType.PostgreSQL, "MathFunctionsInWhere_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.Price AS Price
             FROM 
                 products a0
@@ -1585,7 +1585,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.ProductId
+            LEFT JOIN products a2 ON a1.Amount = a2.Id
             """, [])),
             new((DatabaseType.SQLite, "MixedJoinTypesFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1596,7 +1596,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.ProductId
+            LEFT JOIN products a2 ON a1.Amount = a2.Id
             """, [])),
             new((DatabaseType.PostgreSQL, "MixedJoinTypesFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1607,7 +1607,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.ProductId
+            LEFT JOIN products a2 ON a1.Amount = a2.Id
             """, []))
         ];
 
@@ -1622,7 +1622,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.ProductId
+            INNER JOIN products a2 ON a1.Amount = a2.Id
             """, [])),
             new((DatabaseType.SQLite, "MultipleInnerJoinsFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1633,7 +1633,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.ProductId
+            INNER JOIN products a2 ON a1.Amount = a2.Id
             """, [])),
             new((DatabaseType.PostgreSQL, "MultipleInnerJoinsFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1644,7 +1644,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.ProductId
+            INNER JOIN products a2 ON a1.Amount = a2.Id
             """, []))
         ];
 
@@ -1668,7 +1668,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "ParameterAsDateTimeParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1680,7 +1680,7 @@ public static class QueryTestCases
             """, ["@startDate"])),
             new((DatabaseType.SQLite, "ParameterAsDateTimeParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1692,7 +1692,7 @@ public static class QueryTestCases
             """, [":startDate"])),
             new((DatabaseType.PostgreSQL, "ParameterAsDateTimeParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1708,7 +1708,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "ParameterAsDecimalParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1720,7 +1720,7 @@ public static class QueryTestCases
             """, ["@minPrice"])),
             new((DatabaseType.SQLite, "ParameterAsDecimalParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1732,7 +1732,7 @@ public static class QueryTestCases
             """, [":minPrice"])),
             new((DatabaseType.PostgreSQL, "ParameterAsDecimalParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1748,7 +1748,7 @@ public static class QueryTestCases
         [
             new((DatabaseType.SqlServer, "ParameterAsGuidParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1760,7 +1760,7 @@ public static class QueryTestCases
             """, ["@targetId"])),
             new((DatabaseType.SQLite, "ParameterAsGuidParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1772,7 +1772,7 @@ public static class QueryTestCases
             """, [":targetId"])),
             new((DatabaseType.PostgreSQL, "ParameterAsGuidParam_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -1865,7 +1865,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= @p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.ProductId
+            INNER JOIN products a3 ON a2.Amount = a3.Id
             WHERE 
                 a2.Amount > @p1
             """, ["@p0", "@p1"])),
@@ -1886,7 +1886,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= :p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.ProductId
+            INNER JOIN products a3 ON a2.Amount = a3.Id
             WHERE 
                 a2.Amount > :p1
             """, [":p0", ":p1"])),
@@ -1907,7 +1907,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= :p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.ProductId
+            INNER JOIN products a3 ON a2.Amount = a3.Id
             WHERE 
                 a2.Amount > :p1
             """, [":p0", ":p1"]))
@@ -3188,7 +3188,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromProductWhereSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName
             FROM 
                 products a0
@@ -3197,7 +3197,7 @@ public static class QueryTestCases
             """, ["@p0"])),
         new((DatabaseType.SQLite, "FromProductWhereSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName
             FROM 
                 products a0
@@ -3206,7 +3206,7 @@ public static class QueryTestCases
             """, [":p0"])),
         new((DatabaseType.PostgreSQL, "FromProductWhereSelect_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName
             FROM 
                 products a0
@@ -3839,7 +3839,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereCreatedDateComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3851,7 +3851,7 @@ public static class QueryTestCases
             """, ["@p0"])),
         new((DatabaseType.SQLite, "FromWhereCreatedDateComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3863,7 +3863,7 @@ public static class QueryTestCases
             """, [":p0"])),
         new((DatabaseType.PostgreSQL, "FromWhereCreatedDateComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3879,7 +3879,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereCreatedDateIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3891,7 +3891,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.SQLite, "FromWhereCreatedDateIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3903,7 +3903,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.PostgreSQL, "FromWhereCreatedDateIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3919,7 +3919,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereCreatedDateIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3931,7 +3931,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.SQLite, "FromWhereCreatedDateIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3943,7 +3943,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.PostgreSQL, "FromWhereCreatedDateIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3959,7 +3959,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereDecimalComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3971,7 +3971,7 @@ public static class QueryTestCases
             """, ["@p0"])),
         new((DatabaseType.SQLite, "FromWhereDecimalComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3983,7 +3983,7 @@ public static class QueryTestCases
             """, [":p0"])),
         new((DatabaseType.PostgreSQL, "FromWhereDecimalComparison_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -3999,7 +3999,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereDecimalIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -4011,7 +4011,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.SQLite, "FromWhereDecimalIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -4023,7 +4023,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.PostgreSQL, "FromWhereDecimalIsNotNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -4039,7 +4039,7 @@ public static class QueryTestCases
     [
         new((DatabaseType.SqlServer, "FromWhereDecimalIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -4051,7 +4051,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.SQLite, "FromWhereDecimalIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,
@@ -4063,7 +4063,7 @@ public static class QueryTestCases
             """, [])),
         new((DatabaseType.PostgreSQL, "FromWhereDecimalIsNull_GeneratesCorrectSql"), ("""
             SELECT 
-                a0.ProductId AS ProductId,
+                a0.Id AS Id,
                 a0.ProductName AS ProductName,
                 a0.Price AS Price,
                 a0.CreatedDate AS CreatedDate,

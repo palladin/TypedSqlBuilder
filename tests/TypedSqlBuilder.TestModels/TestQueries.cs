@@ -109,7 +109,7 @@ public static class TestQueries
     public static ISqlQuery FromProductWhereSelect()
         => Db.Products.From()
             .Where(p => p.ProductName != "Discontinued")
-            .Select(p => (p.ProductId, p.ProductName));
+            .Select(p => (p.Id, p.ProductName));
 
     // Parameterized queries
     public static ISqlQuery FromWhereSelectParameterized(int minAge, int maxAge)
@@ -402,7 +402,7 @@ public static class TestQueries
             .InnerJoin(
                 Db.Products,
                 joined => joined.Order.Amount, // Using Amount as a simple join key for testing
-                p => p.ProductId,
+                p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, p.ProductName));
 
     public static ISqlQuery MixedJoinTypesFusion()
@@ -415,7 +415,7 @@ public static class TestQueries
             .LeftJoin(
                 Db.Products,
                 joined => joined.Order.Amount,
-                p => p.ProductId,
+                p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, ProductName: p.ProductName));
 
     public static ISqlQuery JoinFusionWithWhere()
@@ -429,7 +429,7 @@ public static class TestQueries
             .InnerJoin(
                 Db.Products,
                 joined => joined.Order.Amount,
-                p => p.ProductId,
+                p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Amount, p.ProductName))
             .Where(result => result.Amount > 100);
 
@@ -847,13 +847,13 @@ public static class TestQueries
     public static ISqlQuery DateTimeFunctionsInWhere()
         => Db.Products.From()
             .Where(p => p.CreatedDate.Year() == 2024 && p.CreatedDate.Month() > 6)
-            .Select(p => (p.ProductId, p.CreatedDate));
+            .Select(p => (p.Id, p.CreatedDate));
 
     // Test multiple date functions in SELECT
     public static ISqlQuery DateTimeFunctionsInSelect()
         => Db.Products.From()
             .Select(p => (
-                p.ProductId,
+                p.Id,
                 CreatedYear: p.CreatedDate.Year(),
                 CreatedMonth: p.CreatedDate.Month(),
                 CreatedDay: p.CreatedDate.Day(),
@@ -883,13 +883,13 @@ public static class TestQueries
     public static ISqlQuery MathFunctionsInWhere()
         => Db.Products.From()
             .Where(p => p.Price.Round(0) > 100 && p.Price.Ceiling() < 1000)
-            .Select(p => (p.ProductId, p.Price));
+            .Select(p => (p.Id, p.Price));
 
     // Test multiple math functions in SELECT
     public static ISqlQuery MathFunctionsInSelect()
         => Db.Products.From()
             .Select(p => (
-                p.ProductId,
+                p.Id,
                 OriginalPrice: p.Price,
                 RoundedPrice: p.Price.Round(2),
                 CeilingPrice: p.Price.Ceiling(),

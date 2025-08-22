@@ -116,7 +116,7 @@ public static class StatementsTestCases
     [
         new((DatabaseType.SqlServer, "InsertWithNewColumnsNull_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -127,7 +127,7 @@ public static class StatementsTestCases
         """, ["@p0", "@p1"])),
         new((DatabaseType.SQLite, "InsertWithNewColumnsNull_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -138,7 +138,7 @@ public static class StatementsTestCases
         """, [":p0", ":p1"])),
         new((DatabaseType.PostgreSQL, "InsertWithNewColumnsNull_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -153,7 +153,7 @@ public static class StatementsTestCases
     [
         new((DatabaseType.SqlServer, "InsertWithNewColumns_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -164,7 +164,7 @@ public static class StatementsTestCases
         """, ["@p0", "@p1", "@p2", "@p3", "@p4"])),
         new((DatabaseType.SQLite, "InsertWithNewColumns_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -175,7 +175,7 @@ public static class StatementsTestCases
         """, [":p0", ":p1", ":p2", ":p3", ":p4"])),
         new((DatabaseType.PostgreSQL, "InsertWithNewColumns_GeneratesCorrectSql"), ("""
         INSERT INTO products (
-            ProductId,
+            Id,
             ProductName,
             Price,
             CreatedDate,
@@ -310,7 +310,7 @@ public static class StatementsTestCases
             CreatedDate = NULL,
             UniqueId = NULL
         WHERE 
-            products.ProductId = @p0
+            products.Id = @p0
         """, ["@p0"])),
         new((DatabaseType.SQLite, "UpdateSetNewColumnsNull_GeneratesCorrectSql"), ("""
         UPDATE products
@@ -319,7 +319,7 @@ public static class StatementsTestCases
             CreatedDate = NULL,
             UniqueId = NULL
         WHERE 
-            products.ProductId = :p0
+            products.Id = :p0
         """, [":p0"])),
         new((DatabaseType.PostgreSQL, "UpdateSetNewColumnsNull_GeneratesCorrectSql"), ("""
         UPDATE products
@@ -328,7 +328,7 @@ public static class StatementsTestCases
             CreatedDate = NULL,
             UniqueId = NULL
         WHERE 
-            products.ProductId = :p0
+            products.Id = :p0
         """, [":p0"]))
     ];
 
@@ -426,7 +426,7 @@ public static class StatementsTestCases
             CreatedDate = @p1,
             UniqueId = @p2
         WHERE 
-            products.ProductId = @p3
+            products.Id = @p3
         """, ["@p0", "@p1", "@p2", "@p3"])),
         new((DatabaseType.SQLite, "UpdateWithNewColumns_GeneratesCorrectSql"), ("""
         UPDATE products
@@ -435,7 +435,7 @@ public static class StatementsTestCases
             CreatedDate = :p1,
             UniqueId = :p2
         WHERE 
-            products.ProductId = :p3
+            products.Id = :p3
         """, [":p0", ":p1", ":p2", ":p3"])),
         new((DatabaseType.PostgreSQL, "UpdateWithNewColumns_GeneratesCorrectSql"), ("""
         UPDATE products
@@ -444,7 +444,7 @@ public static class StatementsTestCases
             CreatedDate = :p1,
             UniqueId = :p2
         WHERE 
-            products.ProductId = :p3
+            products.Id = :p3
         """, [":p0", ":p1", ":p2", ":p3"]))
     ];
 

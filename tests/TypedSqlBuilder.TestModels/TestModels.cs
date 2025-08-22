@@ -23,8 +23,8 @@ public class Customer() : SqlTable("customers")
 /// </summary>
 public class Product() : SqlTable("products") 
 {
-    [Column("ProductId")]
-    public SqlIntColumn ProductId { get; set; } = default!;
+    [Column("Id")]
+    public SqlIntColumn Id { get; set; } = default!;
     [Column("ProductName")]
     public SqlStringColumn ProductName { get; set; } = default!;
     [Column("Price")]

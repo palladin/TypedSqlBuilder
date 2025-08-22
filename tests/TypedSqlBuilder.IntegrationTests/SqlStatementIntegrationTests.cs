@@ -57,18 +57,18 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
     /// <summary>
     /// Handle database-specific product DTO querying (SQLite stores GUID as string)
     /// </summary>
-    private async Task<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, string UniqueId)> 
+    private async Task<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, string UniqueId)> 
         QueryProductAsync(IDbConnection connection, IDbTransaction transaction, DatabaseType databaseType, string sql)
     {
         if (databaseType == DatabaseType.SQLite)
         {
             var product = await connection.QueryFirstOrDefaultAsync<SqliteProductDto>(sql, transaction: transaction);
-            return (product?.ProductId ?? 0, product?.ProductName ?? "", product?.Price, product?.CreatedDate, product?.UniqueId ?? "");
+            return (product?.Id ?? 0, product?.ProductName ?? "", product?.Price, product?.CreatedDate, product?.UniqueId ?? "");
         }
         else
         {
             var product = await connection.QueryFirstOrDefaultAsync<ProductDto>(sql, transaction: transaction);
-            return (product?.ProductId ?? 0, product?.ProductName ?? "", product?.Price, product?.CreatedDate, product?.UniqueId?.ToString() ?? "");
+            return (product?.Id ?? 0, product?.ProductName ?? "", product?.Price, product?.CreatedDate, product?.UniqueId?.ToString() ?? "");
         }
     }
 
@@ -233,7 +233,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             var insertedProduct = await connection.QuerySingleAsync<ProductDto>(
                 "SELECT * FROM products WHERE ProductName = 'Null Test'", transaction: transaction);
             Assert.Equal("Null Test", insertedProduct.ProductName);
-            Assert.Equal(201, insertedProduct.ProductId);
+            Assert.Equal(201, insertedProduct.Id);
             Assert.Null(insertedProduct.Price); // Should be null
             Assert.Null(insertedProduct.CreatedDate); // Should be null
             Assert.Null(insertedProduct.UniqueId); // Should be null
@@ -256,9 +256,9 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(1, insertedRows);
 
             // Verify the inserted product (handle database-specific GUID types)
-            var insertedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE ProductId = 200");
+            var insertedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE Id = 200");
             
-            Assert.Equal(200, insertedProduct.ProductId);
+            Assert.Equal(200, insertedProduct.Id);
             Assert.Equal("Test Product", insertedProduct.ProductName);
             Assert.Equal(99.99m, insertedProduct.Price);
             Assert.Equal(new DateTime(2024, 8, 18), insertedProduct.CreatedDate);
@@ -439,7 +439,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first with some values in the new columns
-            var setupSql = "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (101, 'Test Product', 99.99, '2024-01-01', '11111111-2222-3333-4444-555555555555')";
+            var setupSql = "INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (101, 'Test Product', 99.99, '2024-01-01', '11111111-2222-3333-4444-555555555555')";
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -451,9 +451,9 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             // Verify the update worked (handle database-specific GUID types)
             if (databaseType == DatabaseType.SQLite)
             {
-                var updatedProduct = await connection.QueryFirstOrDefaultAsync<SqliteProductDto>("SELECT * FROM products WHERE ProductId = 101", transaction: transaction);
+                var updatedProduct = await connection.QueryFirstOrDefaultAsync<SqliteProductDto>("SELECT * FROM products WHERE Id = 101", transaction: transaction);
                 Assert.NotNull(updatedProduct);
-                Assert.Equal(101, updatedProduct.ProductId);
+                Assert.Equal(101, updatedProduct.Id);
                 Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
                 Assert.Null(updatedProduct.Price); // Should be set to NULL
                 Assert.Null(updatedProduct.CreatedDate); // Should be set to NULL
@@ -461,9 +461,9 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             }
             else
             {
-                var updatedProduct = await connection.QueryFirstOrDefaultAsync<ProductDto>("SELECT * FROM products WHERE ProductId = 101", transaction: transaction);
+                var updatedProduct = await connection.QueryFirstOrDefaultAsync<ProductDto>("SELECT * FROM products WHERE Id = 101", transaction: transaction);
                 Assert.NotNull(updatedProduct);
-                Assert.Equal(101, updatedProduct.ProductId);
+                Assert.Equal(101, updatedProduct.Id);
                 Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
                 Assert.Null(updatedProduct.Price); // Should be set to NULL
                 Assert.Null(updatedProduct.CreatedDate); // Should be set to NULL
@@ -641,7 +641,7 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
         await _fixture.WithTransactionAsync(async (connection, transaction) =>
         {
             // Arrange - setup test data first with some initial values in the new columns
-            var setupSql = "INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (100, 'Test Product', 50.00, '2024-01-01', '00000000-1111-2222-3333-444444444444')";
+            var setupSql = "INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (100, 'Test Product', 50.00, '2024-01-01', '00000000-1111-2222-3333-444444444444')";
             await connection.ExecuteAsync(setupSql, transaction: transaction);
 
             // Act
@@ -651,9 +651,9 @@ public class SqlStatementIntegrationTests : IClassFixture<SqlFixture>, IStatemen
             Assert.Equal(1, updatedRows);
 
             // Verify the update worked (handle database-specific GUID types)
-            var updatedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE ProductId = 100");
+            var updatedProduct = await QueryProductAsync(connection, transaction, databaseType, "SELECT * FROM products WHERE Id = 100");
 
-            Assert.Equal(100, updatedProduct.ProductId);
+            Assert.Equal(100, updatedProduct.Id);
             Assert.Equal("Test Product", updatedProduct.ProductName); // Should remain unchanged
             Assert.Equal(119.99m, updatedProduct.Price); // Should be updated
             Assert.Equal(new DateTime(2024, 12, 25), updatedProduct.CreatedDate); // Should be updated

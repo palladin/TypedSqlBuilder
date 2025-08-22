@@ -15,7 +15,7 @@ public class CustomerDto
 
 public class ProductDto
 {
-    public int ProductId { get; set; }
+    public int Id { get; set; }
     public string? ProductName { get; set; }
     public decimal? Price { get; set; }
     public DateTime? CreatedDate { get; set; }
@@ -24,7 +24,7 @@ public class ProductDto
 
 public class SqliteProductDto
 {
-    public int ProductId { get; set; }
+    public int Id { get; set; }
     public string? ProductName { get; set; }
     public decimal? Price { get; set; }
     public DateTime? CreatedDate { get; set; }

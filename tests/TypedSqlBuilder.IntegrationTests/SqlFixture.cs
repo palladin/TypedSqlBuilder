@@ -102,7 +102,7 @@ public class SqlFixture : IAsyncLifetime
 
                 createProducts = @"
                     CREATE TABLE products (
-                        ProductId INT PRIMARY KEY,
+                        Id INT PRIMARY KEY,
                         ProductName NVARCHAR(255),
                         Price DECIMAL(18,2),
                         CreatedDate DATETIME2,
@@ -129,7 +129,7 @@ public class SqlFixture : IAsyncLifetime
 
                 createProducts = @"
                     CREATE TABLE products (
-                        ProductId INT PRIMARY KEY,
+                        Id INT PRIMARY KEY,
                         ProductName VARCHAR(255),
                         Price DECIMAL(18,2),
                         CreatedDate TIMESTAMP,
@@ -156,7 +156,7 @@ public class SqlFixture : IAsyncLifetime
 
                 createProducts = @"
                     CREATE TABLE products (
-                        ProductId INTEGER PRIMARY KEY,
+                        Id INTEGER PRIMARY KEY,
                         ProductName TEXT,
                         Price REAL,
                         CreatedDate TEXT,
@@ -195,7 +195,7 @@ public class SqlFixture : IAsyncLifetime
                     .Select(c => $"({c.Id}, {c.Age}, N'{c.Name}', {(c.IsActive ? 1 : 0)})"));
 
                 productTuples = string.Join(",\n            ", TestDataConstants.Products
-                    .Select(p => $"({p.ProductId}, N'{p.ProductName}', " +
+                    .Select(p => $"({p.Id}, N'{p.ProductName}', " +
                                $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
                                $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
                                $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"));
@@ -206,7 +206,7 @@ public class SqlFixture : IAsyncLifetime
                     .Select(c => $"({c.Id}, {c.Age}, '{c.Name}', {(c.IsActive ? "TRUE" : "FALSE")})"));
 
                 productTuples = string.Join(",\n            ", TestDataConstants.Products
-                    .Select(p => $"({p.ProductId}, '{p.ProductName}', " +
+                    .Select(p => $"({p.Id}, '{p.ProductName}', " +
                                $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
                                $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
                                $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"));
@@ -217,7 +217,7 @@ public class SqlFixture : IAsyncLifetime
                     .Select(c => $"({c.Id}, {c.Age}, '{c.Name}', {(c.IsActive ? 1 : 0)})"));
 
                 productTuples = string.Join(",\n            ", TestDataConstants.Products
-                    .Select(p => $"({p.ProductId}, '{p.ProductName}', " +
+                    .Select(p => $"({p.Id}, '{p.ProductName}', " +
                                $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
                                $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
                                $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"));
@@ -232,7 +232,7 @@ public class SqlFixture : IAsyncLifetime
             {customerTuples}";
 
         var insertProducts = $@"            
-            INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES
+            INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES
             {productTuples}";
 
         var insertOrders = $@"            

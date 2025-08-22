@@ -727,13 +727,13 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int ProductId, int? CreatedYear, int? CreatedMonth, int? CreatedDay, DateTime? NextWeek, DateTime? NextMonth, int? DaysAgo)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int Id, int? CreatedYear, int? CreatedMonth, int? CreatedDay, DateTime? NextWeek, DateTime? NextMonth, int? DaysAgo)>(sql, parameters);
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
         var now = DateTime.Now;
         var expectedResults = TestDataConstants.Products
             .Select(p => (
-                ProductId: p.ProductId,
+                Id: p.Id,
                 CreatedYear: p.CreatedDate?.Year,
                 CreatedMonth: p.CreatedDate?.Month,
                 CreatedDay: p.CreatedDate?.Day,
@@ -765,7 +765,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         var currentYear = DateTime.Now.Year;
         var expectedResults = TestDataConstants.Products
             .Where(p => p.CreatedDate.HasValue && p.CreatedDate.Value.Year == currentYear && p.CreatedDate.Value.Month >= 6)
-            .Select(p => p.ProductId)
+            .Select(p => p.Id)
             .ToList();
 
         var actualResultsSet = actualResults.ToList();
@@ -1497,13 +1497,13 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int ProductId, string ProductName)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int Id, string ProductName)>(sql, parameters);
         var actualResultsList = actualResults.ToList();
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
         var expectedResults = TestDataConstants.Products
             .Where(p => p.ProductName != "Discontinued")
-            .Select(p => (ProductId: p.ProductId, ProductName: p.ProductName))
+            .Select(p => (Id: p.Id, ProductName: p.ProductName))
             .ToList();
         
         Assert.Equal(expectedResults, actualResultsList);
@@ -1949,7 +1949,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         var query = TestQueries.FromWhereCreatedDateComparison();
         var (sql, parameters) = query.ToSqlRaw(databaseType);
         
-        var actualResultsList = (await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters)).ToList();
+        var actualResultsList = (await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters)).ToList();
         
         var expectedResults = TestDataConstants.Products
             .Where(p => p.CreatedDate > new DateTime(2024, 1, 1))
@@ -1971,18 +1971,18 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         if (databaseType == DatabaseType.SQLite)
         {
             // SQLite stores GUIDs as TEXT, so we need to use string type
-            var actualResultsList = (await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters)).ToList();
+            var actualResultsList = (await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters)).ToList();
             
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.CreatedDate != null)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId?.ToString()))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId?.ToString()))
                 .ToList();
                 
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResultsList = (await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters)).ToList();
+            var actualResultsList = (await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters)).ToList();
             
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.CreatedDate != null)
@@ -2008,8 +2008,8 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         
         if (databaseType == DatabaseType.SQLite)
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
-            var actualResultsList = result.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResultsList = result.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
@@ -2018,7 +2018,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         }
         else
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             var actualResultsList = result.ToList();
             
             var expectedResults = expected.ToList();
@@ -2042,8 +2042,8 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         
         if (databaseType == DatabaseType.SQLite)
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
-            var actualResultsList = result.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResultsList = result.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
@@ -2052,7 +2052,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         }
         else
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             var actualResultsList = result.ToList();
             
             var expectedResults = expected.ToList();
@@ -2076,8 +2076,8 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         
         if (databaseType == DatabaseType.SQLite)
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
-            var actualResultsList = result.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResultsList = result.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
@@ -2086,7 +2086,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         }
         else
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             var actualResultsList = result.ToList();
             
             var expectedResults = expected.ToList();
@@ -2110,8 +2110,8 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         
         if (databaseType == DatabaseType.SQLite)
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
-            var actualResultsList = result.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResultsList = result.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
@@ -2120,7 +2120,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         }
         else
         {
-            var result = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var result = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             var actualResultsList = result.ToList();
             
             var expectedResults = expected.ToList();
@@ -2688,12 +2688,12 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
         var expectedResults = TestDataConstants.Products
             .Where(p => p.UniqueId == Guid.Parse("12345678-1234-1234-1234-123456789012"))
-            .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
+            .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
             .ToList();
 
         var actualResultsList = actualResults.ToList();
@@ -2716,25 +2716,25 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // SQLite stores GUIDs as strings, so we need different handling
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId != null)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId.ToString()))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId.ToString()))
                 .ToList();
 
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId != null)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
                 .ToList();
 
             var actualResultsList = actualResults.ToList();
@@ -2758,25 +2758,25 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // SQLite stores GUIDs as strings, so we need different handling
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId == null)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, (string?)null))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, (string?)null))
                 .ToList();
 
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId == null)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
                 .ToList();
 
             var actualResultsList = actualResults.ToList();
@@ -2800,27 +2800,27 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // SQLite stores GUIDs as strings, so we need different handling
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, string? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             // UniqueId != Guid.Empty should return records with non-empty GUIDs (excluding nulls and empty GUIDs)
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId != null && p.UniqueId != Guid.Empty)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId.ToString()))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId.ToString()))
                 .ToList();
 
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, r.CreatedDate, r.UniqueId)).ToList();
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, parameters);
             
             // Assert - Compare SQL results to LINQ results using TestDataConstants
             // UniqueId != Guid.Empty should return records with non-empty GUIDs (excluding nulls and empty GUIDs)
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId != null && p.UniqueId != Guid.Empty)
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId))
                 .ToList();
 
             var actualResultsList = actualResults.ToList();
@@ -3015,7 +3015,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
                 (c, o) => new { Customer = c, Order = o })
             .Join(TestDataConstants.Products,
                 joined => joined.Order.Amount, // Using Amount as ProductId for test
-                p => p.ProductId,
+                p => p.Id,
                 (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, OrderId: joined.Order.Id, ProductName: p.ProductName))
             .ToList();
 
@@ -3323,11 +3323,11 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         
         var dapperParams = parameters;
             
-        var actualResults = (await connection.QueryAsync<(int ProductId, decimal? OriginalPrice, decimal? RoundedPrice, decimal? CeilingPrice, decimal? FloorPrice)>(sql, dapperParams)).ToList();
+        var actualResults = (await connection.QueryAsync<(int Id, decimal? OriginalPrice, decimal? RoundedPrice, decimal? CeilingPrice, decimal? FloorPrice)>(sql, dapperParams)).ToList();
         
         var expectedResults = TestDataConstants.Products
             .Select(p => (
-                ProductId: p.ProductId, 
+                Id: p.Id, 
                 OriginalPrice: p.Price,
                 RoundedPrice: p.Price != null ? Math.Round(p.Price.Value, 2) : (decimal?)null,
                 CeilingPrice: p.Price != null ? Math.Ceiling(p.Price.Value) : (decimal?)null,
@@ -3351,14 +3351,14 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int ProductId, decimal? Price)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int Id, decimal? Price)>(sql, parameters);
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
         var expectedResults = TestDataConstants.Products
             .Where(p => p.Price.HasValue && 
                        Math.Round(p.Price.Value, 0) > 100 && 
                        Math.Ceiling(p.Price.Value) < 1000)
-            .Select(p => (p.ProductId, p.Price))
+            .Select(p => (p.Id, p.Price))
             .ToList();
 
         var actualResultsList = actualResults.ToList();
@@ -3437,7 +3437,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
             .Where(joined => joined.Order.Id != 0) // Only include customers with orders
             .GroupJoin(TestDataConstants.Products,
                 joined => joined.Order.Amount, // Using Amount as ProductId for test
-                p => p.ProductId,
+                p => p.Id,
                 (joined, products) => new { joined.Customer, joined.Order, Products = products })
             .SelectMany(
                 x => x.Products.DefaultIfEmpty(),
@@ -3475,7 +3475,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
                 (c, o) => new { Customer = c, Order = o })
             .Join(TestDataConstants.Products,
                 joined => joined.Order.Amount, // Using Amount as ProductId for test
-                p => p.ProductId,
+                p => p.Id,
                 (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, OrderId: joined.Order.Id, ProductName: p.ProductName, ProductPrice: p.Price))
             .ToList();
 
@@ -3533,10 +3533,10 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // Act
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
             
             // Convert to expected format for comparison
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
@@ -3549,7 +3549,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
             var actualResultsList = actualResults.ToList();
             
             var expectedResults = TestDataConstants.Products
@@ -3581,27 +3581,27 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // Use simpler result mapping to avoid SQLite GUID casting issues
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
             
             // Convert to expected format for comparison
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.Price > minPriceValue) // Same WHERE logic as SQL query: Price > 50.0
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
                 .ToList();
 
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
 
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.Price > minPriceValue) // Same WHERE logic as SQL query: Price > 50.0
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
                 .ToList();
 
             var actualResultsList = actualResults.ToList();
@@ -3629,27 +3629,27 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         // SQLite stores GUIDs as strings, so we need different handling
         if (databaseType == DatabaseType.SQLite)
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, string CreatedDate, string UniqueId)>(sql, updatedParameters);
             
             // Convert to expected format for comparison
-            var actualResultsList = actualResults.Select(r => (r.ProductId, r.ProductName, r.Price, 
+            var actualResultsList = actualResults.Select(r => (r.Id, r.ProductName, r.Price, 
                 string.IsNullOrEmpty(r.CreatedDate) ? (DateTime?)null : DateTime.Parse(r.CreatedDate), 
                 string.IsNullOrEmpty(r.UniqueId) ? (Guid?)null : Guid.Parse(r.UniqueId))).ToList();
             
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId == targetIdValue) // Same WHERE logic as SQL query: UniqueId = targetIdValue
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
                 .ToList();
 
             Assert.Equal(expectedResults, actualResultsList);
         }
         else
         {
-            var actualResults = await connection.QueryAsync<(int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
+            var actualResults = await connection.QueryAsync<(int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)>(sql, updatedParameters);
 
             var expectedResults = TestDataConstants.Products
                 .Where(p => p.UniqueId == targetIdValue) // Same WHERE logic as SQL query: UniqueId = targetIdValue
-                .Select(p => (p.ProductId, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
+                .Select(p => (p.Id, p.ProductName, p.Price, p.CreatedDate, p.UniqueId)) // Full product data
                 .ToList();
 
             var actualResultsList = actualResults.ToList();

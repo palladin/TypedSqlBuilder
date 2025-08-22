@@ -19,9 +19,9 @@ public static class TestDataConstants
     ];
 
     /// <summary>
-    /// Product data: (ProductId, ProductName, Price, CreatedDate, UniqueId)
+    /// Product data: (Id, ProductName, Price, CreatedDate, UniqueId)
     /// </summary>
-    public static readonly (int ProductId, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)[] Products = 
+    public static readonly (int Id, string ProductName, decimal? Price, DateTime? CreatedDate, Guid? UniqueId)[] Products = 
     [
         (1, "Laptop", 999.99m, new DateTime(2023, 1, 15), new Guid("11111111-1111-1111-1111-111111111111")),
         (2, "Mouse", 25.50m, new DateTime(2023, 6, 10), new Guid("22222222-2222-2222-2222-222222222222")),
@@ -48,7 +48,7 @@ public static class TestDataConstants
     /// Generate product tuples as SQL strings
     /// </summary>
     public static string[] ProductTuples => Products.Select(p => 
-        $"({p.ProductId}, '{p.ProductName}', " +
+        $"({p.Id}, '{p.ProductName}', " +
         $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
         $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
         $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"
@@ -58,7 +58,7 @@ public static class TestDataConstants
     /// Generate product tuples for SQLite (different date format)
     /// </summary>
     public static string[] SqliteProductTuples => Products.Select(p => 
-        $"({p.ProductId}, '{p.ProductName}', " +
+        $"({p.Id}, '{p.ProductName}', " +
         $"{(p.Price.HasValue ? p.Price.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "NULL")}, " +
         $"{(p.CreatedDate.HasValue ? $"'{p.CreatedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, " +
         $"{(p.UniqueId.HasValue ? $"'{p.UniqueId.Value}'" : "NULL")})"

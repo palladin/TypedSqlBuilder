@@ -112,11 +112,11 @@ public static class TestStatements
     
     /// <summary>
     /// INSERT with new column types (decimal, datetime, guid)
-    /// INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (200, 'Test Product', 99.99, '2024-08-18T00:00:00', '12345678-1234-1234-1234-123456789012')
+    /// INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (200, 'Test Product', 99.99, '2024-08-18T00:00:00', '12345678-1234-1234-1234-123456789012')
     /// </summary>
     public static ISqlStatement InsertWithNewColumns() 
         => TypedSql.Insert<Product>()
-            .Value(p => p.ProductId, 200)
+            .Value(p => p.Id, 200)
             .Value(p => p.ProductName, "Test Product")
             .Value(p => p.Price, 99.99m)
             .Value(p => p.CreatedDate, new DateTime(2024, 8, 18))
@@ -124,22 +124,22 @@ public static class TestStatements
 
     /// <summary>
     /// UPDATE with new column types  
-    /// UPDATE products SET Price = 119.99, CreatedDate = '2024-12-25T00:00:00', UniqueId = '87654321-4321-4321-4321-210987654321' WHERE ProductId = 100
+    /// UPDATE products SET Price = 119.99, CreatedDate = '2024-12-25T00:00:00', UniqueId = '87654321-4321-4321-4321-210987654321' WHERE Id = 100
     /// </summary>
     public static ISqlStatement UpdateWithNewColumns() 
         => TypedSql.Update<Product>()
             .Set(p => p.Price, 119.99m)
             .Set(p => p.CreatedDate, new DateTime(2024, 12, 25))
             .Set(p => p.UniqueId, Guid.Parse("87654321-4321-4321-4321-210987654321"))
-            .Where(p => p.ProductId == 100);
+            .Where(p => p.Id == 100);
 
     /// <summary>
     /// INSERT with new column types set to NULL
-    /// INSERT INTO products (ProductId, ProductName, Price, CreatedDate, UniqueId) VALUES (201, 'Null Test', NULL, NULL, NULL)
+    /// INSERT INTO products (Id, ProductName, Price, CreatedDate, UniqueId) VALUES (201, 'Null Test', NULL, NULL, NULL)
     /// </summary>
     public static ISqlStatement InsertWithNewColumnsNull() 
         => TypedSql.Insert<Product>()
-            .Value(p => p.ProductId, 201)
+            .Value(p => p.Id, 201)
             .Value(p => p.ProductName, "Null Test")
             .Value(p => p.Price, SqlNull.Value)
             .Value(p => p.CreatedDate, SqlNull.Value)
@@ -147,12 +147,12 @@ public static class TestStatements
 
     /// <summary>
     /// UPDATE setting new column types to NULL
-    /// UPDATE products SET Price = NULL, CreatedDate = NULL, UniqueId = NULL WHERE ProductId = 101
+    /// UPDATE products SET Price = NULL, CreatedDate = NULL, UniqueId = NULL WHERE Id = 101
     /// </summary>
     public static ISqlStatement UpdateSetNewColumnsNull() 
         => TypedSql.Update<Product>()
             .Set(p => p.Price, SqlNull.Value)
             .Set(p => p.CreatedDate, SqlNull.Value)
             .Set(p => p.UniqueId, SqlNull.Value)
-            .Where(p => p.ProductId == 101);
+            .Where(p => p.Id == 101);
 }

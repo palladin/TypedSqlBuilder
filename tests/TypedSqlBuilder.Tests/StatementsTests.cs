@@ -108,7 +108,7 @@ public class StatementsTests : IStatementTestContract
 
         // Assert        
         Assert.Equal(expectedSql, sql);
-        Assert.Equal(2, parameters.Count); // ProductId and ProductName are parameterized
+        Assert.Equal(2, parameters.Count); // Id and ProductName are parameterized
         Assert.Equal(201, parameters[expectedParameters[0]]);
         Assert.Equal("Null Test", parameters[expectedParameters[1]]);
         return Task.CompletedTask;
