@@ -29,14 +29,14 @@ public static class TestDataConstants
     ];
 
     /// <summary>
-    /// Order data: (Id, CustomerId, Amount)
+    /// Order data: (Id, CustomerId, ProductId, Amount)
     /// </summary>
-    public static readonly (int Id, int CustomerId, int Amount)[] Orders = 
+    public static readonly (int Id, int CustomerId, int ProductId, int Amount)[] Orders = 
     [
-        (1, 1, 500),
-        (2, 1, 150),
-        (3, 2, 300),
-        (4, 4, 75)
+        (1, 1, 1, 500),  // John Doe orders Laptop
+        (2, 1, 2, 150),  // John Doe orders Mouse
+        (3, 2, 1, 300),  // Jane Smith orders Laptop
+        (4, 4, 2, 75)    // Senior User orders Mouse
     ];
 
     /// <summary>
@@ -67,5 +67,5 @@ public static class TestDataConstants
     /// <summary>
     /// Generate order tuples as SQL strings
     /// </summary>
-    public static string[] OrderTuples => Orders.Select(o => $"({o.Id}, {o.CustomerId}, {o.Amount})").ToArray();
+    public static string[] OrderTuples => Orders.Select(o => $"({o.Id}, {o.CustomerId}, {o.ProductId}, {o.Amount})").ToArray();
 }

@@ -36,7 +36,7 @@ public class Product() : SqlTable("products")
 }
 
 /// <summary>
-/// Sample order table for testing joins with customers
+/// Sample order table for testing joins with customers and products
 /// </summary>
 public class Order() : SqlTable("orders")
 {
@@ -44,6 +44,8 @@ public class Order() : SqlTable("orders")
     public SqlIntColumn Id { get; set; } = default!;
     [Column("CustomerId")]
     public SqlIntColumn CustomerId { get; set; } = default!;
+    [Column("ProductId")]
+    public SqlIntColumn ProductId { get; set; } = default!;
     [Column("Amount")]
     public SqlIntColumn Amount { get; set; } = default!;
 }

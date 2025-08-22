@@ -1585,7 +1585,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.Id
+            LEFT JOIN products a2 ON a1.ProductId = a2.Id
             """, [])),
             new((DatabaseType.SQLite, "MixedJoinTypesFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1596,7 +1596,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.Id
+            LEFT JOIN products a2 ON a1.ProductId = a2.Id
             """, [])),
             new((DatabaseType.PostgreSQL, "MixedJoinTypesFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1607,7 +1607,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            LEFT JOIN products a2 ON a1.Amount = a2.Id
+            LEFT JOIN products a2 ON a1.ProductId = a2.Id
             """, []))
         ];
 
@@ -1622,7 +1622,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.Id
+            INNER JOIN products a2 ON a1.ProductId = a2.Id
             """, [])),
             new((DatabaseType.SQLite, "MultipleInnerJoinsFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1633,7 +1633,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.Id
+            INNER JOIN products a2 ON a1.ProductId = a2.Id
             """, [])),
             new((DatabaseType.PostgreSQL, "MultipleInnerJoinsFusion_GeneratesCorrectSql"), ("""
             SELECT 
@@ -1644,7 +1644,7 @@ public static class QueryTestCases
             FROM 
                 customers a0
             INNER JOIN orders a1 ON a0.Id = a1.CustomerId
-            INNER JOIN products a2 ON a1.Amount = a2.Id
+            INNER JOIN products a2 ON a1.ProductId = a2.Id
             """, []))
         ];
 
@@ -1865,7 +1865,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= @p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.Id
+            INNER JOIN products a3 ON a2.ProductId = a3.Id
             WHERE 
                 a2.Amount > @p1
             """, ["@p0", "@p1"])),
@@ -1886,7 +1886,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= :p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.Id
+            INNER JOIN products a3 ON a2.ProductId = a3.Id
             WHERE 
                 a2.Amount > :p1
             """, [":p0", ":p1"])),
@@ -1907,7 +1907,7 @@ public static class QueryTestCases
                 WHERE 
                     a0.Age >= :p0) a1
             INNER JOIN orders a2 ON a1.Id = a2.CustomerId
-            INNER JOIN products a3 ON a2.Amount = a3.Id
+            INNER JOIN products a3 ON a2.ProductId = a3.Id
             WHERE 
                 a2.Amount > :p1
             """, [":p0", ":p1"]))

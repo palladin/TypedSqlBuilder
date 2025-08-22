@@ -3003,10 +3003,10 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
         using var connection = _fixture.CreateConnection(databaseType);
         
         var dapperParams = parameters;
-        var actualResults = (await connection.QueryAsync<(int CustomerId, string CustomerName, int OrderId, string ProductName)>(sql, dapperParams)).ToList();
+        var actualResults = (await connection.QueryAsync<(int CustomerId, string CustomerName, int Amount, string ProductName)>(sql, dapperParams)).ToList();
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
-        // This is a complex join: Customers -> Orders -> Products with WHERE c.Age >= 18
+        // This is a complex join: Customers -> Orders -> Products with WHERE c.Age >= 18 AND Amount > 100
         var expectedResults = TestDataConstants.Customers
             .Where(c => c.Age >= 18)
             .Join(TestDataConstants.Orders,
@@ -3014,9 +3014,10 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
                 o => o.CustomerId,
                 (c, o) => new { Customer = c, Order = o })
             .Join(TestDataConstants.Products,
-                joined => joined.Order.Amount, // Using Amount as ProductId for test
+                joined => joined.Order.ProductId, // Using ProductId as proper foreign key
                 p => p.Id,
-                (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, OrderId: joined.Order.Id, ProductName: p.ProductName))
+                (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, Amount: joined.Order.Amount, ProductName: p.ProductName))
+            .Where(result => result.Amount > 100) // Additional WHERE clause to match the query
             .ToList();
 
         var actualResultsList = actualResults.ToList();
@@ -3421,11 +3422,11 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act 
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int CustomerId, string CustomerName, int? OrderId, string ProductName, decimal? ProductPrice)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int CustomerId, string CustomerName, int? OrderId, string ProductName)>(sql, parameters);
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
         // This represents mixed joins: Customers -> Orders (LEFT) -> Products (LEFT JOIN when no product match)
-        // The SQL returns customers with orders but null product info when no Product matches the Order.Amount
+        // The SQL returns customers with orders but null product info when no Product matches the Order.ProductId
         var expectedResults = TestDataConstants.Customers
             .GroupJoin(TestDataConstants.Orders,
                 c => c.Id,
@@ -3436,7 +3437,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
                 (x, order) => new { x.Customer, Order = order })
             .Where(joined => joined.Order.Id != 0) // Only include customers with orders
             .GroupJoin(TestDataConstants.Products,
-                joined => joined.Order.Amount, // Using Amount as ProductId for test
+                joined => joined.Order.ProductId, // Using ProductId as proper foreign key
                 p => p.Id,
                 (joined, products) => new { joined.Customer, joined.Order, Products = products })
             .SelectMany(
@@ -3444,8 +3445,7 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
                 (x, product) => (CustomerId: x.Customer.Id, 
                     CustomerName: x.Customer.Name, 
                     OrderId: (int?)x.Order.Id, 
-                    ProductName: product.ProductName, 
-                    ProductPrice: product.Price))
+                    ProductName: product.ProductName))
             .ToList();
 
         var actualResultsList = actualResults.ToList();
@@ -3464,19 +3464,19 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         // Act 
         using var connection = _fixture.CreateConnection(databaseType);
-        var actualResults = await connection.QueryAsync<(int CustomerId, string CustomerName, int OrderId, string ProductName, decimal? ProductPrice)>(sql, parameters);
+        var actualResults = await connection.QueryAsync<(int CustomerId, string CustomerName, int OrderId, string ProductName)>(sql, parameters);
 
         // Assert - Compare SQL results to LINQ results using TestDataConstants
-        // This is a complex join: Customers -> Orders -> Products (using Amount as ProductId for test)
+        // This is a complex join: Customers -> Orders -> Products (using ProductId as foreign key)
         var expectedResults = TestDataConstants.Customers
             .Join(TestDataConstants.Orders,
                 c => c.Id,
                 o => o.CustomerId,
                 (c, o) => new { Customer = c, Order = o })
             .Join(TestDataConstants.Products,
-                joined => joined.Order.Amount, // Using Amount as ProductId for test
+                joined => joined.Order.ProductId, // Using ProductId as proper foreign key
                 p => p.Id,
-                (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, OrderId: joined.Order.Id, ProductName: p.ProductName, ProductPrice: p.Price))
+                (joined, p) => (CustomerId: joined.Customer.Id, CustomerName: joined.Customer.Name, OrderId: joined.Order.Id, ProductName: p.ProductName))
             .ToList();
 
         var actualResultsList = actualResults.ToList();

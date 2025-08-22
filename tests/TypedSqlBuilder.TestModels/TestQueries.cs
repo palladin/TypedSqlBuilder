@@ -401,7 +401,7 @@ public static class TestQueries
                 (c, o) => (Customer: c, Order: o))
             .InnerJoin(
                 Db.Products,
-                joined => joined.Order.Amount, // Using Amount as a simple join key for testing
+                joined => joined.Order.ProductId,
                 p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, p.ProductName));
 
@@ -414,7 +414,7 @@ public static class TestQueries
                 (c, o) => (Customer: c, Order: o))
             .LeftJoin(
                 Db.Products,
-                joined => joined.Order.Amount,
+                joined => joined.Order.ProductId,
                 p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Id, ProductName: p.ProductName));
 
@@ -428,7 +428,7 @@ public static class TestQueries
                 (c, o) => (Customer: c, Order: o))
             .InnerJoin(
                 Db.Products,
-                joined => joined.Order.Amount,
+                joined => joined.Order.ProductId,
                 p => p.Id,
                 (joined, p) => (joined.Customer.Id, joined.Customer.Name, joined.Order.Amount, p.ProductName))
             .Where(result => result.Amount > 100);

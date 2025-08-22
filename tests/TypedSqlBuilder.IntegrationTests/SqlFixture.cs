@@ -113,8 +113,10 @@ public class SqlFixture : IAsyncLifetime
                     CREATE TABLE orders (
                         Id INT PRIMARY KEY,
                         CustomerId INT,
+                        ProductId INT,
                         Amount INT,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id)
+                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
+                        FOREIGN KEY (ProductId) REFERENCES products(Id)
                     )";
                 break;
 
@@ -140,8 +142,10 @@ public class SqlFixture : IAsyncLifetime
                     CREATE TABLE orders (
                         Id INT PRIMARY KEY,
                         CustomerId INT,
+                        ProductId INT,
                         Amount INT,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id)
+                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
+                        FOREIGN KEY (ProductId) REFERENCES products(Id)
                     )";
                 break;
 
@@ -167,8 +171,10 @@ public class SqlFixture : IAsyncLifetime
                     CREATE TABLE orders (
                         Id INTEGER PRIMARY KEY,
                         CustomerId INTEGER,
+                        ProductId INTEGER,
                         Amount INTEGER,
-                        FOREIGN KEY (CustomerId) REFERENCES customers(Id)
+                        FOREIGN KEY (CustomerId) REFERENCES customers(Id),
+                        FOREIGN KEY (ProductId) REFERENCES products(Id)
                     )";
                 break;
 
@@ -236,7 +242,7 @@ public class SqlFixture : IAsyncLifetime
             {productTuples}";
 
         var insertOrders = $@"            
-            INSERT INTO orders (Id, CustomerId, Amount) VALUES
+            INSERT INTO orders (Id, CustomerId, ProductId, Amount) VALUES
             {string.Join(",\n            ", TestDataConstants.OrderTuples)}";
 
         await connection.ExecuteAsync(insertCustomers);
