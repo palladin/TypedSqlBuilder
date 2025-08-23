@@ -32,9 +32,15 @@ var (sql, params)  =
 var customers = connection.Query<(int Id, string Name)>(sql, params);
 ```
 
+## Examples
+
+For comprehensive examples showing all TypedSqlBuilder features including JOINs, GROUP BY, aggregates, subqueries, and built-in functions, see [**EXAMPLES.md**](EXAMPLES.md).
+
 ## How to Start
 
 The best way to get started with TypedSqlBuilder is to explore the working example in the `examples/Northwind.RetroConsole` directory. This retro-styled console application demonstrates the usage of TypedSqlBuilder with a full CRUD implementation using the classic Northwind database.
+
+For comprehensive documentation with examples of all features, see [**EXAMPLES.md**](EXAMPLES.md).
 
 <img src="docs/retro-console-screenshot.png" alt="Palladin Shop System - A retro demonstration of modern type-safe SQL building" width="600">
 
