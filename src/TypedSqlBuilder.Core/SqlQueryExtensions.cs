@@ -182,6 +182,50 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
+    /// Projects the query result to a SQL long expression.
+    /// Used for selecting computed long values or preparing for aggregate operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL long expressions</param>
+    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
+    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
+    /// <returns>A new query that produces SQL long expressions</returns>
+    /// <example>
+    /// <code>
+    /// var sizeQuery = fileQuery.Select(file => file.SizeBytes);
+    /// var distinctSizes = fileQuery.Select(file => file.SizeBytes, distinct: true);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<ValueTuple<SqlExprLong>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprLong> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+        where TSource : ITuple
+    {
+        return new SelectClause<TSource, ValueTuple<SqlExprLong>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+    }
+
+    /// <summary>
+    /// Projects the query result to a SQL double expression.
+    /// Used for selecting computed double values or preparing for aggregate operations.
+    /// </summary>
+    /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
+    /// <param name="query">The source query to project from</param>
+    /// <param name="selector">Function that transforms source tuples to SQL double expressions</param>
+    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
+    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
+    /// <returns>A new query that produces SQL double expressions</returns>
+    /// <example>
+    /// <code>
+    /// var distanceQuery = routeQuery.Select(route => route.Distance);
+    /// var distinctDistances = routeQuery.Select(route => route.Distance, distinct: true);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<ValueTuple<SqlExprDouble>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDouble> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+        where TSource : ITuple
+    {
+        return new SelectClause<TSource, ValueTuple<SqlExprDouble>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+    }
+
+    /// <summary>
     /// Applies the SUM aggregate function to a query of integer expressions.
     /// Computes the total sum of all integer values in the query result.
     /// </summary>
@@ -307,6 +351,134 @@ public static class SqlQueryExtensions
     public static SqlScalarQuery<SqlExprDecimal> Max(this ISqlQuery<ValueTuple<SqlExprDecimal>> query)
     {
         return new MaxSqlDecimalClause(query);
+    }
+
+    /// <summary>
+    /// Applies the SUM aggregate function to a query of long expressions.
+    /// Computes the total sum of all long values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL long expressions</param>
+    /// <returns>A SQL scalar query representing the sum of all values</returns>
+    /// <example>
+    /// <code>
+    /// var totalBytes = fileQuery.Select(file => file.SizeBytes).Sum();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprLong> Sum(this ISqlQuery<ValueTuple<SqlExprLong>> query)
+    {
+        return new SumSqlLongClause(query);
+    }
+
+    /// <summary>
+    /// Applies the AVG aggregate function to a query of long expressions.
+    /// Computes the average of all long values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL long expressions</param>
+    /// <returns>A SQL scalar query representing the average of all values</returns>
+    /// <example>
+    /// <code>
+    /// var avgBytes = fileQuery.Select(file => file.SizeBytes).Avg();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprLong> Avg(this ISqlQuery<ValueTuple<SqlExprLong>> query)
+    {
+        return new AvgSqlLongClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to a query of long expressions.
+    /// Finds the minimum value among all long values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL long expressions</param>
+    /// <returns>A SQL scalar query representing the minimum value</returns>
+    /// <example>
+    /// <code>
+    /// var minBytes = fileQuery.Select(file => file.SizeBytes).Min();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprLong> Min(this ISqlQuery<ValueTuple<SqlExprLong>> query)
+    {
+        return new MinSqlLongClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to a query of long expressions.
+    /// Finds the maximum value among all long values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL long expressions</param>
+    /// <returns>A SQL scalar query representing the maximum value</returns>
+    /// <example>
+    /// <code>
+    /// var maxBytes = fileQuery.Select(file => file.SizeBytes).Max();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprLong> Max(this ISqlQuery<ValueTuple<SqlExprLong>> query)
+    {
+        return new MaxSqlLongClause(query);
+    }
+
+    /// <summary>
+    /// Applies the SUM aggregate function to a query of double expressions.
+    /// Computes the total sum of all double values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL double expressions</param>
+    /// <returns>A SQL scalar query representing the sum of all values</returns>
+    /// <example>
+    /// <code>
+    /// var totalDistance = routeQuery.Select(route => route.Distance).Sum();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDouble> Sum(this ISqlQuery<ValueTuple<SqlExprDouble>> query)
+    {
+        return new SumSqlDoubleClause(query);
+    }
+
+    /// <summary>
+    /// Applies the AVG aggregate function to a query of double expressions.
+    /// Computes the average of all double values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL double expressions</param>
+    /// <returns>A SQL scalar query representing the average of all values</returns>
+    /// <example>
+    /// <code>
+    /// var avgDistance = routeQuery.Select(route => route.Distance).Avg();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDouble> Avg(this ISqlQuery<ValueTuple<SqlExprDouble>> query)
+    {
+        return new AvgSqlDoubleClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MIN aggregate function to a query of double expressions.
+    /// Finds the minimum value among all double values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL double expressions</param>
+    /// <returns>A SQL scalar query representing the minimum value</returns>
+    /// <example>
+    /// <code>
+    /// var minDistance = routeQuery.Select(route => route.Distance).Min();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDouble> Min(this ISqlQuery<ValueTuple<SqlExprDouble>> query)
+    {
+        return new MinSqlDoubleClause(query);
+    }
+
+    /// <summary>
+    /// Applies the MAX aggregate function to a query of double expressions.
+    /// Finds the maximum value among all double values in the query result.
+    /// </summary>
+    /// <param name="query">A query that produces SQL double expressions</param>
+    /// <returns>A SQL scalar query representing the maximum value</returns>
+    /// <example>
+    /// <code>
+    /// var maxDistance = routeQuery.Select(route => route.Distance).Max();
+    /// </code>
+    /// </example>
+    public static SqlScalarQuery<SqlExprDouble> Max(this ISqlQuery<ValueTuple<SqlExprDouble>> query)
+    {
+        return new MaxSqlDoubleClause(query);
     }
 
     /// <summary>

@@ -289,6 +289,126 @@ internal class MaxSqlDecimalClause(ISqlQuery<ValueTuple<SqlExprDecimal>> Query) 
 }
 
 /// <summary>
+/// Represents a SQL SUM aggregate function applied to long queries.
+/// Inherits from SqlExprLong to be used as a long expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing long values to sum</param>
+internal class SumSqlLongClause(ISqlQuery<ValueTuple<SqlExprLong>> Query) : SqlScalarQuery<SqlExprLong>
+{
+    /// <summary>
+    /// Deconstructs the SUM clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being summed</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprLong>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL AVG aggregate function applied to long queries.
+/// Inherits from SqlExprLong to be used as a long expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing long values to average</param>
+internal class AvgSqlLongClause(ISqlQuery<ValueTuple<SqlExprLong>> Query) : SqlScalarQuery<SqlExprLong>
+{
+    /// <summary>
+    /// Deconstructs the AVG clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being averaged</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprLong>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MIN aggregate function applied to long queries.
+/// Inherits from SqlExprLong to be used as a long expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing long values to find minimum of</param>
+internal class MinSqlLongClause(ISqlQuery<ValueTuple<SqlExprLong>> Query) : SqlScalarQuery<SqlExprLong>
+{
+    /// <summary>
+    /// Deconstructs the MIN clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for minimum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprLong>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MAX aggregate function applied to long queries.
+/// Inherits from SqlExprLong to be used as a long expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing long values to find maximum of</param>
+internal class MaxSqlLongClause(ISqlQuery<ValueTuple<SqlExprLong>> Query) : SqlScalarQuery<SqlExprLong>
+{
+    /// <summary>
+    /// Deconstructs the MAX clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for maximum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprLong>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL SUM aggregate function applied to double queries.
+/// Inherits from SqlExprDouble to be used as a double expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing double values to sum</param>
+internal class SumSqlDoubleClause(ISqlQuery<ValueTuple<SqlExprDouble>> Query) : SqlScalarQuery<SqlExprDouble>
+{
+    /// <summary>
+    /// Deconstructs the SUM clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being summed</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDouble>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL AVG aggregate function applied to double queries.
+/// Inherits from SqlExprDouble to be used as a double expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing double values to average</param>
+internal class AvgSqlDoubleClause(ISqlQuery<ValueTuple<SqlExprDouble>> Query) : SqlScalarQuery<SqlExprDouble>
+{
+    /// <summary>
+    /// Deconstructs the AVG clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being averaged</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDouble>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MIN aggregate function applied to double queries.
+/// Inherits from SqlExprDouble to be used as a double expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing double values to find minimum of</param>
+internal class MinSqlDoubleClause(ISqlQuery<ValueTuple<SqlExprDouble>> Query) : SqlScalarQuery<SqlExprDouble>
+{
+    /// <summary>
+    /// Deconstructs the MIN clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for minimum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDouble>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
+/// Represents a SQL MAX aggregate function applied to double queries.
+/// Inherits from SqlExprDouble to be used as a double expression in larger queries.
+/// Implements ISqlScalarQuery to indicate it returns a single scalar value.
+/// </summary>
+/// <param name="Query">The query containing double values to find maximum of</param>
+internal class MaxSqlDoubleClause(ISqlQuery<ValueTuple<SqlExprDouble>> Query) : SqlScalarQuery<SqlExprDouble>
+{
+    /// <summary>
+    /// Deconstructs the MAX clause to extract the underlying query.
+    /// </summary>
+    /// <param name="QueryOut">The query being evaluated for maximum</param>
+    public void Deconstruct(out ISqlQuery<ValueTuple<SqlExprDouble>> QueryOut) => QueryOut = Query;
+}
+
+/// <summary>
 /// Base class for SQL COUNT aggregate functions.
 /// Provides the foundation for counting operations that return integer scalar values.
 /// Implements ISqlScalarQuery to indicate it returns a single scalar value.

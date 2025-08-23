@@ -190,6 +190,28 @@ public static class SqlFunc
     }
 
     /// <summary>
+    /// Creates a SQL long parameter from a string name.
+    /// Extension method that allows string literals to be converted to SQL parameters.
+    /// </summary>
+    /// <param name="name">The parameter name (e.g., "@fileSize", ":bytes")</param>
+    /// <returns>A SQL long parameter expression</returns>
+    public static SqlExprLong AsLongParam(this string name)
+    {
+        return new SqlParameterLong(name);
+    }
+
+    /// <summary>
+    /// Creates a SQL double parameter from a string name.
+    /// Extension method that allows string literals to be converted to SQL parameters.
+    /// </summary>
+    /// <param name="name">The parameter name (e.g., "@distance", ":ratio")</param>
+    /// <returns>A SQL double parameter expression</returns>
+    public static SqlExprDouble AsDoubleParam(this string name)
+    {
+        return new SqlParameterDouble(name);
+    }
+
+    /// <summary>
     /// Creates a SQL ABS() function expression for the given integer expression.
     /// Returns the absolute (non-negative) value of the input.
     /// </summary>
@@ -198,6 +220,28 @@ public static class SqlFunc
     public static SqlExprInt Abs(this SqlExprInt value)
     {
         return new SqlIntAbs(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL ABS() function expression for the given long expression.
+    /// Returns the absolute (non-negative) value of the input.
+    /// </summary>
+    /// <param name="value">The long expression to get the absolute value of</param>
+    /// <returns>A SQL long expression representing ABS(value)</returns>
+    public static SqlExprLong Abs(this SqlExprLong value)
+    {
+        return new SqlLongAbs(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL ABS() function expression for the given double expression.
+    /// Returns the absolute (non-negative) value of the input.
+    /// </summary>
+    /// <param name="value">The double expression to get the absolute value of</param>
+    /// <returns>A SQL double expression representing ABS(value)</returns>
+    public static SqlExprDouble Abs(this SqlExprDouble value)
+    {
+        return new SqlDoubleAbs(value);
     }
     
     /// <summary>
@@ -425,6 +469,40 @@ public static class SqlFunc
     }
 
     /// <summary>
+    /// Creates a SQL ROUND function for rounding double values to specified precision.
+    /// Equivalent to: ROUND(value, precision)
+    /// </summary>
+    /// <param name="value">The double expression to round</param>
+    /// <param name="precision">The number of decimal places</param>
+    /// <returns>A SQL double expression representing the rounded value</returns>
+    public static SqlExprDouble Round(this SqlExprDouble value, SqlExprInt precision)
+    {
+        return new SqlDoubleRound(value, precision);
+    }
+
+    /// <summary>
+    /// Creates a SQL CEILING function for rounding up double values to nearest integer.
+    /// Equivalent to: CEILING(value) or CEIL(value)
+    /// </summary>
+    /// <param name="value">The double expression to round up</param>
+    /// <returns>A SQL double expression representing the ceiling value</returns>
+    public static SqlExprDouble Ceiling(this SqlExprDouble value)
+    {
+        return new SqlDoubleCeiling(value);
+    }
+
+    /// <summary>
+    /// Creates a SQL FLOOR function for rounding down double values to nearest integer.
+    /// Equivalent to: FLOOR(value)
+    /// </summary>
+    /// <param name="value">The double expression to round down</param>
+    /// <returns>A SQL double expression representing the floor value</returns>
+    public static SqlExprDouble Floor(this SqlExprDouble value)
+    {
+        return new SqlDoubleFloor(value);
+    }
+
+    /// <summary>
     /// Creates a SQL CASE expression for conditional string values.
     /// Equivalent to: CASE WHEN condition THEN trueValue ELSE falseValue END
     /// </summary>
@@ -605,5 +683,53 @@ public static class SqlFunc
     public static SqlExprBool In(this SqlExprGuid expr, ISqlQuery<ValueTuple<SqlExprGuid>> subQuery)
     {
         return new SqlInSubQuery<SqlExprGuid>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a list of long values.
+    /// Equivalent to: expr IN (value1, value2, ...)
+    /// </summary>
+    /// <param name="expr">The long expression to test</param>
+    /// <param name="values">The long values to check against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprLong expr, params SqlExprLong[] values)
+    {
+        return new SqlInValues<SqlExprLong>(expr, [.. values]);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a long subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The long expression to test</param>
+    /// <param name="subQuery">The subquery that returns long values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprLong expr, ISqlQuery<ValueTuple<SqlExprLong>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprLong>(expr, subQuery);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a list of double values.
+    /// Equivalent to: expr IN (value1, value2, ...)
+    /// </summary>
+    /// <param name="expr">The double expression to test</param>
+    /// <param name="values">The double values to check against</param>
+    /// <returns>A SQL boolean expression representing the IN operation</returns>
+    public static SqlExprBool In(this SqlExprDouble expr, params SqlExprDouble[] values)
+    {
+        return new SqlInValues<SqlExprDouble>(expr, [.. values]);
+    }
+
+    /// <summary>
+    /// Creates a SQL IN expression with a double subquery.
+    /// Equivalent to: expr IN (SELECT ... FROM ...)
+    /// </summary>
+    /// <param name="expr">The double expression to test</param>
+    /// <param name="subQuery">The subquery that returns double values</param>
+    /// <returns>A SQL boolean expression representing the IN operation with subquery</returns>
+    public static SqlExprBool In(this SqlExprDouble expr, ISqlQuery<ValueTuple<SqlExprDouble>> subQuery)
+    {
+        return new SqlInSubQuery<SqlExprDouble>(expr, subQuery);
     }
 }

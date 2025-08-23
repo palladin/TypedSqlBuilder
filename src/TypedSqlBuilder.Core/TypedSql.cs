@@ -291,6 +291,68 @@ public static class TypedSql
     }
 
     /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a long column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the long column to update</param>
+    /// <param name="value">The new value to set for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
+    public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprLong> columnSelector, SqlExprLong value)
+        where TSqlTable : SqlTable, new()
+    {
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
+        return new SetStatement<TSqlTable>(updateStatement, setClause);
+    }
+
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a long column using an expression.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the long column to update</param>
+    /// <param name="valueSelector">A function that generates the new value expression for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
+    public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprLong> columnSelector, Func<TSqlTable, SqlExprLong> valueSelector)
+        where TSqlTable : SqlTable, new()
+    {
+        var value = valueSelector(new TSqlTable());
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
+        return new SetStatement<TSqlTable>(updateStatement, setClause);
+    }
+
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a double column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the double column to update</param>
+    /// <param name="value">The new value to set for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
+    public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprDouble> columnSelector, SqlExprDouble value)
+        where TSqlTable : SqlTable, new()
+    {
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
+        return new SetStatement<TSqlTable>(updateStatement, setClause);
+    }
+
+    /// <summary>
+    /// Adds a SET clause to an UPDATE statement for a double column using an expression.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="updateStatement">The UPDATE statement to add the SET clause to</param>
+    /// <param name="columnSelector">A function that selects the double column to update</param>
+    /// <param name="valueSelector">A function that generates the new value expression for the column</param>
+    /// <returns>An UPDATE statement with the SET clause applied</returns>
+    public static ISqlUpdateStatement<TSqlTable> Set<TSqlTable>(this ISqlUpdateStatement<TSqlTable> updateStatement, Func<TSqlTable, SqlExprDouble> columnSelector, Func<TSqlTable, SqlExprDouble> valueSelector)
+        where TSqlTable : SqlTable, new()
+    {
+        var value = valueSelector(new TSqlTable());
+        var setClause = new SetClause(t => columnSelector((TSqlTable)t), value);
+        return new SetStatement<TSqlTable>(updateStatement, setClause);
+    }
+
+    /// <summary>
     /// Adds a WHERE clause to an UPDATE statement.
     /// </summary>
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
@@ -398,6 +460,36 @@ public static class TypedSql
     /// <param name="value">The value to insert for the column</param>
     /// <returns>An INSERT statement with the VALUE clause applied</returns>
     public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprGuid> columnSelector, SqlExprGuid value)
+        where TSqlTable : SqlTable, new()
+    {
+        var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
+        return new ValueStatement<TSqlTable>(insertStatement, valueClause);
+    }
+
+    /// <summary>
+    /// Adds a VALUE clause to an INSERT statement for a long column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="insertStatement">The INSERT statement to add the VALUE clause to</param>
+    /// <param name="columnSelector">A function that selects the long column to insert into</param>
+    /// <param name="value">The value to insert for the column</param>
+    /// <returns>An INSERT statement with the VALUE clause applied</returns>
+    public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprLong> columnSelector, SqlExprLong value)
+        where TSqlTable : SqlTable, new()
+    {
+        var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);
+        return new ValueStatement<TSqlTable>(insertStatement, valueClause);
+    }
+
+    /// <summary>
+    /// Adds a VALUE clause to an INSERT statement for a double column.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="insertStatement">The INSERT statement to add the VALUE clause to</param>
+    /// <param name="columnSelector">A function that selects the double column to insert into</param>
+    /// <param name="value">The value to insert for the column</param>
+    /// <returns>An INSERT statement with the VALUE clause applied</returns>
+    public static ISqlInsertStatement<TSqlTable> Value<TSqlTable>(this ISqlInsertStatement<TSqlTable> insertStatement, Func<TSqlTable, SqlExprDouble> columnSelector, SqlExprDouble value)
         where TSqlTable : SqlTable, new()
     {
         var valueClause = new ValueClause(t => columnSelector((TSqlTable)t), value);

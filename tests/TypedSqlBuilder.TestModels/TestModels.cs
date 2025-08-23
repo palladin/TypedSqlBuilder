@@ -9,7 +9,7 @@ namespace TypedSqlBuilder.TestModels;
 public class Customer() : SqlTable("customers")
 {
     [Column("Id")]
-    public SqlIntColumn Id { get; set; } = default!;
+    public SqlLongColumn Id { get; set; } = default!;
     [Column("Age")]
     public SqlIntColumn Age { get; set; } = default!;
     [Column("Name")]
@@ -24,7 +24,7 @@ public class Customer() : SqlTable("customers")
 public class Product() : SqlTable("products") 
 {
     [Column("Id")]
-    public SqlIntColumn Id { get; set; } = default!;
+    public SqlLongColumn Id { get; set; } = default!;
     [Column("ProductName")]
     public SqlStringColumn ProductName { get; set; } = default!;
     [Column("Price")]
@@ -41,11 +41,11 @@ public class Product() : SqlTable("products")
 public class Order() : SqlTable("orders")
 {
     [Column("Id")]
-    public SqlIntColumn Id { get; set; } = default!;
+    public SqlLongColumn Id { get; set; } = default!;
     [Column("CustomerId")]
-    public SqlIntColumn CustomerId { get; set; } = default!;
+    public SqlLongColumn CustomerId { get; set; } = default!;
     [Column("ProductId")]
-    public SqlIntColumn ProductId { get; set; } = default!;
+    public SqlLongColumn ProductId { get; set; } = default!;
     [Column("Amount")]
     public SqlIntColumn Amount { get; set; } = default!;
 }

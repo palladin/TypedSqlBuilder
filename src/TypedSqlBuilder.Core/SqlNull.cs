@@ -19,6 +19,20 @@ public class SqlNull
     public static implicit operator SqlExprInt(SqlNull _) => new SqlIntNull();
     
     /// <summary>
+    /// Implicitly converts SqlNull to a typed long null expression.
+    /// </summary>
+    /// <param name="_">The SqlNull instance (ignored)</param>
+    /// <returns>A SqlLongNull instance</returns>
+    public static implicit operator SqlExprLong(SqlNull _) => new SqlLongNull();
+    
+    /// <summary>
+    /// Implicitly converts SqlNull to a typed double null expression.
+    /// </summary>
+    /// <param name="_">The SqlNull instance (ignored)</param>
+    /// <returns>A SqlDoubleNull instance</returns>
+    public static implicit operator SqlExprDouble(SqlNull _) => new SqlDoubleNull();
+    
+    /// <summary>
     /// Implicitly converts SqlNull to a typed string null expression.
     /// </summary>
     /// <param name="_">The SqlNull instance (ignored)</param>

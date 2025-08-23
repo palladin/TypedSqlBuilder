@@ -76,6 +76,8 @@ public abstract class SqlTable : ITuple
             SqlExpr column = returnType switch
             {
                 _ when typeof(SqlIntColumn) == returnType => new SqlIntColumn(TableName, columnAttr.Name),
+                _ when typeof(SqlLongColumn) == returnType => new SqlLongColumn(TableName, columnAttr.Name),
+                _ when typeof(SqlDoubleColumn) == returnType => new SqlDoubleColumn(TableName, columnAttr.Name),
                 _ when typeof(SqlStringColumn) == returnType => new SqlStringColumn(TableName, columnAttr.Name),
                 _ when typeof(SqlBoolColumn) == returnType => new SqlBoolColumn(TableName, columnAttr.Name),
                 _ when typeof(SqlDecimalColumn) == returnType => new SqlDecimalColumn(TableName, columnAttr.Name),

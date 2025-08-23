@@ -1079,6 +1079,62 @@ internal static partial class SqlCompiler
                 return (sql, ctx);
             }
 
+            case SumSqlLongClause(var query):
+            {
+                var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlLongSum((SqlExprLong)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(sumQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case AvgSqlLongClause(var query):
+            {
+                var avgQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlLongAvg((SqlExprLong)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(avgQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MinSqlLongClause(var query):
+            {
+                var minQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlLongMin((SqlExprLong)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(minQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MaxSqlLongClause(var query):
+            {
+                var maxQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlLongMax((SqlExprLong)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(maxQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case SumSqlDoubleClause(var query):
+            {
+                var sumQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDoubleSum((SqlExprDouble)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(sumQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case AvgSqlDoubleClause(var query):
+            {
+                var avgQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDoubleAvg((SqlExprDouble)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(avgQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MinSqlDoubleClause(var query):
+            {
+                var minQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDoubleMin((SqlExprDouble)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(minQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
+            case MaxSqlDoubleClause(var query):
+            {
+                var maxQuery = new SelectClause(query, tuple => ValueTuple.Create(new SqlDoubleMax((SqlExprDouble)tuple[0]!)), []);
+                var (sql, _, ctx) = Compile(maxQuery, context, scopeLevel);
+                return (sql, ctx);
+            }
+
             case CountClause(var query):
             {
                 var countQuery = new SelectClause(query, _ => ValueTuple.Create(new SqlIntCount()), []);

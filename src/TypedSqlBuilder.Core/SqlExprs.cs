@@ -193,6 +193,220 @@ public abstract class SqlExprInt : SqlExpr
 		new SqlLessThanOrEqualTo<SqlExprInt>(left, right);
 }
 
+#pragma warning disable CS0660, CS0661
+/// <summary>
+/// Abstract base class for SQL long (bigint) expressions.
+/// </summary>
+public abstract class SqlExprLong : SqlExpr
+{
+	/// <summary>
+	/// Implicitly converts a long value to a SqlExprLong.
+	/// </summary>
+	/// <param name="x">The long value to convert</param>
+	/// <returns>A SqlExprLong representing the long value</returns>
+	public static implicit operator SqlExprLong(long x) => new SqlLongValue(x);
+
+	/// <summary>
+	/// Implicitly converts an integer expression to a long expression.
+	/// This enables seamless integration between integer and long expressions in SQL operations.
+	/// </summary>
+	/// <param name="x">The integer expression to convert</param>
+	/// <returns>A SqlExprLong representing the integer expression as a long</returns>
+	public static implicit operator SqlExprLong(SqlExprInt x) => new SqlLongImplicit(x);
+
+	/// <summary>
+	/// Implements the equality operator (==) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the equality comparison</returns>
+	public static SqlExprBool operator ==(SqlExprLong left, SqlExprLong right) => new SqlEquals<SqlExprLong>(left, right);
+	
+	/// <summary>
+	/// Implements the inequality operator (!=) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the inequality comparison</returns>
+	public static SqlExprBool operator !=(SqlExprLong left, SqlExprLong right) => new SqlNotEquals<SqlExprLong>(left, right);
+
+	/// <summary>
+	/// Implements the addition operator (+) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A long expression representing the addition</returns>
+	public static SqlExprLong operator +(SqlExprLong left, SqlExprLong right) => new SqlLongAdd(left, right);
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A long expression representing the subtraction</returns>
+	public static SqlExprLong operator -(SqlExprLong left, SqlExprLong right) => new SqlLongSub(left, right);
+	
+	/// <summary>
+	/// Implements the unary negation operator (-) for long expressions.
+	/// </summary>
+	/// <param name="value">The operand to negate</param>
+	/// <returns>A long expression representing the negation</returns>
+	public static SqlExprLong operator -(SqlExprLong value) => new SqlLongMinus(value);
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A long expression representing the multiplication</returns>
+	public static SqlExprLong operator *(SqlExprLong left, SqlExprLong right) => new SqlLongMult(left, right);
+	
+	/// <summary>
+	/// Implements the division operator (/) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A long expression representing the division</returns>
+	public static SqlExprLong operator /(SqlExprLong left, SqlExprLong right) => new SqlLongDiv(left, right);
+
+	/// <summary>
+	/// Implements the greater than operator (&gt;) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than comparison</returns>
+	public static SqlExprBool operator >(SqlExprLong left, SqlExprLong right) => new SqlGreaterThan<SqlExprLong>(left, right);
+	
+	/// <summary>
+	/// Implements the less than operator (&lt;) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than comparison</returns>
+	public static SqlExprBool operator <(SqlExprLong left, SqlExprLong right) => new SqlLessThan<SqlExprLong>(left, right);
+
+	/// <summary>
+	/// Implements the greater than or equal operator (&gt;=) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than or equal comparison</returns>
+	public static SqlExprBool operator >=(SqlExprLong left, SqlExprLong right) =>
+		new SqlGreaterThanOrEqualTo<SqlExprLong>(left, right);
+
+	/// <summary>
+	/// Implements the less than or equal operator (&lt;=) for long expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than or equal comparison</returns>
+	public static SqlExprBool operator <=(SqlExprLong left, SqlExprLong right) =>
+		new SqlLessThanOrEqualTo<SqlExprLong>(left, right);
+}
+
+#pragma warning disable CS0660, CS0661
+/// <summary>
+/// Abstract base class for SQL double expressions.
+/// </summary>
+public abstract class SqlExprDouble : SqlExpr
+{
+	/// <summary>
+	/// Implicitly converts a double value to a SqlExprDouble.
+	/// </summary>
+	/// <param name="x">The double value to convert</param>
+	/// <returns>A SqlExprDouble representing the double value</returns>
+	public static implicit operator SqlExprDouble(double x) => new SqlDoubleValue(x);
+
+	/// <summary>
+	/// Implements the equality operator (==) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the equality comparison</returns>
+	public static SqlExprBool operator ==(SqlExprDouble left, SqlExprDouble right) => new SqlEquals<SqlExprDouble>(left, right);
+	
+	/// <summary>
+	/// Implements the inequality operator (!=) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the inequality comparison</returns>
+	public static SqlExprBool operator !=(SqlExprDouble left, SqlExprDouble right) => new SqlNotEquals<SqlExprDouble>(left, right);
+
+	/// <summary>
+	/// Implements the addition operator (+) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A double expression representing the addition</returns>
+	public static SqlExprDouble operator +(SqlExprDouble left, SqlExprDouble right) => new SqlDoubleAdd(left, right);
+	
+	/// <summary>
+	/// Implements the subtraction operator (-) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A double expression representing the subtraction</returns>
+	public static SqlExprDouble operator -(SqlExprDouble left, SqlExprDouble right) => new SqlDoubleSub(left, right);
+	
+	/// <summary>
+	/// Implements the unary negation operator (-) for double expressions.
+	/// </summary>
+	/// <param name="value">The operand to negate</param>
+	/// <returns>A double expression representing the negation</returns>
+	public static SqlExprDouble operator -(SqlExprDouble value) => new SqlDoubleMinus(value);
+	
+	/// <summary>
+	/// Implements the multiplication operator (*) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A double expression representing the multiplication</returns>
+	public static SqlExprDouble operator *(SqlExprDouble left, SqlExprDouble right) => new SqlDoubleMult(left, right);
+	
+	/// <summary>
+	/// Implements the division operator (/) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A double expression representing the division</returns>
+	public static SqlExprDouble operator /(SqlExprDouble left, SqlExprDouble right) => new SqlDoubleDiv(left, right);
+
+	/// <summary>
+	/// Implements the greater than operator (&gt;) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than comparison</returns>
+	public static SqlExprBool operator >(SqlExprDouble left, SqlExprDouble right) => new SqlGreaterThan<SqlExprDouble>(left, right);
+	
+	/// <summary>
+	/// Implements the less than operator (&lt;) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than comparison</returns>
+	public static SqlExprBool operator <(SqlExprDouble left, SqlExprDouble right) => new SqlLessThan<SqlExprDouble>(left, right);
+
+	/// <summary>
+	/// Implements the greater than or equal operator (&gt;=) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the greater than or equal comparison</returns>
+	public static SqlExprBool operator >=(SqlExprDouble left, SqlExprDouble right) =>
+		new SqlGreaterThanOrEqualTo<SqlExprDouble>(left, right);
+
+	/// <summary>
+	/// Implements the less than or equal operator (&lt;=) for double expressions.
+	/// </summary>
+	/// <param name="left">The left operand</param>
+	/// <param name="right">The right operand</param>
+	/// <returns>A boolean expression representing the less than or equal comparison</returns>
+	public static SqlExprBool operator <=(SqlExprDouble left, SqlExprDouble right) =>
+		new SqlLessThanOrEqualTo<SqlExprDouble>(left, right);
+}
+
 /// <summary>
 /// Abstract base class for SQL string expressions.
 /// </summary>
@@ -277,6 +491,38 @@ public abstract class SqlExprDecimal : SqlExpr
 	public static implicit operator SqlExprDecimal(decimal value) => new SqlDecimalValue(value);
 
 	/// <summary>
+	/// Implicitly converts an integer expression to a decimal expression.
+	/// This enables seamless integration between integer and decimal expressions in SQL operations.
+	/// </summary>
+	/// <param name="value">The integer expression to convert</param>
+	/// <returns>A SqlExprDecimal representing the integer expression as a decimal</returns>
+	public static implicit operator SqlExprDecimal(SqlExprInt value) => new SqlDecimalImplicit(value);
+	
+	/// <summary>
+	/// Implicitly converts a long expression to a decimal expression.
+	/// This enables seamless integration between long and decimal expressions in SQL operations.
+	/// </summary>
+	/// <param name="value">The long expression to convert</param>
+	/// <returns>A SqlExprDecimal representing the long expression as a decimal</returns>
+	public static implicit operator SqlExprDecimal(SqlExprLong value) => new SqlDecimalImplicit(value);
+	
+	/// <summary>
+	/// Implicitly converts an integer value to a decimal expression.
+	/// The integer is first wrapped in a SqlIntValue, then converted to decimal.
+	/// </summary>
+	/// <param name="value">The integer value to convert</param>
+	/// <returns>A SqlExprDecimal representing the integer value as a decimal</returns>
+	public static implicit operator SqlExprDecimal(int value) => new SqlDecimalImplicit(new SqlIntValue(value));
+	
+	/// <summary>
+	/// Implicitly converts a long value to a decimal expression.
+	/// The long is first wrapped in a SqlLongValue, then converted to decimal.
+	/// </summary>
+	/// <param name="value">The long value to convert</param>
+	/// <returns>A SqlExprDecimal representing the long value as a decimal</returns>
+	public static implicit operator SqlExprDecimal(long value) => new SqlDecimalImplicit(new SqlLongValue(value));
+
+	/// <summary>
 	/// Implements the equality operator (==) for decimal expressions.
 	/// </summary>
 	/// <param name="left">The left operand</param>
@@ -301,38 +547,6 @@ public abstract class SqlExprDecimal : SqlExpr
 	public static SqlExprDecimal operator +(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalAdd(left, right);
 
 	/// <summary>
-	/// Implements the addition operator (+) for mixed decimal and integer expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the addition</returns>
-	public static SqlExprDecimal operator +(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalAdd(left, right);
-	
-	/// <summary>
-	/// Implements the addition operator (+) for mixed decimal and int expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the addition</returns>
-	public static SqlExprDecimal operator +(SqlExprDecimal left, int right) => new SqlDecimalAdd(left, new SqlIntValue(right));
-	
-	/// <summary>
-	/// Implements the addition operator (+) for mixed integer and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the addition</returns>
-	public static SqlExprDecimal operator +(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalAdd(left, right);
-	
-	/// <summary>
-	/// Implements the addition operator (+) for mixed int and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the addition</returns>
-	public static SqlExprDecimal operator +(int left, SqlExprDecimal right) => new SqlDecimalAdd(new SqlIntValue(left), right);
-	
-	/// <summary>
 	/// Implements the subtraction operator (-) for decimal expressions.
 	/// </summary>
 	/// <param name="left">The left operand</param>
@@ -340,39 +554,6 @@ public abstract class SqlExprDecimal : SqlExpr
 	/// <returns>A decimal expression representing the subtraction</returns>
 	public static SqlExprDecimal operator -(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalSub(left, right);
 	
-	/// <summary>
-	/// Implements the subtraction operator (-) for mixed decimal and integer expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the subtraction</returns>
-	public static SqlExprDecimal operator -(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalSub(left, right);
-	
-	/// <summary>
-	/// Implements the subtraction operator (-) for mixed decimal and int expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the subtraction</returns>
-	public static SqlExprDecimal operator -(SqlExprDecimal left, int right) => new SqlDecimalSub(left, new SqlIntValue(right));
-	
-	/// <summary>
-	/// Implements the subtraction operator (-) for mixed integer and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the subtraction</returns>
-	public static SqlExprDecimal operator -(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalSub(left, right);
-	
-	/// <summary>
-	/// Implements the subtraction operator (-) for mixed int and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the subtraction</returns>
-	public static SqlExprDecimal operator -(int left, SqlExprDecimal right) => new SqlDecimalSub(new SqlIntValue(left), right);
-
-
 	/// <summary>
 	/// Implements the unary negation operator (-) for decimal expressions.
 	/// </summary>
@@ -389,37 +570,6 @@ public abstract class SqlExprDecimal : SqlExpr
 	/// <returns>A decimal expression representing the multiplication</returns>
 	public static SqlExprDecimal operator *(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalMult(left, right);
 	
-	/// <summary>
-	/// Implements the multiplication operator (*) for mixed decimal and integer expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the multiplication</returns>
-	public static SqlExprDecimal operator *(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalMult(left, right);
-	
-	/// <summary>
-	/// Implements the multiplication operator (*) for mixed decimal and int expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the multiplication</returns>
-	public static SqlExprDecimal operator *(SqlExprDecimal left, int right) => new SqlDecimalMult(left, new SqlIntValue(right));
-	
-	/// <summary>
-	/// Implements the multiplication operator (*) for mixed integer and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the multiplication</returns>
-	public static SqlExprDecimal operator *(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalMult(left, right);
-	
-	/// <summary>
-	/// Implements the multiplication operator (*) for mixed int and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the multiplication</returns>
-	public static SqlExprDecimal operator *(int left, SqlExprDecimal right) => new SqlDecimalMult(new SqlIntValue(left), right);
 	
 	/// <summary>
 	/// Implements the division operator (/) for decimal expressions.
@@ -429,38 +579,6 @@ public abstract class SqlExprDecimal : SqlExpr
 	/// <returns>A decimal expression representing the division</returns>
 	public static SqlExprDecimal operator /(SqlExprDecimal left, SqlExprDecimal right) => new SqlDecimalDiv(left, right);
 	
-	/// <summary>
-	/// Implements the division operator (/) for mixed decimal and integer expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the division</returns>
-	public static SqlExprDecimal operator /(SqlExprDecimal left, SqlExprInt right) => new SqlDecimalDiv(left, right);
-	
-	/// <summary>
-	/// Implements the division operator (/) for mixed decimal and int expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the division</returns>
-	public static SqlExprDecimal operator /(SqlExprDecimal left, int right) => new SqlDecimalDiv(left, new SqlIntValue(right));
-	
-	/// <summary>
-	/// Implements the division operator (/) for mixed integer and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the division</returns>
-	public static SqlExprDecimal operator /(SqlExprInt left, SqlExprDecimal right) => new SqlDecimalDiv(left, right);
-	
-	/// <summary>
-	/// Implements the division operator (/) for mixed int and decimal expressions.
-	/// </summary>
-	/// <param name="left">The left operand</param>
-	/// <param name="right">The right operand</param>
-	/// <returns>A decimal expression representing the division</returns>
-	public static SqlExprDecimal operator /(int left, SqlExprDecimal right) => new SqlDecimalDiv(new SqlIntValue(left), right);
-		
 	/// <summary>
 	/// Implements the greater than operator (>) for decimal expressions.
 	/// </summary>

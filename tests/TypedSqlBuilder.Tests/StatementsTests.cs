@@ -27,7 +27,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Equal(3, parameters.Count);
-        Assert.Equal(200, parameters[expectedParameters[0]]);
+        Assert.Equal(200L, parameters[expectedParameters[0]]);
         Assert.Equal(25, parameters[expectedParameters[1]]);
         Assert.Equal("John Doe", parameters[expectedParameters[2]]);
         return Task.CompletedTask;
@@ -68,7 +68,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
-        Assert.Equal(200, parameters[expectedParameters[0]]);
+        Assert.Equal(200L, parameters[expectedParameters[0]]);
         return Task.CompletedTask;
     }
 
@@ -109,7 +109,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count); // Id and ProductName are parameterized
-        Assert.Equal(201, parameters[expectedParameters[0]]);
+        Assert.Equal(201L, parameters[expectedParameters[0]]);
         Assert.Equal("Null Test", parameters[expectedParameters[1]]);
         return Task.CompletedTask;
     }
@@ -130,7 +130,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Equal(5, parameters.Count);
-        Assert.Equal(200, parameters[expectedParameters[0]]);
+        Assert.Equal(200L, parameters[expectedParameters[0]]);
         Assert.Equal("Test Product", parameters[expectedParameters[1]]);
         Assert.Equal(99.99m, parameters[expectedParameters[2]]);
         Assert.Equal(new DateTime(2024, 8, 18), parameters[expectedParameters[3]]);
@@ -154,7 +154,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
-        Assert.Equal(203, parameters[expectedParameters[0]]);
+        Assert.Equal(203L, parameters[expectedParameters[0]]);
         Assert.Equal("John", parameters[expectedParameters[1]]);
         return Task.CompletedTask;
     }
@@ -175,7 +175,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
-        Assert.Equal(202, parameters[expectedParameters[0]]);
+        Assert.Equal(202L, parameters[expectedParameters[0]]);
         Assert.Equal(25, parameters[expectedParameters[1]]);
         return Task.CompletedTask;
     }
@@ -197,7 +197,7 @@ public class StatementsTests : IStatementTestContract
         Assert.Equal(expectedSql, sql);
         Assert.Equal(2, parameters.Count);
         Assert.Equal(26, parameters[expectedParameters[0]]);
-        Assert.Equal(200, parameters[expectedParameters[1]]);
+        Assert.Equal(200L, parameters[expectedParameters[1]]);
         return Task.CompletedTask;
     }
 
@@ -241,7 +241,7 @@ public class StatementsTests : IStatementTestContract
         Assert.Equal(3, parameters.Count);
         Assert.Equal(27, parameters[expectedParameters[0]]);
         Assert.Equal("John Smith", parameters[expectedParameters[1]]);
-        Assert.Equal(200, parameters[expectedParameters[2]]);
+        Assert.Equal(200L, parameters[expectedParameters[2]]);
         return Task.CompletedTask;
     }
 
@@ -261,7 +261,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
-        Assert.Equal(101, parameters[expectedParameters[0]]);
+        Assert.Equal(101L, parameters[expectedParameters[0]]);
         return Task.CompletedTask;
     }
 
@@ -320,7 +320,7 @@ public class StatementsTests : IStatementTestContract
         // Assert        
         Assert.Equal(expectedSql, sql);
         Assert.Single(parameters);
-        Assert.Equal(200, parameters[expectedParameters[0]]);
+        Assert.Equal(200L, parameters[expectedParameters[0]]);
         return Task.CompletedTask;
     }
 
@@ -362,7 +362,7 @@ public class StatementsTests : IStatementTestContract
         Assert.Equal(119.99m, parameters[expectedParameters[0]]);
         Assert.Equal(new DateTime(2024, 12, 25), parameters[expectedParameters[1]]);
         Assert.Equal(Guid.Parse("87654321-4321-4321-4321-210987654321"), parameters[expectedParameters[2]]);
-        Assert.Equal(100, parameters[expectedParameters[3]]);
+        Assert.Equal(100L, parameters[expectedParameters[3]]);
         return Task.CompletedTask;
     }
 }

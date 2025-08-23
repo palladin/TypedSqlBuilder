@@ -51,6 +51,12 @@ internal static partial class SqlCompiler
         SqlIntAdd _ or SqlIntSub _ => SqlPrecedence.Additive,
         SqlIntValue _ or SqlIntColumn _ => SqlPrecedence.Primary,
         
+        // Long expressions
+        SqlLongMinus _ or SqlLongAbs _ => SqlPrecedence.UnaryMath,
+        SqlLongMult _ or SqlLongDiv _ => SqlPrecedence.Multiplicative,
+        SqlLongAdd _ or SqlLongSub _ => SqlPrecedence.Additive,
+        SqlLongValue _ or SqlLongColumn _ => SqlPrecedence.Primary,
+        
         // Comparison expressions
         SqlEquals _ or SqlNotEquals _ or SqlGreaterThan _ or SqlLessThan _ 
         or SqlGreaterThanOrEqualTo _ or SqlLessThanOrEqualTo _ or SqlStringLike _ => SqlPrecedence.Comparison,
@@ -64,6 +70,12 @@ internal static partial class SqlCompiler
         SqlDecimalMult _ or SqlDecimalDiv _ => SqlPrecedence.Multiplicative,
         SqlDecimalAdd _ or SqlDecimalSub _ => SqlPrecedence.Additive,
         SqlDecimalValue _ or SqlDecimalColumn _ => SqlPrecedence.Primary,
+        
+        // Double expressions
+        SqlDoubleMinus _ or SqlDoubleAbs _ or SqlDoubleRound _ or SqlDoubleCeiling _ or SqlDoubleFloor _ => SqlPrecedence.UnaryMath,
+        SqlDoubleMult _ or SqlDoubleDiv _ => SqlPrecedence.Multiplicative,
+        SqlDoubleAdd _ or SqlDoubleSub _ => SqlPrecedence.Additive,
+        SqlDoubleValue _ or SqlDoubleColumn _ => SqlPrecedence.Primary,
         
         // Default for other expressions (functions, aggregates, etc.)
         _ => SqlPrecedence.Primary
@@ -651,6 +663,12 @@ internal static partial class SqlCompiler
                 return (paramName, newContext);
             }
 
+            // Implicit conversion from int/long to decimal
+            case SqlDecimalImplicit(var sourceExpr):
+            {
+                return Compile(sourceExpr, context, scopeLevel);
+            }
+
             // Arithmetic operations
             case SqlDecimalAdd(var left, var right):
             {
@@ -753,6 +771,282 @@ internal static partial class SqlCompiler
 
             default:
                 throw new NotSupportedException($"Decimal expression type {expr.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Compiles long expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The long expression to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    private static (string, Context) CompileExprLong(SqlExprLong expr, Context context, int scopeLevel)
+    {
+        switch (expr)
+        {
+            // Literal values
+            case SqlLongValue(var value):
+            {
+                var (paramName, newContext) = context.GenerateParameter(value);
+                return (paramName, newContext);
+            }
+
+            // Implicit conversion from int to long
+            case SqlLongImplicit(var intExpr):
+            {
+                return Compile(intExpr, context, scopeLevel);
+            }
+
+            // Unary operations
+            case SqlLongMinus(var operand):
+            {
+                var (compiled, ctx) = CompileWithPrecedence(
+                    operand, context, scopeLevel, SqlPrecedence.UnaryMath);
+                return ($"-{compiled}", ctx);
+            }
+
+            case SqlLongAbs(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"ABS({compiled})", ctx);
+            }
+
+            // Binary arithmetic operations
+            case SqlLongAdd(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} + {rightSql}", rightCtx);
+            }
+
+            case SqlLongSub(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} - {rightSql}", rightCtx);
+            }
+
+            case SqlLongMult(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} * {rightSql}", rightCtx);
+            }
+
+            case SqlLongDiv(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} / {rightSql}", rightCtx);
+            }            
+
+            // Parameters
+            case SqlParameterLong(var name):
+            {
+                var paramKey = $"{context.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
+
+            // Aggregate functions
+            case SqlLongSum(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"SUM({compiled})", ctx);
+            }
+
+            case SqlLongAvg(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"AVG({compiled})", ctx);
+            }
+
+            case SqlLongMin(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MIN({compiled})", ctx);
+            }
+
+            case SqlLongMax(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MAX({compiled})", ctx);
+            }
+
+            // CASE expressions
+            case SqlLongCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context, scopeLevel);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx, scopeLevel);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx, scopeLevel);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            // NULL value
+            case SqlLongNull:
+                return ("NULL", context);
+
+            default:
+                throw new NotSupportedException($"Long expression type {expr.GetType().Name} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Compiles double expressions to SQL string representation.
+    /// </summary>
+    /// <param name="expr">The double expression to compile</param>
+    /// <param name="context">The compilation context</param>
+    /// <param name="scopeLevel">The nesting scope level for the SQL statement</param>
+    /// <returns>The SQL string representation and updated context</returns>
+    private static (string, Context) CompileExprDouble(SqlExprDouble expr, Context context, int scopeLevel)
+    {
+        switch (expr)
+        {
+            // Literal values
+            case SqlDoubleValue(var value):
+            {
+                var (paramName, newContext) = context.GenerateParameter(value);
+                return (paramName, newContext);
+            }
+
+            // Arithmetic operations
+            case SqlDoubleAdd(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive);
+                return ($"{leftSql} + {rightSql}", rightCtx);
+            }
+
+            case SqlDoubleSub(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Additive);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Additive); 
+                return ($"{leftSql} - {rightSql}", rightCtx);
+            }
+
+            case SqlDoubleMinus(var operand):
+            {
+                var (compiled, ctx) = CompileWithPrecedence(
+                    operand, context, scopeLevel, SqlPrecedence.UnaryMath);
+                return ($"-{compiled}", ctx);
+            }
+
+            case SqlDoubleMult(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative);
+                return ($"{leftSql} * {rightSql}", rightCtx);
+            }
+
+            case SqlDoubleDiv(var left, var right):
+            {
+                var (leftSql, leftCtx) = CompileWithPrecedence(
+                    left, context, scopeLevel, SqlPrecedence.Multiplicative);
+                var (rightSql, rightCtx) = CompileWithPrecedence(
+                    right, leftCtx, scopeLevel, SqlPrecedence.Multiplicative); 
+                return ($"{leftSql} / {rightSql}", rightCtx);
+            }
+
+            // Parameters
+            case SqlParameterDouble(var name):
+            {
+                var paramKey = $"{context.ParameterPrefix}{name}";
+                var updatedContext = context.Parameters.ContainsKey(paramKey) 
+                    ? context 
+                    : context with { Parameters = context.Parameters.Add(paramKey, null!) };
+                return (paramKey, updatedContext);
+            }
+
+            // Aggregate functions
+            case SqlDoubleSum(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"SUM({compiled})", ctx);
+            }
+
+            case SqlDoubleAvg(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"AVG({compiled})", ctx);
+            }
+
+            case SqlDoubleMin(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MIN({compiled})", ctx);
+            }
+
+            case SqlDoubleMax(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"MAX({compiled})", ctx);
+            }
+
+            // Mathematical functions
+            case SqlDoubleAbs(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"ABS({compiled})", ctx);
+            }
+
+            case SqlDoubleRound(var value, var precision):
+            {
+                var (valueSql, valueCtx) = Compile(value, context, scopeLevel);
+                var (precisionSql, precisionCtx) = Compile(precision, valueCtx, scopeLevel);
+                return ($"ROUND({valueSql}, {precisionSql})", precisionCtx);
+            }
+
+            case SqlDoubleCeiling(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                var sql = context.DatabaseType switch
+                {
+                    DatabaseType.SqlServer => $"CEILING({compiled})",
+                    DatabaseType.PostgreSQL => $"CEILING({compiled})",
+                    DatabaseType.SQLite => $"CEIL({compiled})",
+                    _ => throw new NotSupportedException($"Database type {context.DatabaseType} is not supported for CEILING function")
+                };
+                return (sql, ctx);
+            }
+
+            case SqlDoubleFloor(var operand):
+            {
+                var (compiled, ctx) = Compile(operand, context, scopeLevel);
+                return ($"FLOOR({compiled})", ctx);
+            }
+
+            // CASE expressions
+            case SqlDoubleCase(var condition, var trueValue, var falseValue):
+            {
+                var (conditionSql, conditionCtx) = Compile(condition, context, scopeLevel);
+                var (trueSql, trueCtx) = Compile(trueValue, conditionCtx, scopeLevel);
+                var (falseSql, falseCtx) = Compile(falseValue, trueCtx, scopeLevel);
+                return ($"CASE WHEN {conditionSql} THEN {trueSql} ELSE {falseSql} END", falseCtx);
+            }
+
+            // NULL value
+            case SqlDoubleNull:
+                return ("NULL", context);
+
+            default:
+                throw new NotSupportedException($"Double expression type {expr.GetType().Name} is not supported");
         }
     }
 
@@ -987,12 +1281,18 @@ internal static partial class SqlCompiler
 
             case SqlExprInt intExpr:
                 return CompileExprInt(intExpr, context, scopeLevel);
+                
+            case SqlExprLong longExpr:
+                return CompileExprLong(longExpr, context, scopeLevel);
 
             case SqlExprString stringExpr:
                 return CompileExprString(stringExpr, context, scopeLevel);
 
             case SqlExprDecimal decimalExpr:
                 return CompileExprDecimal(decimalExpr, context, scopeLevel);
+                
+            case SqlExprDouble doubleExpr:
+                return CompileExprDouble(doubleExpr, context, scopeLevel);
 
             case SqlExprDateTime dateTimeExpr:
                 return CompileExprDateTime(dateTimeExpr, context, scopeLevel);

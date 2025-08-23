@@ -12,7 +12,17 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 internal class SqlDecimalValue(decimal value) : SqlExprDecimal
 {
-	public void Deconstruct(out decimal valueOut) => valueOut = value;
+    public void Deconstruct(out decimal valueOut) => valueOut = value;
+}
+
+/// <summary>
+/// Represents an implicit conversion to a decimal expression.
+/// This class wraps other SQL expressions (typically int or long) for automatic type conversion to decimal.
+/// The compiler unwraps this to compile the original expression directly.
+/// </summary>
+internal class SqlDecimalImplicit(SqlExpr value) : SqlExprDecimal
+{
+	public void Deconstruct(out SqlExpr valueOut) => valueOut = value;
 }
 
 /// <summary>
