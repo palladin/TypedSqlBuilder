@@ -4915,6 +4915,514 @@ public static class QueryTestCases
                 "a0"."Age" >= :p0
             """, [":p0"]))
         ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY
+            """, [])),
+            new((DatabaseType.SQLite, "FromLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 5 OFFSET 10
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 5 OFFSET 10
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromSelectLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Name] AS [Name]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 5 ROWS FETCH NEXT 3 ROWS ONLY
+            """, [])),
+            new((DatabaseType.SQLite, "FromSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 3 OFFSET 5
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 3 OFFSET 5
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromWhereLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromWhereLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            WHERE 
+                [a0].[Age] > @p0
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY
+            """, ["@p0"])),
+            new((DatabaseType.SQLite, "FromWhereLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 10 OFFSET 0
+            """, [":p0"])),
+            new((DatabaseType.PostgreSQL, "FromWhereLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 10 OFFSET 0
+            """, [":p0"]))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromWhereSelectLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromWhereSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Name] AS [Name],
+                [a0].[Age] AS [Age]
+            FROM 
+                [customers] [a0]
+            WHERE 
+                [a0].[Age] >= @p0
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 15 ROWS FETCH NEXT 5 ROWS ONLY
+            """, ["@p0"])),
+            new((DatabaseType.SQLite, "FromWhereSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" >= :p0
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 5 OFFSET 15
+            """, [":p0"])),
+            new((DatabaseType.PostgreSQL, "FromWhereSelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" >= :p0
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 5 OFFSET 15
+            """, [":p0"]))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromOrderByLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Name] ASC
+            OFFSET 5 ROWS FETCH NEXT 10 ROWS ONLY
+            """, [])),
+            new((DatabaseType.SQLite, "FromOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            LIMIT 10 OFFSET 5
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            LIMIT 10 OFFSET 5
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromWhereOrderByLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromWhereOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            WHERE 
+                [a0].[Age] > @p0
+            ORDER BY 
+                [a0].[Age] DESC
+            OFFSET 10 ROWS FETCH NEXT 20 ROWS ONLY
+            """, ["@p0"])),
+            new((DatabaseType.SQLite, "FromWhereOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            ORDER BY 
+                "a0"."Age" DESC
+            LIMIT 20 OFFSET 10
+            """, [":p0"])),
+            new((DatabaseType.PostgreSQL, "FromWhereOrderByLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            ORDER BY 
+                "a0"."Age" DESC
+            LIMIT 20 OFFSET 10
+            """, [":p0"]))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromWhereOrderBySelectLimitOffset_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Name] AS [Name],
+                [a0].[Age] AS [Age]
+            FROM 
+                [customers] [a0]
+            WHERE 
+                [a0].[Name] != @p0
+            ORDER BY 
+                [a0].[Name] ASC, [a0].[Age] DESC
+            OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY
+            """, ["@p0"])),
+            new((DatabaseType.SQLite, "FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Name" != :p0
+            ORDER BY 
+                "a0"."Name" ASC, "a0"."Age" DESC
+            LIMIT 5 OFFSET 0
+            """, [":p0"])),
+            new((DatabaseType.PostgreSQL, "FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Name" != :p0
+            ORDER BY 
+                "a0"."Name" ASC, "a0"."Age" DESC
+            LIMIT 5 OFFSET 0
+            """, [":p0"]))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromLimitOffsetOnly_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromLimitOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY
+            """, [])),
+            new((DatabaseType.SQLite, "FromLimitOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 10
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromLimitOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 10
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromOffsetOnly_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                [a0].[Id] AS [Id],
+                [a0].[Age] AS [Age],
+                [a0].[Name] AS [Name],
+                [a0].[IsActive] AS [IsActive]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Id] ASC
+            OFFSET 5 ROWS FETCH NEXT 9223372036854775807 ROWS ONLY
+            """, [])),
+            new((DatabaseType.SQLite, "FromOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 9223372036854775807 OFFSET 5
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromOffsetOnly_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Id" ASC
+            LIMIT 9223372036854775807 OFFSET 5
+            """, []))
+        ];
+
+    // New test case for LIMIT without ORDER BY - only supported by PostgreSQL and SQLite
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromLimitOffsetWithoutOrderBy_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SQLite, "FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            LIMIT 10
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql"), ("""
+            SELECT 
+                "a0"."Id" AS "Id",
+                "a0"."Age" AS "Age",
+                "a0"."Name" AS "Name",
+                "a0"."IsActive" AS "IsActive"
+            FROM 
+                "customers" "a0"
+            LIMIT 10
+            """, []))
+        ];
+
+    // DISTINCT Tests
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromSelectDistinct_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromSelectDistinct_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                [a0].[Name] AS [Name]
+            FROM 
+                [customers] [a0]
+            """, [])),
+            new((DatabaseType.SQLite, "FromSelectDistinct_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromSelectDistinct_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromSelectDistinctWhere_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromSelectDistinctWhere_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                [a0].[Name] AS [Name]
+            FROM 
+                [customers] [a0]
+            WHERE 
+                [a0].[Age] > @p0
+            """, ["@p0"])),
+            new((DatabaseType.SQLite, "FromSelectDistinctWhere_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            """, [":p0"])),
+            new((DatabaseType.PostgreSQL, "FromSelectDistinctWhere_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            WHERE 
+                "a0"."Age" > :p0
+            """, [":p0"]))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromSelectDistinctOrderBy_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromSelectDistinctOrderBy_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                [a0].[Name] AS [Name]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Name] ASC
+            """, [])),
+            new((DatabaseType.SQLite, "FromSelectDistinctOrderBy_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromSelectDistinctOrderBy_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            """, []))
+        ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] FromSelectDistinctMultipleColumns_GeneratesCorrectSqlPair =
+        [
+            new((DatabaseType.SqlServer, "FromSelectDistinctMultipleColumns_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                [a0].[Name] AS [Name],
+                [a0].[Age] AS [Age]
+            FROM 
+                [customers] [a0]
+            ORDER BY 
+                [a0].[Name] ASC
+            """, [])),
+            new((DatabaseType.SQLite, "FromSelectDistinctMultipleColumns_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            """, [])),
+            new((DatabaseType.PostgreSQL, "FromSelectDistinctMultipleColumns_GeneratesCorrectSql"), ("""
+            SELECT DISTINCT
+                "a0"."Name" AS "Name",
+                "a0"."Age" AS "Age"
+            FROM 
+                "customers" "a0"
+            ORDER BY 
+                "a0"."Name" ASC
+            """, []))
+        ];
+
     public static readonly Dictionary<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)> TestCases = 
         From_GeneratesCorrectSqlPair
             .Concat(AbsColumn_GeneratesCorrectSqlPair)
@@ -5062,6 +5570,20 @@ public static class QueryTestCases
             .Concat(LeftJoinWithOrderBy_GeneratesCorrectSqlPair)
             .Concat(LeftJoinWithSelect_GeneratesCorrectSqlPair)
             .Concat(LeftJoinWithWhere_GeneratesCorrectSqlPair)
+            .Concat(FromLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromSelectLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromWhereLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromWhereSelectLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromOrderByLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromWhereOrderByLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromWhereOrderBySelectLimitOffset_GeneratesCorrectSqlPair)
+            .Concat(FromLimitOffsetOnly_GeneratesCorrectSqlPair)
+            .Concat(FromOffsetOnly_GeneratesCorrectSqlPair)
+            .Concat(FromLimitOffsetWithoutOrderBy_GeneratesCorrectSqlPair)
+            .Concat(FromSelectDistinct_GeneratesCorrectSqlPair)
+            .Concat(FromSelectDistinctWhere_GeneratesCorrectSqlPair)
+            .Concat(FromSelectDistinctOrderBy_GeneratesCorrectSqlPair)
+            .Concat(FromSelectDistinctMultipleColumns_GeneratesCorrectSqlPair)
             .ToDictionary(kv => kv.Key, kv => kv.Value);
 
 

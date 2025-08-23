@@ -39,7 +39,36 @@ internal static partial class SqlCompiler
             DatabaseType.SQLite => $"\"{identifier}\"",
             _ => throw new NotSupportedException($"Database type {dbType} is not supported for identifier quoting")
         };
+
+    /// <summary>
+    /// Generates database-specific LIMIT/OFFSET clause by splicing it into the SQL template.
+    /// </summary>
+    /// <param name="sql">The base SQL query</param>
+    /// <param name="limitOffset">Optional limit/offset parameters</param>
+    /// <param name="dbType">The database type to determine LIMIT/OFFSET syntax</param>
+    /// <returns>The SQL query with LIMIT/OFFSET clause spliced in if specified</returns>
+    private static string GenerateLimitOffsetClause(string sql, (long Limit, long? Offset)? limitOffset, DatabaseType dbType)
+    {
+        if (!limitOffset.HasValue)
+            return sql;
+
+        var (limit, offset) = limitOffset.Value;
+        
+        var limitOffsetClause = dbType switch
+        {
+            DatabaseType.SqlServer when offset.HasValue => $"\nOFFSET {offset.Value} ROWS FETCH NEXT {limit} ROWS ONLY",
+            DatabaseType.SqlServer => $"\nOFFSET 0 ROWS FETCH NEXT {limit} ROWS ONLY", // SQL Server requires OFFSET with FETCH
+            DatabaseType.PostgreSQL or DatabaseType.SQLite when offset.HasValue => $"\nLIMIT {limit} OFFSET {offset.Value}",
+            DatabaseType.PostgreSQL or DatabaseType.SQLite => $"\nLIMIT {limit}",
+            _ => throw new NotSupportedException($"Database type {dbType} is not supported for LIMIT/OFFSET")
+        };
+
+        return $$"""
+        {{sql}}{{limitOffsetClause}}
+        """;
+    }
             
+    /// <summary>
     /// Normalizes a SQL query by applying fusion rules until a fixpoint is reached.
     /// Moves all fusion logic from extension methods to centralized normalization.
     /// Handles WHERE clause fusion, ORDER BY fusion, and SELECT composition.
@@ -83,8 +112,8 @@ internal static partial class SqlCompiler
             
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
             // Preserve outer Select's Aliases (projection names)
-            case SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases), var outerSelector, var outerAliases):
-                return (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases), true);
+            case SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases, var innerDistinct, var innerLimitOffset), var outerSelector, var outerAliases, var outerDistinct, var outerLimitOffset):
+                return (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases, outerDistinct || innerDistinct, outerLimitOffset ?? innerLimitOffset), true);
 
             case HavingClause(GroupByClause(var innerQuery, var keySelector, null), var predicate):
                 return (new GroupByClause(innerQuery, keySelector, predicate), true);
@@ -97,8 +126,8 @@ internal static partial class SqlCompiler
                 return ApplyToSubQuery(subQuery, q => new WhereClause(q, predicate));
             
             // Recursive normalization of subqueries - SELECT (preserve Aliases)
-            case SelectClause(var subQuery, var selector, var aliases):
-                return ApplyToSubQuery(subQuery, q => new SelectClause(q, selector, aliases));
+            case SelectClause(var subQuery, var selector, var aliases, var distinct, var limitOffset):
+                return ApplyToSubQuery(subQuery, q => new SelectClause(q, selector, aliases, distinct, limitOffset));
             
             // Recursive normalization of subqueries - ORDER BY
             case OrderByClause(var subQuery, var keySelectors):
@@ -352,7 +381,7 @@ internal static partial class SqlCompiler
         switch (normalizedQuery)
         {
             // 16. select(orderby(groupby(where(join(rest)))))
-            case SelectClause(OrderByClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -364,13 +393,12 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 string sql;
-                Context finalCtx;
 
                 if (havingPredicate is not null)
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -384,12 +412,12 @@ internal static partial class SqlCompiler
                     {{indent}}ORDER BY 
                     {{subIndent}}{{orderByClause}}
                     """;
-                    finalCtx = havingCtx;
+                    return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, havingCtx);
                 }
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -401,13 +429,12 @@ internal static partial class SqlCompiler
                     {{indent}}ORDER BY 
                     {{subIndent}}{{orderByClause}}
                     """;
-                    finalCtx = projectionCtx;
+                    return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
                 }
-                return (sql, selected, finalCtx);
             }
 
             // 15. select(orderby(groupby(where(rest))))
-            case SelectClause(OrderByClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
@@ -424,7 +451,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -442,7 +469,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -455,11 +482,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 14. select(orderby(groupby(join(rest))))
-            case SelectClause(OrderByClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -476,7 +503,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -493,7 +520,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -505,11 +532,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 13. select(orderby(groupby(rest)))
-            case SelectClause(OrderByClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, innerContext, scopeLevel);
@@ -552,11 +579,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 12. select(orderby(where(join(rest))))
-            case SelectClause(OrderByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -567,7 +594,7 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
@@ -577,11 +604,11 @@ internal static partial class SqlCompiler
                 {{indent}}ORDER BY 
                 {{subIndent}}{{orderByClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 11. select(orderby(where(rest)))
-            case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(WhereClause(var innerQuery, var predicate), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
@@ -591,7 +618,7 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
@@ -600,11 +627,11 @@ internal static partial class SqlCompiler
                 {{indent}}ORDER BY 
                 {{subIndent}}{{orderByClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 10. select(orderby(join(rest)))
-            case SelectClause(OrderByClause(JoinClause(var outer, var joinData), var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(JoinClause(var outer, var joinData), var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -614,7 +641,7 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
@@ -622,11 +649,11 @@ internal static partial class SqlCompiler
                 {{indent}}ORDER BY 
                 {{subIndent}}{{orderByClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 9. select(orderby(rest))
-            case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector, var aliases):
+            case SelectClause(OrderByClause(var innerQuery, var keySelectors), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (orderByClause, orderCtx) = CompileOrderBy(keySelectors, innerTuple, innerContext, scopeLevel);
@@ -635,18 +662,18 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
                 {{indent}}ORDER BY 
                 {{subIndent}}{{orderByClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 8. select(groupby(where(join(rest))))
-            case SelectClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var selector, var aliases):
+            case SelectClause(GroupByClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var keySelector, var havingPredicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -663,7 +690,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -680,7 +707,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -692,11 +719,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 7. select(groupby(where(rest)))
-            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector, var aliases):
+            case SelectClause(GroupByClause(WhereClause(var innerQuery, var predicate), var keySelector, var havingPredicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
@@ -712,7 +739,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -728,7 +755,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -739,11 +766,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
                 }
 
             // 6. select(groupby(join(rest)))
-            case SelectClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var selector, var aliases):
+            case SelectClause(GroupByClause(JoinClause(var outer, var joinData), var keySelector, var havingPredicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -759,7 +786,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(updatedTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -774,7 +801,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -784,11 +811,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 5. select(groupby(rest))
-            case SelectClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var selector, var aliases):
+            case SelectClause(GroupByClause(var innerQuery, var keySelector, var havingPredicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (groupByClause, groupCtx) = CompileGroupBy(keySelector, innerTuple, innerContext, scopeLevel);
@@ -803,7 +830,7 @@ internal static partial class SqlCompiler
                 {
                     var (havingSql, havingCtx) = Compile(havingPredicate(innerTuple, new SqlAggregateFunc()), groupCtx, scopeLevel);
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -817,7 +844,7 @@ internal static partial class SqlCompiler
                 else
                 {
                     sql = $$"""
-                    {{indent}}SELECT 
+                    {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                     {{projection}}
                     {{indent}}FROM 
                     {{subIndent}}{{fromClause}}
@@ -826,11 +853,11 @@ internal static partial class SqlCompiler
                     """;
                     finalCtx = projectionCtx;
                 }
-                return (sql, selected, finalCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, finalCtx);
             }
 
             // 4. select(where(join(rest)))
-            case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases):
+            case SelectClause(WhereClause(JoinClause(var outer, var joinData), var predicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, joinContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -840,7 +867,7 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
@@ -848,11 +875,11 @@ internal static partial class SqlCompiler
                 {{indent}}WHERE 
                 {{subIndent}}{{whereClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 3. select(where(rest))
-            case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases):
+            case SelectClause(WhereClause(var innerQuery, var predicate), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var (whereClause, whereCtx) = Compile(predicate(innerTuple), innerContext, scopeLevel);
@@ -861,18 +888,18 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
                 {{indent}}WHERE 
                 {{subIndent}}{{whereClause}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 2. select(join(rest))
-            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases):
+            case SelectClause(JoinClause(var outer, var joinData), var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (fromClause, currentTuple, currentContext) = CompileFrom(outer, context, scopeLevel);
                 var (joinClauses, updatedTuple, finalContext) = CompileJoin(joinData, currentTuple, currentContext, scopeLevel);
@@ -881,17 +908,17 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{fromClause}}
                 {{indent}}{{string.Join($"\n{indent}", joinClauses)}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             // 1. select(rest)
-            case SelectClause(var innerQuery, var selector, var aliases):
+            case SelectClause(var innerQuery, var selector, var aliases, var isDistinct, var limitOffset):
             {
                 var (innerSql, innerTuple, innerContext) = CompileFrom(innerQuery, context, scopeLevel);
                 var selected = selector(innerTuple);
@@ -899,12 +926,12 @@ internal static partial class SqlCompiler
 
                 var (indent, subIndent) = GetIndentation(scopeLevel);
                 var sql = $$"""
-                {{indent}}SELECT 
+                {{indent}}SELECT{{(isDistinct ? " DISTINCT" : " ")}}
                 {{projection}}
                 {{indent}}FROM 
                 {{subIndent}}{{innerSql}}
                 """;
-                return (sql, selected, projectionCtx);
+                return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
             }
 
             default:

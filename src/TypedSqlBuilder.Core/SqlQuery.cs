@@ -117,7 +117,9 @@ internal record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQ
 /// <param name="Query">The source query</param>
 /// <param name="Selector">Function that transforms input tuples to output tuples</param>
 /// <param name="Aliases">Optional column aliases for the result</param>
-internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases) : ISqlQuery;
+/// <param name="IsDistinct">Whether to eliminate duplicate rows from the result</param>
+/// <param name="LimitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
+internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, ImmutableArray<string?> Aliases, bool IsDistinct = false, (long Limit, long? Offset)? LimitOffset = null) : ISqlQuery;
 
 /// <summary>
 /// Strongly-typed SELECT clause for tuple projections.
@@ -128,8 +130,10 @@ internal record SelectClause(ISqlQuery Query, Func<ITuple, ITuple> Selector, Imm
 /// <param name="TypedQuery">The strongly-typed source query</param>
 /// <param name="TypedSelector">Function that transforms source tuples to result tuples</param>
 /// <param name="Aliases">Optional column aliases for the result</param>
-internal record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases) 
-    : SelectClause(TypedQuery, x => TypedSelector((TSource) x), Aliases), ISqlQuery<TResult>
+/// <param name="IsDistinct">Whether to eliminate duplicate rows from the result</param>
+/// <param name="LimitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
+internal record SelectClause<TSource, TResult>(ISqlQuery<TSource> TypedQuery, Func<TSource, TResult> TypedSelector, ImmutableArray<string?> Aliases, bool IsDistinct = false, (long Limit, long? Offset)? LimitOffset = null) 
+    : SelectClause(TypedQuery, x => TypedSelector((TSource) x), Aliases, IsDistinct, LimitOffset), ISqlQuery<TResult>
     where TSource : ITuple
     where TResult : ITuple;
 

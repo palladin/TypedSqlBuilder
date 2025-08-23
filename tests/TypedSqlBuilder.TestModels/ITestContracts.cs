@@ -170,6 +170,24 @@ public interface IQueryTestContract
     Task DecimalFloor_GeneratesCorrectSql(DatabaseType databaseType);
     Task MathFunctionsInWhere_GeneratesCorrectSql(DatabaseType databaseType);
     Task MathFunctionsInSelect_GeneratesCorrectSql(DatabaseType databaseType);
+
+    // LimitOffset Tests
+    Task FromLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromLimitOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    
+    // DISTINCT Tests
+    Task FromSelectDistinct_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectDistinctWhere_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectDistinctOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
+    Task FromSelectDistinctMultipleColumns_GeneratesCorrectSql(DatabaseType databaseType);
 }
 
 

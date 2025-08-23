@@ -2650,4 +2650,233 @@ public class QueryTests : IQueryTestContract
         
         return Task.CompletedTask;
     }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromSelectLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromSelectLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromWhereLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromWhereLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromWhereLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(18, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age > 18
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromWhereSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromWhereSelectLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromWhereSelectLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(21, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age >= 21
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromOrderByLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromOrderByLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromWhereOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromWhereOrderByLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromWhereOrderByLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(18, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age > 18
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromWhereOrderBySelectLimitOffset();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal("", parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Name != ""
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromLimitOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromLimitOffsetOnly();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromLimitOffsetOnly_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromOffsetOnly();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromOffsetOnly_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    // Special test for LIMIT without ORDER BY - only PostgreSQL and SQLite support this
+    [Theory]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public Task FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromLimitOffsetWithoutOrderBy();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    // DISTINCT Tests
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task FromSelectDistinct_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromSelectDistinct();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromSelectDistinct_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task FromSelectDistinctWhere_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromSelectDistinctWhere();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromSelectDistinctWhere_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task FromSelectDistinctOrderBy_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromSelectDistinctOrderBy();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromSelectDistinctOrderBy_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task FromSelectDistinctMultipleColumns_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.FromSelectDistinctMultipleColumns();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(FromSelectDistinctMultipleColumns_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        
+        return Task.CompletedTask;
+    }
 }

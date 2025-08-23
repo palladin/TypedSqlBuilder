@@ -895,4 +895,79 @@ public static class TestQueries
                 CeilingPrice: p.Price.Ceiling(),
                 FloorPrice: p.Price.Floor()
             ));
+
+    // LimitOffset Tests
+    public static ISqlQuery FromLimitOffset()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => c, limitOffset: (5L, 10L));
+
+    public static ISqlQuery FromSelectLimitOffset()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => (c.Id, c.Name), limitOffset: (3L, 5L));
+
+    public static ISqlQuery FromWhereLimitOffset()
+        => Db.Customers.From()
+            .Where(c => c.Age > 18)
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => c, limitOffset: (10L, 0L));
+
+    public static ISqlQuery FromWhereSelectLimitOffset()
+        => Db.Customers.From()
+            .Where(c => c.Age >= 21)
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => (c.Id, c.Name, c.Age), limitOffset: (5L, 15L));
+
+    public static ISqlQuery FromOrderByLimitOffset()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Name, Sort.Asc))
+            .Select(c => c, limitOffset: (10L, 5L));
+
+    public static ISqlQuery FromWhereOrderByLimitOffset()
+        => Db.Customers.From()
+            .Where(c => c.Age > 18)
+            .OrderBy(c => (c.Age, Sort.Desc))
+            .Select(c => c, limitOffset: (20L, 10L));
+
+    public static ISqlQuery FromWhereOrderBySelectLimitOffset()
+        => Db.Customers.From()
+            .Where(c => c.Name != "")
+            .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Desc)))
+            .Select(c => (c.Id, c.Name, c.Age), limitOffset: (5L, 0L));
+
+    public static ISqlQuery FromLimitOffsetOnly()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => c, limitOffset: (10L, null));
+
+    public static ISqlQuery FromOffsetOnly()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Id, Sort.Asc))
+            .Select(c => c, limitOffset: (long.MaxValue, 5L));
+
+    // Special test without ORDER BY - should work for PostgreSQL/SQLite but not SQL Server
+    public static ISqlQuery FromLimitOffsetWithoutOrderBy()
+        => Db.Customers.From()
+            .Select(c => c, limitOffset: (10L, null));
+
+    // DISTINCT Tests
+    public static ISqlQuery FromSelectDistinct()
+        => Db.Customers.From()
+            .Select(c => c.Name, distinct: true);
+
+    public static ISqlQuery FromSelectDistinctWhere()
+        => Db.Customers.From()
+            .Where(c => c.Age > 18)
+            .Select(c => c.Name, distinct: true);
+
+    public static ISqlQuery FromSelectDistinctOrderBy()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Name, Sort.Asc))
+            .Select(c => c.Name, distinct: true);
+
+    public static ISqlQuery FromSelectDistinctMultipleColumns()
+        => Db.Customers.From()
+            .OrderBy(c => (c.Name, Sort.Asc))
+            .Select(c => (c.Name, c.Age), distinct: true);
 }

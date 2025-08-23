@@ -3945,4 +3945,356 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         Assert.Equal(expectedResult, actualResult);
     }
+
+    // LimitOffset Integration Tests
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromLimitOffset(); // LIMIT 5 OFFSET 10
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .OrderBy(c => c.Id)
+            .Skip(10) // offset 10
+            .Take(5)  // limit 5
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromSelectLimitOffset(); // SELECT Id, Name LIMIT 3 OFFSET 5
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .OrderBy(c => c.Id)
+            .Skip(5) // offset 5
+            .Take(3) // limit 3
+            .Select(c => (c.Id, c.Name))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromWhereLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromWhereLimitOffset(); // WHERE Age > 18 LIMIT 10 OFFSET 0
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Where(c => c.Age > 18)
+            .OrderBy(c => c.Id)
+            .Skip(0)  // offset 0
+            .Take(10) // limit 10
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromWhereSelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromWhereSelectLimitOffset(); // WHERE Age >= 21 SELECT Id, Name, Age LIMIT 5 OFFSET 15
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name, int Age)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Where(c => c.Age >= 21)
+            .OrderBy(c => c.Id)
+            .Skip(15) // offset 15
+            .Take(5)  // limit 5
+            .Select(c => (c.Id, c.Name, c.Age))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromOrderByLimitOffset(); // ORDER BY Name ASC LIMIT 10 OFFSET 5
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .OrderBy(c => c.Name)
+            .Skip(5)  // offset 5
+            .Take(10) // limit 10
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromWhereOrderByLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromWhereOrderByLimitOffset(); // WHERE Age > 18 ORDER BY Age DESC LIMIT 20 OFFSET 10
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Where(c => c.Age > 18)
+            .OrderByDescending(c => c.Age)
+            .Skip(10) // offset 10
+            .Take(20) // limit 20
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromWhereOrderBySelectLimitOffset(); // WHERE Name != "" ORDER BY Name ASC, Age DESC SELECT Id, Name, Age LIMIT 5 OFFSET 0
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name, int Age)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Where(c => c.Name != "")
+            .OrderBy(c => c.Name).ThenByDescending(c => c.Age)
+            .Skip(0) // offset 0
+            .Take(5) // limit 5
+            .Select(c => (c.Id, c.Name, c.Age))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromLimitOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromLimitOffsetOnly(); // LIMIT 10 (no offset - null offset)
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .OrderBy(c => c.Id)
+            .Take(10) // limit 10 only, no skip (offset is null)
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromOffsetOnly_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromOffsetOnly(); // LIMIT long.MaxValue OFFSET 5 (effectively just offset 5, take all remaining)
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .OrderBy(c => c.Id)
+            .Skip(5) // offset 5
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    // Special integration test for LIMIT without ORDER BY - only PostgreSQL and SQLite support this
+    [Theory]
+    [InlineData(DatabaseType.SQLite)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    public async Task FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromLimitOffsetWithoutOrderBy();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, int Age, string Name, bool IsActive)>(sql, parameters)).ToList();
+
+        // Assert - Should return limited results (up to 10 customers)
+        var expectedResults = TestDataConstants.Customers
+            .Take(10) // Same logic as SQL query: LIMIT 10
+            .Select(c => (c.Id, c.Age, c.Name, c.IsActive))
+            .ToList();
+
+        Assert.True(actualResults.Count <= 10, "Should return at most 10 results due to LIMIT 10");
+        Assert.True(actualResults.Count > 0, "Should return some results from test data");
+        
+        // Note: We can't guarantee exact ordering without ORDER BY, so we just verify count constraints
+    }
+
+    // DISTINCT Integration Tests
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromSelectDistinct_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromSelectDistinct();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<string>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Select(c => c.Name)
+            .Distinct()
+            .ToList();
+
+        Assert.Equal(expectedResults.Count, actualResults.Count);
+        Assert.True(expectedResults.All(name => actualResults.Contains(name)));
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromSelectDistinctWhere_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromSelectDistinctWhere();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<string>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Where(c => c.Age > 18)
+            .Select(c => c.Name)
+            .Distinct()
+            .ToList();
+
+        Assert.Equal(expectedResults.Count, actualResults.Count);
+        Assert.True(expectedResults.All(name => actualResults.Contains(name)));
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromSelectDistinctOrderBy_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromSelectDistinctOrderBy();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<string>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Select(c => c.Name)
+            .Distinct()
+            .OrderBy(name => name)
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task FromSelectDistinctMultipleColumns_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.FromSelectDistinctMultipleColumns();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(string Name, int Age)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var expectedResults = TestDataConstants.Customers
+            .Select(c => (c.Name, c.Age))
+            .Distinct()
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        Assert.Equal(expectedResults, actualResults);
+    }
 }
