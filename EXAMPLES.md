@@ -70,6 +70,57 @@ FROM
     [customers] [a0]
 ```
 
+## Data Modification Operations
+
+### INSERT Statement
+
+**C# Code:**
+```csharp
+Db.Customers.Insert()
+    .Value(c => c.Id, 1)
+    .Value(c => c.Name, "John Doe")
+    .Value(c => c.Age, 30)
+    .Value(c => c.IsActive, true)
+```
+
+**Generated SQL:**
+```sql
+INSERT INTO [customers] ([Id], [Name], [Age], [IsActive])
+VALUES (@p0, @p1, @p2, @p3)
+```
+
+### UPDATE Statement
+
+**C# Code:**
+```csharp
+Db.Customers.Update()
+    .Set(c => c.Name, "Jane Smith")
+    .Set(c => c.Age, 32)
+    .Set(c => c.IsActive, false)
+    .Where(c => c.Id == 1)
+```
+
+**Generated SQL:**
+```sql
+UPDATE [customers] 
+SET [Name] = @p0, [Age] = @p1, [IsActive] = @p2
+WHERE [Id] = @p3
+```
+
+### DELETE Statement
+
+**C# Code:**
+```csharp
+Db.Customers.Delete()
+    .Where(c => c.Id == 1)
+```
+
+**Generated SQL:**
+```sql
+DELETE FROM [customers]
+WHERE [Id] = @p0
+```
+
 ## WHERE Clauses
 
 ### Simple WHERE Condition

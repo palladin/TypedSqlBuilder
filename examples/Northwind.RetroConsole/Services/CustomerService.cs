@@ -71,7 +71,7 @@ public class CustomerService
     
     public void AddCustomer(Customer customer)
     {
-        var statement = TypedSql.Insert<CustomersTable>()
+        var statement = NorthwindDb.Customers.Insert()
             .Value(c => c.CustomerID, customer.CustomerID)
             .Value(c => c.CompanyName, customer.CompanyName)
             .Value(c => c.ContactName, customer.ContactName)
@@ -89,7 +89,7 @@ public class CustomerService
     
     public void UpdateCustomer(Customer customer)
     {
-        var statement = TypedSql.Update<CustomersTable>()
+        var statement = NorthwindDb.Customers.Update()
             .Set(c => c.CompanyName, customer.CompanyName)
             .Set(c => c.ContactName, customer.ContactName)
             .Set(c => c.ContactTitle, customer.ContactTitle)
@@ -107,7 +107,7 @@ public class CustomerService
     
     public void DeleteCustomer(string customerId)
     {
-        var statement = TypedSql.Delete<CustomersTable>()
+        var statement = NorthwindDb.Customers.Delete()
             .Where(c => c.CustomerID == customerId);
             
         ExecuteStatement(statement);

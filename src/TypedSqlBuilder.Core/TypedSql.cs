@@ -80,6 +80,32 @@ public static class TypedSql
     }
 
     /// <summary>
+    /// Creates a DELETE statement from a SqlTable instance using extension method syntax for more fluent method chaining.
+    /// This extension method provides a more natural and readable way to start DELETE statement chains by allowing
+    /// table instances to be used directly in fluent syntax patterns.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="_">The table instance (parameter is ignored, a fresh instance is created internally)</param>
+    /// <returns>A DELETE statement that can be further composed with WHERE clauses</returns>
+    /// <example>
+    /// <code>
+    /// var customers = new CustomersTable();
+    /// var deleteStatement = customers.Delete()  // More fluent than TypedSql.Delete&lt;CustomersTable&gt;()
+    ///                                 .Where(c => c.Id == 1);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// This method creates a fresh instance of the table internally rather than using the passed instance.
+    /// This is essential for proper alias disambiguation during SQL compilation, ensuring each table reference
+    /// gets a unique alias and preventing conflicts when the same table type is used multiple times.
+    /// </remarks>
+    public static ISqlDeleteStatement<TSqlTable> Delete<TSqlTable>(this TSqlTable _)
+        where TSqlTable : SqlTable, new()
+    {
+        return new DeleteStatement<TSqlTable>(new TSqlTable());
+    }
+
+    /// <summary>
     /// Adds a WHERE clause to a DELETE statement.
     /// </summary>
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
@@ -98,6 +124,33 @@ public static class TypedSql
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
     /// <returns>An UPDATE statement that can be further composed with SET and WHERE clauses</returns>
     public static ISqlUpdateStatement<TSqlTable> Update<TSqlTable>()
+        where TSqlTable : SqlTable, new()
+    {
+        return new UpdateStatement<TSqlTable>(new TSqlTable());
+    }
+
+    /// <summary>
+    /// Creates an UPDATE statement from a SqlTable instance using extension method syntax for more fluent method chaining.
+    /// This extension method provides a more natural and readable way to start UPDATE statement chains by allowing
+    /// table instances to be used directly in fluent syntax patterns.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="_">The table instance (parameter is ignored, a fresh instance is created internally)</param>
+    /// <returns>An UPDATE statement that can be further composed with SET and WHERE clauses</returns>
+    /// <example>
+    /// <code>
+    /// var customers = new CustomersTable();
+    /// var updateStatement = customers.Update()  // More fluent than TypedSql.Update&lt;CustomersTable&gt;()
+    ///                                 .Set(c => c.Name, "Jane Smith")
+    ///                                 .Where(c => c.Id == 1);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// This method creates a fresh instance of the table internally rather than using the passed instance.
+    /// This is essential for proper alias disambiguation during SQL compilation, ensuring each table reference
+    /// gets a unique alias and preventing conflicts when the same table type is used multiple times.
+    /// </remarks>
+    public static ISqlUpdateStatement<TSqlTable> Update<TSqlTable>(this TSqlTable _)
         where TSqlTable : SqlTable, new()
     {
         return new UpdateStatement<TSqlTable>(new TSqlTable());
@@ -371,6 +424,33 @@ public static class TypedSql
     /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
     /// <returns>An INSERT statement that can be further composed with VALUE clauses</returns>
     public static ISqlInsertStatement<TSqlTable> Insert<TSqlTable>()
+        where TSqlTable : SqlTable, new()
+    {
+        return new InsertStatement<TSqlTable>(new TSqlTable());
+    }
+
+    /// <summary>
+    /// Creates an INSERT statement from a SqlTable instance using extension method syntax for more fluent method chaining.
+    /// This extension method provides a more natural and readable way to start INSERT statement chains by allowing
+    /// table instances to be used directly in fluent syntax patterns.
+    /// </summary>
+    /// <typeparam name="TSqlTable">The SqlTable subclass defining the table structure</typeparam>
+    /// <param name="_">The table instance (parameter is ignored, a fresh instance is created internally)</param>
+    /// <returns>An INSERT statement that can be further composed with VALUE clauses</returns>
+    /// <example>
+    /// <code>
+    /// var customers = new CustomersTable();
+    /// var insertStatement = customers.Insert()  // More fluent than TypedSql.Insert&lt;CustomersTable&gt;()
+    ///                                 .Value(c => c.Name, "John Doe")
+    ///                                 .Value(c => c.Age, 30);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// This method creates a fresh instance of the table internally rather than using the passed instance.
+    /// This is essential for proper alias disambiguation during SQL compilation, ensuring each table reference
+    /// gets a unique alias and preventing conflicts when the same table type is used multiple times.
+    /// </remarks>
+    public static ISqlInsertStatement<TSqlTable> Insert<TSqlTable>(this TSqlTable _)
         where TSqlTable : SqlTable, new()
     {
         return new InsertStatement<TSqlTable>(new TSqlTable());
