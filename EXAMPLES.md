@@ -442,13 +442,12 @@ Db.Customers.From()
     .InnerJoin(Db.Orders,
                c => c.Id,
                o => o.CustomerId,
-               (customer, order) => (Customer: customer, Order: order))
-    .Select(result => (result.Customer.Id, result.Customer.Name, result.Order.Amount))
-    .GroupBy(result => (result.Id, result.Name))
+               (customer, order) => (Customer: customer, Order: order))    
+    .GroupBy(result => (result.Customer.Id, result.Customer.Name))
     .Select((result, agg) => (
-        CustomerId: result.Id,
-        CustomerName: result.Name,
-        TotalAmount: agg.Sum(result.Amount)
+        CustomerId: result.Customer.Id,
+        CustomerName: result.Customer.Name,
+        TotalAmount: agg.Sum(result.Order.Amount)
     ))
 ```
 
