@@ -5018,7 +5018,7 @@ public static class QueryTestCases
                 "a0"."Age" > :p0
             ORDER BY 
                 "a0"."Id" ASC
-            LIMIT 10 OFFSET 0
+            LIMIT 10
             """, [":p0"])),
             new((DatabaseType.PostgreSQL, "FromWhereLimitOffset_GeneratesCorrectSql"), ("""
             SELECT 
@@ -5032,7 +5032,7 @@ public static class QueryTestCases
                 "a0"."Age" > :p0
             ORDER BY 
                 "a0"."Id" ASC
-            LIMIT 10 OFFSET 0
+            LIMIT 10
             """, [":p0"]))
         ];
 
@@ -5191,7 +5191,7 @@ public static class QueryTestCases
                 "a0"."Name" != :p0
             ORDER BY 
                 "a0"."Name" ASC, "a0"."Age" DESC
-            LIMIT 5 OFFSET 0
+            LIMIT 5
             """, [":p0"])),
             new((DatabaseType.PostgreSQL, "FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql"), ("""
             SELECT 
@@ -5204,7 +5204,7 @@ public static class QueryTestCases
                 "a0"."Name" != :p0
             ORDER BY 
                 "a0"."Name" ASC, "a0"."Age" DESC
-            LIMIT 5 OFFSET 0
+            LIMIT 5
             """, [":p0"]))
         ];
 

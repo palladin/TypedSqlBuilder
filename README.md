@@ -30,11 +30,27 @@ var (sql, params)  =
                 .ToSqlServerRaw();
 
 var customers = connection.Query<(int Id, string Name)>(sql, params);
+
+// DISTINCT and LIMIT operations
+var distinctAges = 
+    Db.Customers.From()
+                .Select(c => c.Age)
+                .Distinct()
+                .OrderBy(age => (age.Age, Sort.Asc))
+                .ToSqlServerRaw();
+
+var topCustomers = 
+    Db.Customers.From()
+                .Where(c => c.Age >= 21)
+                .OrderBy(c => (c.Name, Sort.Asc))
+                .Select(c => (c.Id, c.Name, c.Age))
+                .Limit(10, 20) // Skip 20, take 10 (pagination)
+                .ToSqlServerRaw();
 ```
 
 ## Examples
 
-For comprehensive examples showing all TypedSqlBuilder features including JOINs, GROUP BY, aggregates, subqueries, and built-in functions, see [**EXAMPLES.md**](EXAMPLES.md).
+For comprehensive examples showing all TypedSqlBuilder features including JOINs, GROUP BY, aggregates, subqueries, DISTINCT, LIMIT, and built-in functions, see [**EXAMPLES.md**](EXAMPLES.md).
 
 ## How to Start
 

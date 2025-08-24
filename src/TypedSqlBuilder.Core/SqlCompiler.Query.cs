@@ -109,11 +109,17 @@ internal static partial class SqlCompiler
             // ORDER BY fusion: OrderBy(OrderBy(q, keys1), keys2) → OrderBy(q, keys1 + keys2)  
             case OrderByClause(OrderByClause(var innerQuery, var innerKeys), var outerKeys):
                 return (new OrderByClause(innerQuery, tuple => innerKeys(tuple).AddRange(outerKeys(tuple))), true);
-            
+                        
             // SELECT composition: SELECT(SELECT(q, f1), f2) → SELECT(q, f2 ∘ f1)
             // Preserve outer Select's Aliases (projection names)
-            case SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases, var innerDistinct, var innerLimitOffset), var outerSelector, var outerAliases, var outerDistinct, var outerLimitOffset):
-                return (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases, outerDistinct || innerDistinct, outerLimitOffset ?? innerLimitOffset), true);
+            case SelectClause(SelectClause(var innerQuery, var innerSelector, var innerAliases, _, _), var outerSelector, var outerAliases, _, _):
+                return (new SelectClause(innerQuery, tuple => outerSelector(innerSelector(tuple)), outerAliases), true);
+
+            case DistinctClause(DistinctClause(var innerQuery)):
+                return (new DistinctClause(innerQuery), true);
+
+            case LimitClause(LimitClause(var innerQuery, var innerLimit, var innerOffset), var outerLimit, var outerOffset):
+                return (new LimitClause(innerQuery, outerLimit, outerLimit), true);           
 
             case HavingClause(GroupByClause(var innerQuery, var keySelector, null), var predicate):
                 return (new GroupByClause(innerQuery, keySelector, predicate), true);
@@ -138,6 +144,12 @@ internal static partial class SqlCompiler
 
             case JoinClause(var outer, var joinData):
                 return ApplyToSubQuery(outer, q => new JoinClause(q, joinData));
+
+            case DistinctClause(var subQuery):
+                return ApplyToSubQuery(subQuery, q => new DistinctClause(q));
+
+            case LimitClause(var subQuery, var limit, var offset):
+                return ApplyToSubQuery(subQuery, q => new LimitClause(q, limit, offset));
 
             // No changes needed
             default:
@@ -185,6 +197,27 @@ internal static partial class SqlCompiler
 
             JoinClause =>
                 new SelectClause(query, tuple => tuple, []),
+
+
+            // Decorate SelectClause
+            DistinctClause(SelectClause(var innerQuery, var selector, var aliases, _, _)) =>
+                new SelectClause(innerQuery, selector, aliases, IsDistinct: true),
+
+            LimitClause(SelectClause(var innerQuery, var selector, var aliases, _, _), var limit, var offset) =>
+                new SelectClause(innerQuery, selector, aliases, IsDistinct: false, LimitOffset: (limit, offset)),
+
+            LimitClause(DistinctClause(SelectClause(var innerQuery, var selector, var aliases, _, _)), var limit, var offset) =>
+                new SelectClause(innerQuery, selector, aliases, IsDistinct: true, LimitOffset: (limit, offset)),
+
+            LimitClause(DistinctClause(var innerQuery), var innerLimit, var innerOffset) =>
+                new SelectClause(innerQuery, tuple => tuple, [], IsDistinct: true, LimitOffset: (innerLimit, innerOffset)),
+
+            DistinctClause =>
+                new SelectClause(query, tuple => tuple, [], IsDistinct: true),
+
+            LimitClause(var innerQuery, var innerLimit, var innerOffset) =>
+                new SelectClause(innerQuery, tuple => tuple, [], LimitOffset: (innerLimit, innerOffset)),
+
 
             // Already in canonical form
             _ => query

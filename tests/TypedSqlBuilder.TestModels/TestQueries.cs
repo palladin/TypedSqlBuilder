@@ -900,74 +900,88 @@ public static class TestQueries
     public static ISqlQuery FromLimitOffset()
         => Db.Customers.From()
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => c, limitOffset: (5L, 10L));
+            .Select(c => c)
+            .Limit(5, 10);
 
     public static ISqlQuery FromSelectLimitOffset()
         => Db.Customers.From()
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => (c.Id, c.Name), limitOffset: (3L, 5L));
+            .Select(c => (c.Id, c.Name))
+            .Limit(3, 5);
 
     public static ISqlQuery FromWhereLimitOffset()
         => Db.Customers.From()
             .Where(c => c.Age > 18)
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => c, limitOffset: (10L, 0L));
+            .Select(c => c)
+            .Limit(10);
 
     public static ISqlQuery FromWhereSelectLimitOffset()
         => Db.Customers.From()
             .Where(c => c.Age >= 21)
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => (c.Id, c.Name, c.Age), limitOffset: (5L, 15L));
+            .Select(c => (c.Id, c.Name, c.Age))
+            .Limit(5, 15); 
 
     public static ISqlQuery FromOrderByLimitOffset()
         => Db.Customers.From()
             .OrderBy(c => (c.Name, Sort.Asc))
-            .Select(c => c, limitOffset: (10L, 5L));
+            .Select(c => c)
+            .Limit(10, 5);
 
     public static ISqlQuery FromWhereOrderByLimitOffset()
         => Db.Customers.From()
             .Where(c => c.Age > 18)
             .OrderBy(c => (c.Age, Sort.Desc))
-            .Select(c => c, limitOffset: (20L, 10L));
+            .Select(c => c)
+            .Limit(20, 10);
 
     public static ISqlQuery FromWhereOrderBySelectLimitOffset()
         => Db.Customers.From()
             .Where(c => c.Name != "")
             .OrderBy(c => ((c.Name, Sort.Asc), (c.Age, Sort.Desc)))
-            .Select(c => (c.Id, c.Name, c.Age), limitOffset: (5L, 0L));
+            .Select(c => (c.Id, c.Name, c.Age))
+            .Limit(5);
 
     public static ISqlQuery FromLimitOffsetOnly()
         => Db.Customers.From()
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => c, limitOffset: (10L, null));
+            .Select(c => c)
+            .Limit(10);
 
     public static ISqlQuery FromOffsetOnly()
         => Db.Customers.From()
             .OrderBy(c => (c.Id, Sort.Asc))
-            .Select(c => c, limitOffset: (long.MaxValue, 5L));
+            .Select(c => c)
+            .Limit(long.MaxValue, 5);
 
     // Special test without ORDER BY - should work for PostgreSQL/SQLite but not SQL Server
     public static ISqlQuery FromLimitOffsetWithoutOrderBy()
         => Db.Customers.From()
-            .Select(c => c, limitOffset: (10L, null));
+            .Select(c => c)
+            .Limit(10);
 
     // DISTINCT Tests
     public static ISqlQuery FromSelectDistinct()
         => Db.Customers.From()
-            .Select(c => c.Name, distinct: true);
+            .Select(c => c.Name)
+            .Distinct();
 
     public static ISqlQuery FromSelectDistinctWhere()
         => Db.Customers.From()
             .Where(c => c.Age > 18)
-            .Select(c => c.Name, distinct: true);
+            .Select(c => c.Name)
+            .Distinct();
 
     public static ISqlQuery FromSelectDistinctOrderBy()
         => Db.Customers.From()
             .OrderBy(c => (c.Name, Sort.Asc))
-            .Select(c => c.Name, distinct: true);
+            .Select(c => c.Name)
+            .Distinct();
 
     public static ISqlQuery FromSelectDistinctMultipleColumns()
         => Db.Customers.From()
             .OrderBy(c => (c.Name, Sort.Asc))
-            .Select(c => (c.Name, c.Age), distinct: true);
+            .Select(c => (c.Name, c.Age))
+            .Distinct();
 }

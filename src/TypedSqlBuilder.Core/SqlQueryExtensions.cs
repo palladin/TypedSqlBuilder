@@ -20,6 +20,45 @@ public static class SqlQueryExtensions
         return tupleNamesAttr?.TransformNames?.Where(x => x is not null).ToImmutableArray() ?? [];
     }
 
+    /// <summary>
+    /// Adds a DISTINCT clause to the query to eliminate duplicate rows.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type of the query results</typeparam>
+    /// <param name="query">The source query to make distinct</param>
+    /// <returns>A new query that eliminates duplicate rows</returns>
+    /// <example>
+    /// <code>
+    /// var distinctNames = userQuery.Select(user => user.Name).Distinct();
+    /// var distinctAges = userQuery.Select(user => user.Age).Distinct();
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TSource> Distinct<TSource>(this ISqlQuery<TSource> query)
+        where TSource : ITuple
+    {
+        return new DistinctClause<TSource>(query);
+    }
+
+    /// <summary>
+    /// Adds a LIMIT clause to restrict the number of rows returned by the query.
+    /// Optionally includes an OFFSET to skip a specified number of rows.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type of the query results</typeparam>
+    /// <param name="query">The source query to limit</param>
+    /// <param name="limit">The maximum number of rows to return</param>
+    /// <param name="offset">The number of rows to skip before returning results (optional)</param>
+    /// <returns>A new query that limits the number of rows returned</returns>
+    /// <example>
+    /// <code>
+    /// var firstTen = userQuery.Limit(10);
+    /// var nextTen = userQuery.Limit(10, 10); // Skip 10, take 10
+    /// var page = userQuery.OrderBy(u => u.Name).Limit(20, 40); // Page 3 with 20 items per page
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TSource> Limit<TSource>(this ISqlQuery<TSource> query, long limit, long? offset = null)
+        where TSource : ITuple
+    {
+        return new LimitClause<TSource>(query, limit, offset);
+    }
 
     /// <summary>
     /// Projects the query result to a different tuple type.
@@ -29,24 +68,22 @@ public static class SqlQueryExtensions
     /// <typeparam name="TResult">The output tuple type after projection</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to result tuples</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces the projected result type</returns>
     /// <example>
     /// <code>
     /// var projectedQuery = baseQuery.Select(row => (row.Name, row.Age));
-    /// var pagedQuery = baseQuery.Select(row => (row.Name, row.Age), limitOffset: (10, 20)); // Limit 10, Offset 20
-    /// var limitOnlyQuery = baseQuery.Select(row => (row.Name, row.Age), limitOffset: (10, null)); // Limit 10, no offset
-    /// var distinctQuery = baseQuery.Select(row => (row.Name, row.Age), distinct: true);
+    /// var pagedQuery = baseQuery.Select(row => (row.Name, row.Age)).Limit(10, 20); // Limit 10, Offset 20
+    /// var limitOnlyQuery = baseQuery.Select(row => (row.Name, row.Age)).Limit(10); // Limit 10, no offset
+    /// var distinctQuery = baseQuery.Select(row => (row.Name, row.Age)).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<TResult> Select<TSource, TResult>(this ISqlQuery<TSource> query, Func<TSource, TResult> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<TResult> Select<TSource, TResult>(this ISqlQuery<TSource> query, Func<TSource, TResult> selector)
         where TSource : ITuple
         where TResult : ITuple
     {
         // Capture tuple element names (if any) from the selector's return type
         var names = GetTupleElementNames(selector);
-        return new SelectClause<TSource, TResult>(query, selector, names, distinct, limitOffset);
+        return new SelectClause<TSource, TResult>(query, selector, names);
     }
 
     /// <summary>
@@ -56,19 +93,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL integer expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL integer expressions</returns>
     /// <example>
     /// <code>
     /// var ageQuery = userQuery.Select(user => user.Age);
-    /// var distinctAges = userQuery.Select(user => user.Age, distinct: true);
+    /// var distinctAges = userQuery.Select(user => user.Age).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprInt>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprInt>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprInt> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprInt>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprInt>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -78,19 +113,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL boolean expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL boolean expressions</returns>
     /// <example>
     /// <code>
     /// var adultQuery = userQuery.Select(user => user.Age >= 18);
-    /// var distinctAdults = userQuery.Select(user => user.Age >= 18, distinct: true);
+    /// var distinctAdults = userQuery.Select(user => user.Age >= 18).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprBool>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprBool>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprBool> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprBool>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprBool>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -100,19 +133,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL string expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL string expressions</returns>
     /// <example>
     /// <code>
     /// var nameQuery = userQuery.Select(user => user.FirstName + " " + user.LastName);
-    /// var distinctNames = userQuery.Select(user => user.FirstName, distinct: true);
+    /// var distinctNames = userQuery.Select(user => user.FirstName).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprString>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprString>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprString> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprString>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprString>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -122,19 +153,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL decimal expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL decimal expressions</returns>
     /// <example>
     /// <code>
     /// var priceQuery = productQuery.Select(product => product.UnitPrice * product.Quantity);
-    /// var distinctPrices = productQuery.Select(product => product.UnitPrice, distinct: true);
+    /// var distinctPrices = productQuery.Select(product => product.UnitPrice).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprDecimal>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDecimal> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprDecimal>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDecimal> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprDecimal>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprDecimal>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -144,19 +173,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL DateTime expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL DateTime expressions</returns>
     /// <example>
     /// <code>
     /// var dateQuery = orderQuery.Select(order => order.OrderDate);
-    /// var distinctDates = orderQuery.Select(order => order.OrderDate, distinct: true);
+    /// var distinctDates = orderQuery.Select(order => order.OrderDate).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprDateTime>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDateTime> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprDateTime>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDateTime> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprDateTime>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprDateTime>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -166,19 +193,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL GUID expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL GUID expressions</returns>
     /// <example>
     /// <code>
     /// var idQuery = userQuery.Select(user => user.Id);
-    /// var distinctIds = userQuery.Select(user => user.Id, distinct: true);
+    /// var distinctIds = userQuery.Select(user => user.Id).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprGuid>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprGuid> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprGuid>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprGuid> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprGuid>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprGuid>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -188,19 +213,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL long expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL long expressions</returns>
     /// <example>
     /// <code>
     /// var sizeQuery = fileQuery.Select(file => file.SizeBytes);
-    /// var distinctSizes = fileQuery.Select(file => file.SizeBytes, distinct: true);
+    /// var distinctSizes = fileQuery.Select(file => file.SizeBytes).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprLong>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprLong> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprLong>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprLong> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprLong>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprLong>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>
@@ -210,19 +233,17 @@ public static class SqlQueryExtensions
     /// <typeparam name="TSource">The input tuple type from the source query</typeparam>
     /// <param name="query">The source query to project from</param>
     /// <param name="selector">Function that transforms source tuples to SQL double expressions</param>
-    /// <param name="distinct">Whether to eliminate duplicate rows from the result</param>
-    /// <param name="limitOffset">Optional limit/offset parameters (Limit: number of rows to return, Offset: optional number of rows to skip)</param>
     /// <returns>A new query that produces SQL double expressions</returns>
     /// <example>
     /// <code>
     /// var distanceQuery = routeQuery.Select(route => route.Distance);
-    /// var distinctDistances = routeQuery.Select(route => route.Distance, distinct: true);
+    /// var distinctDistances = routeQuery.Select(route => route.Distance).Distinct();
     /// </code>
     /// </example>
-    public static ISqlQuery<ValueTuple<SqlExprDouble>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDouble> selector, bool distinct = false, (long Limit, long? Offset)? limitOffset = null)
+    public static ISqlQuery<ValueTuple<SqlExprDouble>> Select<TSource>(this ISqlQuery<TSource> query, Func<TSource, SqlExprDouble> selector)
         where TSource : ITuple
     {
-        return new SelectClause<TSource, ValueTuple<SqlExprDouble>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty, distinct, limitOffset);
+        return new SelectClause<TSource, ValueTuple<SqlExprDouble>>(query, x => ValueTuple.Create(selector(x)), ImmutableArray<string?>.Empty);
     }
 
     /// <summary>

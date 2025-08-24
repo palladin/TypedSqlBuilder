@@ -109,6 +109,39 @@ internal record FromTableClause<TColumns>(SqlTable Table) : FromTableClause(Tabl
 internal record FromSubQueryClause<TSource>(ISqlQuery<TSource> query) : FromSubQueryClause(query), ISqlQuery<TSource>
     where TSource : ITuple;
 
+/// <summary>
+/// Represents a SQL DISTINCT clause to eliminate duplicate rows from query results.
+/// Base record type for distinct operations.
+/// </summary>
+/// <param name="Query">The source query to apply DISTINCT to</param>
+internal record DistinctClause(ISqlQuery Query) : ISqlQuery;
+
+/// <summary>
+/// Generic DISTINCT clause that maintains type safety for specific result types.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the query</typeparam>
+/// <param name="query">The source query to apply DISTINCT to</param>
+internal record DistinctClause<TSource>(ISqlQuery<TSource> query) : DistinctClause(query), ISqlQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
+/// Represents a SQL LIMIT clause to restrict the number of rows returned.
+/// Base record type for limit operations with optional offset.
+/// </summary>
+/// <param name="Query">The source query to apply LIMIT to</param>
+/// <param name="Limit">The maximum number of rows to return</param>
+/// <param name="Offset">The number of rows to skip before returning results (optional)</param>
+internal record LimitClause(ISqlQuery Query, long Limit, long? Offset) : ISqlQuery;
+
+/// <summary>
+/// Generic LIMIT clause that maintains type safety for specific result types.
+/// </summary>
+/// <typeparam name="TSource">The type of data produced by the query</typeparam>
+/// <param name="query">The source query to apply LIMIT to</param>
+/// <param name="Limit">The maximum number of rows to return</param>
+/// <param name="Offset">The number of rows to skip before returning results (optional)</param>
+internal record LimitClause<TSource>(ISqlQuery<TSource> query, long Limit, long? Offset) : LimitClause(query, Limit, Offset), ISqlQuery<TSource>
+    where TSource : ITuple;
 
 /// <summary>
 /// Base record representing a SQL SELECT clause with tuple projection.

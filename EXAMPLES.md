@@ -888,3 +888,95 @@ WHERE
     ABS([a0].[Age]) > ABS(@minAge)
 ```
 
+## DISTINCT Operations
+
+### DISTINCT Example
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Select(c => c.Age)
+    .Distinct()
+```
+
+**Generated SQL:**
+```sql
+SELECT DISTINCT
+    [a0].[Age] AS [Age]
+FROM
+    [customers] [a0]
+```
+
+## LIMIT Operations
+
+### LIMIT Example (Limit Only)
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Limit(5)
+```
+
+**Generated SQL:**
+```sql
+SELECT
+    [a0].[Id] AS [Id],
+    [a0].[Age] AS [Age],
+    [a0].[Name] AS [Name],
+    [a0].[IsActive] AS [IsActive]
+FROM
+    [customers] [a0]
+ORDER BY
+    [a0].[Id] ASC
+OFFSET 0 ROWS
+FETCH NEXT 5 ROWS ONLY
+```
+
+### LIMIT with OFFSET Example (Pagination)
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .OrderBy(c => (c.Id, Sort.Asc))
+    .Limit(10, 20)
+```
+
+**Generated SQL:**
+```sql
+SELECT
+    [a0].[Id] AS [Id],
+    [a0].[Age] AS [Age],
+    [a0].[Name] AS [Name],
+    [a0].[IsActive] AS [IsActive]
+FROM
+    [customers] [a0]
+ORDER BY
+    [a0].[Id] ASC
+OFFSET 20 ROWS
+FETCH NEXT 10 ROWS ONLY
+```
+
+## Combining DISTINCT and LIMIT
+
+### DISTINCT with LIMIT Example
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Select(c => c.Age)
+    .Distinct()
+    .Limit(10)
+```
+
+**Generated SQL:**
+```sql
+SELECT DISTINCT
+    [a0].[Age] AS [Age]
+FROM
+    [customers] [a0]
+ORDER BY
+    [a0].[Age] ASC
+OFFSET 0 ROWS
+FETCH NEXT 10 ROWS ONLY
+```
+
