@@ -31,6 +31,13 @@ public class Order() : SqlTable("orders")
     [Column("ProductId")] public SqlIntColumn ProductId { get; set; } = default!;
     [Column("Amount")] public SqlIntColumn Amount { get; set; } = default!;
 }
+
+public static class Db
+{
+    public static Customer Customers { get; } = new();
+    public static Product Products { get; } = new();
+    public static Order Orders { get; } = new();
+}
 ```
 
 ## Basic Queries
@@ -295,7 +302,8 @@ Db.Customers.From()
     .InnerJoin(Db.Orders, 
                c => c.Id, 
                o => o.CustomerId,
-               (c, o) => (c.Id, c.Name, o.Id, o.Amount))
+               (customer, order) => (Customer: customer, Order: order))
+    .Select(result => (result.Customer.Id, result.Customer.Name, result.Order.Id, result.Order.Amount))
 ```
 
 **Generated SQL:**
@@ -318,10 +326,11 @@ Db.Customers.From()
     .InnerJoin(Db.Orders,
                c => c.Id,
                o => o.CustomerId,
-               (c, o) => (
-                   c.Name,
-                   o.Amount
-               ))
+               (customer, order) => (Customer: customer, Order: order))
+    .Select(result => (
+        result.Customer.Name,
+        result.Order.Amount
+    ))
 ```
 
 **Generated SQL:**
@@ -345,9 +354,10 @@ Db.Customers.From()
     .InnerJoin(Db.Orders,
                c => c.Id,
                o => o.CustomerId,
-               (c, o) => (c.Id, c.Name, c.Age,
-                         o.Id, o.Amount))
-    .Where(result => result.Amount > 100)
+               (customer, order) => (Customer: customer, Order: order))    
+    .Where(result => result.Order.Amount > 100)
+    .Select(result => (result.Customer.Id, result.Customer.Name, result.Customer.Age,
+                       result.Order.Id, result.Order.Amount))
 ```
 
 **Generated SQL:**
@@ -383,7 +393,8 @@ Db.Customers.From()
     .LeftJoin(Db.Orders,
               c => c.Id,
               o => o.CustomerId,
-              (c, o) => (c.Id, c.Name, o.Id, o.Amount))
+              (customer, order) => (Customer: customer, Order: order))
+    .Select(result => (result.Customer.Id, result.Customer.Name, result.Order.Id, result.Order.Amount))
 ```
 
 **Generated SQL:**
@@ -431,7 +442,8 @@ Db.Customers.From()
     .InnerJoin(Db.Orders,
                c => c.Id,
                o => o.CustomerId,
-               (c, o) => (c.Id, c.Name, o.Amount))
+               (customer, order) => (Customer: customer, Order: order))
+    .Select(result => (result.Customer.Id, result.Customer.Name, result.Order.Amount))
     .GroupBy(result => (result.Id, result.Name))
     .Select((result, agg) => (
         CustomerId: result.Id,
