@@ -5423,6 +5423,165 @@ public static class QueryTestCases
             """, []))
         ];
 
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] Union_GeneratesCorrectSqlPair =
+    [
+        new((DatabaseType.SqlServer, "Union_GeneratesCorrectSql"), ("""
+        SELECT 
+            [a0].[Id] AS [Id],
+            [a0].[Name] AS [Name]
+        FROM 
+            [customers] [a0]
+        WHERE 
+            [a0].[Age] > @p0
+        UNION
+        SELECT 
+            [a1].[Id] AS [Id],
+            [a1].[Name] AS [Name]
+        FROM 
+            [customers] [a1]
+        WHERE 
+            [a1].[Name] = @p1
+        """, ["@p0", "@p1"])),
+        new((DatabaseType.SQLite, "Union_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        WHERE 
+            "a0"."Age" > :p0
+        UNION
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Name" = :p1
+        """, [":p0", ":p1"])),
+        new((DatabaseType.PostgreSQL, "Union_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        WHERE 
+            "a0"."Age" > :p0
+        UNION
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Name" = :p1
+        """, [":p0", ":p1"]))
+    ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] Intersect_GeneratesCorrectSqlPair =
+    [
+        new((DatabaseType.SqlServer, "Intersect_GeneratesCorrectSql"), ("""
+        SELECT 
+            [a0].[Id] AS [Id],
+            [a0].[Name] AS [Name]
+        FROM 
+            [customers] [a0]
+        WHERE 
+            [a0].[Age] > @p0
+        INTERSECT
+        SELECT 
+            [a1].[Id] AS [Id],
+            [a1].[Name] AS [Name]
+        FROM 
+            [customers] [a1]
+        WHERE 
+            [a1].[Name] = @p1
+        """, ["@p0", "@p1"])),
+        new((DatabaseType.SQLite, "Intersect_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        WHERE 
+            "a0"."Age" > :p0
+        INTERSECT
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Name" = :p1
+        """, [":p0", ":p1"])),
+        new((DatabaseType.PostgreSQL, "Intersect_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        WHERE 
+            "a0"."Age" > :p0
+        INTERSECT
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Name" = :p1
+        """, [":p0", ":p1"]))
+    ];
+
+    private static readonly KeyValuePair<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)>[] Except_GeneratesCorrectSqlPair =
+    [
+        new((DatabaseType.SqlServer, "Except_GeneratesCorrectSql"), ("""
+        SELECT 
+            [a0].[Id] AS [Id],
+            [a0].[Name] AS [Name]
+        FROM 
+            [customers] [a0]
+        EXCEPT
+        SELECT 
+            [a1].[Id] AS [Id],
+            [a1].[Name] AS [Name]
+        FROM 
+            [customers] [a1]
+        WHERE 
+            [a1].[Age] < @p0
+        """, ["@p0"])),
+        new((DatabaseType.SQLite, "Except_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        EXCEPT
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Age" < :p0
+        """, [":p0"])),
+        new((DatabaseType.PostgreSQL, "Except_GeneratesCorrectSql"), ("""
+        SELECT 
+            "a0"."Id" AS "Id",
+            "a0"."Name" AS "Name"
+        FROM 
+            "customers" "a0"
+        EXCEPT
+        SELECT 
+            "a1"."Id" AS "Id",
+            "a1"."Name" AS "Name"
+        FROM 
+            "customers" "a1"
+        WHERE 
+            "a1"."Age" < :p0
+        """, [":p0"]))
+    ];
+
     public static readonly Dictionary<(DatabaseType, string TestName), (string Sql, string[] ParameterNames)> TestCases = 
         From_GeneratesCorrectSqlPair
             .Concat(AbsColumn_GeneratesCorrectSqlPair)
@@ -5584,7 +5743,9 @@ public static class QueryTestCases
             .Concat(FromSelectDistinctWhere_GeneratesCorrectSqlPair)
             .Concat(FromSelectDistinctOrderBy_GeneratesCorrectSqlPair)
             .Concat(FromSelectDistinctMultipleColumns_GeneratesCorrectSqlPair)
+            .Concat(Union_GeneratesCorrectSqlPair)
+            .Concat(Intersect_GeneratesCorrectSqlPair)
+            .Concat(Except_GeneratesCorrectSqlPair)
             .ToDictionary(kv => kv.Key, kv => kv.Value);
-
 
 }

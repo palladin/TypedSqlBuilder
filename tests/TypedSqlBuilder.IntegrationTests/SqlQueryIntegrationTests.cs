@@ -4297,4 +4297,99 @@ public class SqlQueryIntegrationTests : IClassFixture<SqlFixture>, IQueryTestCon
 
         Assert.Equal(expectedResults, actualResults);
     }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task Union_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.Union();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var query1Results = TestDataConstants.Customers
+            .Where(c => c.Age > 30)
+            .Select(c => (c.Id, c.Name));
+            
+        var query2Results = TestDataConstants.Customers
+            .Where(c => c.Name == "Alice")
+            .Select(c => (c.Id, c.Name));
+            
+        var expectedResults = query1Results
+            .Union(query2Results)
+            .OrderBy(x => x.Id)
+            .ToList();
+
+        actualResults = actualResults.OrderBy(x => x.Id).ToList();
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task Intersect_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.Intersect();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var query1Results = TestDataConstants.Customers
+            .Where(c => c.Age > 25)
+            .Select(c => (c.Id, c.Name));
+            
+        var query2Results = TestDataConstants.Customers
+            .Where(c => c.Name == "John")
+            .Select(c => (c.Id, c.Name));
+            
+        var expectedResults = query1Results
+            .Intersect(query2Results)
+            .OrderBy(x => x.Id)
+            .ToList();
+
+        actualResults = actualResults.OrderBy(x => x.Id).ToList();
+        Assert.Equal(expectedResults, actualResults);
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public async Task Except_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        // Arrange
+        var query = TestQueries.Except();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+
+        // Act
+        using var connection = _fixture.CreateConnection(databaseType);
+        var actualResults = (await connection.QueryAsync<(int Id, string Name)>(sql, parameters)).ToList();
+
+        // Assert - Compare SQL results to LINQ results using TestDataConstants
+        var allCustomers = TestDataConstants.Customers
+            .Select(c => (c.Id, c.Name));
+            
+        var underage = TestDataConstants.Customers
+            .Where(c => c.Age < 18)
+            .Select(c => (c.Id, c.Name));
+            
+        var expectedResults = allCustomers
+            .Except(underage)
+            .OrderBy(x => x.Id)
+            .ToList();
+
+        actualResults = actualResults.OrderBy(x => x.Id).ToList();
+        Assert.Equal(expectedResults, actualResults);
+    }
 }

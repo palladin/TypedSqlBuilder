@@ -188,6 +188,11 @@ public interface IQueryTestContract
     Task FromSelectDistinctWhere_GeneratesCorrectSql(DatabaseType databaseType);
     Task FromSelectDistinctOrderBy_GeneratesCorrectSql(DatabaseType databaseType);
     Task FromSelectDistinctMultipleColumns_GeneratesCorrectSql(DatabaseType databaseType);
+
+    // Set Operations Tests
+    Task Union_GeneratesCorrectSql(DatabaseType databaseType);
+    Task Intersect_GeneratesCorrectSql(DatabaseType databaseType);
+    Task Except_GeneratesCorrectSql(DatabaseType databaseType);
 }
 
 

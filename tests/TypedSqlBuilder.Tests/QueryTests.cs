@@ -2662,7 +2662,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2678,7 +2678,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromSelectLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2694,7 +2694,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromWhereLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         Assert.Equal(18, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age > 18
         
         return Task.CompletedTask;
@@ -2711,7 +2711,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromWhereSelectLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         Assert.Equal(21, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age >= 21
         
         return Task.CompletedTask;
@@ -2728,7 +2728,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromOrderByLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2744,7 +2744,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromWhereOrderByLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         Assert.Equal(18, parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Age > 18
         
         return Task.CompletedTask;
@@ -2761,7 +2761,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromWhereOrderBySelectLimitOffset_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         Assert.Equal("", parameters[databaseType == DatabaseType.SqlServer ? "@p0" : ":p0"]); // WHERE Name != ""
         
         return Task.CompletedTask;
@@ -2778,7 +2778,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromLimitOffsetOnly_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2794,7 +2794,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromOffsetOnly_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2810,7 +2810,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromLimitOffsetWithoutOrderBy_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2827,7 +2827,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromSelectDistinct_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2843,7 +2843,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromSelectDistinctWhere_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2859,7 +2859,7 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromSelectDistinctOrderBy_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }
@@ -2875,7 +2875,55 @@ public class QueryTests : IQueryTestContract
         var testCase = TestCases[(databaseType, nameof(FromSelectDistinctMultipleColumns_GeneratesCorrectSql))];
         
         Assert.Equal(testCase.Sql, sql);
-        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).ToArray());
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task Union_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.Union();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(Union_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task Intersect_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.Intersect();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(Intersect_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
+        
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData(DatabaseType.SqlServer)]
+    [InlineData(DatabaseType.PostgreSQL)]
+    [InlineData(DatabaseType.SQLite)]
+    public Task Except_GeneratesCorrectSql(DatabaseType databaseType)
+    {
+        var query = TestQueries.Except();
+        var (sql, parameters) = query.ToSqlRaw(databaseType);
+        var testCase = TestCases[(databaseType, nameof(Except_GeneratesCorrectSql))];
+        
+        Assert.Equal(testCase.Sql, sql);
+        Assert.Equal(testCase.ParameterNames, parameters.Select(p => p.Key).OrderBy(x => x));
         
         return Task.CompletedTask;
     }

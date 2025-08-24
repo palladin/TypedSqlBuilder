@@ -811,6 +811,72 @@ public static class SqlQueryExtensions
     }
 
     /// <summary>
+    /// Performs a UNION operation between two queries with identical result types.
+    /// Combines rows from both queries, automatically eliminating duplicate rows.
+    /// Both queries must return the same column structure and types.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+    /// <param name="query1">The first query to combine</param>
+    /// <param name="query2">The second query to combine</param>
+    /// <returns>A new query that contains all unique rows from both input queries</returns>
+    /// <example>
+    /// <code>
+    /// var activeUsers = usersQuery.Where(u => u.IsActive == true).Select(u => (u.Name, u.Email));
+    /// var premiumUsers = usersQuery.Where(u => u.IsPremium == true).Select(u => (u.Name, u.Email));
+    /// var combinedUsers = activeUsers.Union(premiumUsers);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TSource> Union<TSource>(this ISqlQuery<TSource> query1, ISqlQuery<TSource> query2)
+        where TSource : ITuple
+    {
+        return new UnionClause<TSource>(query1, query2);
+    }
+
+    /// <summary>
+    /// Performs an INTERSECT operation between two queries with identical result types.
+    /// Returns only rows that exist in both queries, eliminating duplicates.
+    /// Both queries must return the same column structure and types.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+    /// <param name="query1">The first query to intersect</param>
+    /// <param name="query2">The second query to intersect</param>
+    /// <returns>A new query that contains only rows found in both input queries</returns>
+    /// <example>
+    /// <code>
+    /// var activeUsers = usersQuery.Where(u => u.IsActive == true).Select(u => (u.Name, u.Email));
+    /// var premiumUsers = usersQuery.Where(u => u.IsPremium == true).Select(u => (u.Name, u.Email));
+    /// var activePremiumUsers = activeUsers.Intersect(premiumUsers);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TSource> Intersect<TSource>(this ISqlQuery<TSource> query1, ISqlQuery<TSource> query2)
+        where TSource : ITuple
+    {
+        return new IntersectClause<TSource>(query1, query2);
+    }
+
+    /// <summary>
+    /// Performs an EXCEPT operation between two queries with identical result types.
+    /// Returns rows that exist in the first query but not in the second query.
+    /// Both queries must return the same column structure and types.
+    /// </summary>
+    /// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+    /// <param name="query1">The first query (rows to include)</param>
+    /// <param name="query2">The second query (rows to exclude)</param>
+    /// <returns>A new query that contains rows from query1 that are not present in query2</returns>
+    /// <example>
+    /// <code>
+    /// var allUsers = usersQuery.Select(u => (u.Name, u.Email));
+    /// var premiumUsers = usersQuery.Where(u => u.IsPremium == true).Select(u => (u.Name, u.Email));
+    /// var nonPremiumUsers = allUsers.Except(premiumUsers);
+    /// </code>
+    /// </example>
+    public static ISqlQuery<TSource> Except<TSource>(this ISqlQuery<TSource> query1, ISqlQuery<TSource> query2)
+        where TSource : ITuple
+    {
+        return new ExceptClause<TSource>(query1, query2);
+    }
+
+    /// <summary>
     /// Compiles the SQL query to SQL Server syntax with parameters.
     /// </summary>
     /// <param name="query">The SQL query to compile</param>

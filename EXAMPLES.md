@@ -980,3 +980,109 @@ OFFSET 0 ROWS
 FETCH NEXT 10 ROWS ONLY
 ```
 
+## Set Operations
+
+TypedSqlBuilder supports SQL set operations to combine results from multiple queries.
+
+### UNION
+
+UNION combines the result sets of two SELECT statements, removing duplicates.
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Where(c => c.Age > 30)
+    .Select(c => (c.Id, c.Name))
+    .Union(
+        Db.Customers.From()
+            .Where(c => c.Name == "Alice")
+            .Select(c => (c.Id, c.Name))
+    )
+```
+
+**Generated SQL:**
+```sql
+SELECT 
+    [a0].[Id] AS [Id],
+    [a0].[Name] AS [Name]
+FROM 
+    [customers] [a0]
+WHERE 
+    [a0].[Age] > @p0
+UNION
+SELECT 
+    [a1].[Id] AS [Id],
+    [a1].[Name] AS [Name]
+FROM 
+    [customers] [a1]
+WHERE 
+    [a1].[Name] = @p1
+```
+
+### INTERSECT
+
+INTERSECT returns the common records from two SELECT statements.
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Where(c => c.Age > 25)
+    .Select(c => (c.Id, c.Name))
+    .Intersect(
+        Db.Customers.From()
+            .Where(c => c.Name == "John")
+            .Select(c => (c.Id, c.Name))
+    )
+```
+
+**Generated SQL:**
+```sql
+SELECT 
+    [a0].[Id] AS [Id],
+    [a0].[Name] AS [Name]
+FROM 
+    [customers] [a0]
+WHERE 
+    [a0].[Age] > @p0
+INTERSECT
+SELECT 
+    [a1].[Id] AS [Id],
+    [a1].[Name] AS [Name]
+FROM 
+    [customers] [a1]
+WHERE 
+    [a1].[Name] = @p1
+```
+
+### EXCEPT
+
+EXCEPT returns records from the first SELECT statement that are not found in the second.
+
+**C# Code:**
+```csharp
+Db.Customers.From()
+    .Select(c => (c.Id, c.Name))
+    .Except(
+        Db.Customers.From()
+            .Where(c => c.Age < 18)
+            .Select(c => (c.Id, c.Name))
+    )
+```
+
+**Generated SQL:**
+```sql
+SELECT 
+    [a0].[Id] AS [Id],
+    [a0].[Name] AS [Name]
+FROM 
+    [customers] [a0]
+EXCEPT
+SELECT 
+    [a1].[Id] AS [Id],
+    [a1].[Name] AS [Name]
+FROM 
+    [customers] [a1]
+WHERE 
+    [a1].[Age] < @p0
+```
+

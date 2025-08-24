@@ -984,4 +984,34 @@ public static class TestQueries
             .OrderBy(c => (c.Name, Sort.Asc))
             .Select(c => (c.Name, c.Age))
             .Distinct();
+
+    // Set Operations
+    public static ISqlQuery Union()
+        => Db.Customers.From()
+            .Where(c => c.Age > 30)
+            .Select(c => (c.Id, c.Name))
+            .Union(
+                Db.Customers.From()
+                    .Where(c => c.Name == "Alice")
+                    .Select(c => (c.Id, c.Name))
+            );
+
+    public static ISqlQuery Intersect()
+        => Db.Customers.From()
+            .Where(c => c.Age > 25)
+            .Select(c => (c.Id, c.Name))
+            .Intersect(
+                Db.Customers.From()
+                    .Where(c => c.Name == "John")
+                    .Select(c => (c.Id, c.Name))
+            );
+
+    public static ISqlQuery Except()
+        => Db.Customers.From()
+            .Select(c => (c.Id, c.Name))
+            .Except(
+                Db.Customers.From()
+                    .Where(c => c.Age < 18)
+                    .Select(c => (c.Id, c.Name))
+            );
 }

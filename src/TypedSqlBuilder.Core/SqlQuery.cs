@@ -191,6 +191,63 @@ internal record WhereClause<TSource>(ISqlQuery<TSource> TypedQuery, Func<TSource
     where TSource : ITuple;
 
 /// <summary>
+/// Base record representing a SQL UNION operation between two queries.
+/// Combines rows from two queries, removing duplicates.
+/// </summary>
+/// <param name="Query1">The first query</param>
+/// <param name="Query2">The second query</param>
+internal record UnionClause(ISqlQuery Query1, ISqlQuery Query2) : ISqlQuery;
+
+/// <summary>
+/// Strongly-typed UNION clause for combining queries with identical result types.
+/// Provides type-safe union operations ensuring both queries return the same structure.
+/// </summary>
+/// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+/// <param name="TypedQuery1">The first strongly-typed query</param>
+/// <param name="TypedQuery2">The second strongly-typed query</param>
+internal record UnionClause<TSource>(ISqlQuery<TSource> TypedQuery1, ISqlQuery<TSource> TypedQuery2) 
+    : UnionClause(TypedQuery1, TypedQuery2), ISqlQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
+/// Base record representing a SQL INTERSECT operation between two queries.
+/// Returns only rows that exist in both queries.
+/// </summary>
+/// <param name="Query1">The first query</param>
+/// <param name="Query2">The second query</param>
+internal record IntersectClause(ISqlQuery Query1, ISqlQuery Query2) : ISqlQuery;
+
+/// <summary>
+/// Strongly-typed INTERSECT clause for finding common rows between queries.
+/// Provides type-safe intersect operations ensuring both queries return the same structure.
+/// </summary>
+/// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+/// <param name="TypedQuery1">The first strongly-typed query</param>
+/// <param name="TypedQuery2">The second strongly-typed query</param>
+internal record IntersectClause<TSource>(ISqlQuery<TSource> TypedQuery1, ISqlQuery<TSource> TypedQuery2) 
+    : IntersectClause(TypedQuery1, TypedQuery2), ISqlQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
+/// Base record representing a SQL EXCEPT operation between two queries.
+/// Returns rows that exist in the first query but not in the second query.
+/// </summary>
+/// <param name="Query1">The first query</param>
+/// <param name="Query2">The second query</param>
+internal record ExceptClause(ISqlQuery Query1, ISqlQuery Query2) : ISqlQuery;
+
+/// <summary>
+/// Strongly-typed EXCEPT clause for finding rows unique to the first query.
+/// Provides type-safe except operations ensuring both queries return the same structure.
+/// </summary>
+/// <typeparam name="TSource">The tuple type that both queries must produce</typeparam>
+/// <param name="TypedQuery1">The first strongly-typed query</param>
+/// <param name="TypedQuery2">The second strongly-typed query</param>
+internal record ExceptClause<TSource>(ISqlQuery<TSource> TypedQuery1, ISqlQuery<TSource> TypedQuery2) 
+    : ExceptClause(TypedQuery1, TypedQuery2), ISqlQuery<TSource>
+    where TSource : ITuple;
+
+/// <summary>
 /// Abstract base class for SQL scalar queries that return single values.
 /// Extends SqlExprInt to enable scalar queries to be used as expressions in other queries.
 /// This allows subqueries that return single values to be embedded in larger expressions.

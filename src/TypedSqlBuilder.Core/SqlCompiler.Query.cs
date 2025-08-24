@@ -151,6 +151,21 @@ internal static partial class SqlCompiler
             case LimitClause(var subQuery, var limit, var offset):
                 return ApplyToSubQuery(subQuery, q => new LimitClause(q, limit, offset));
 
+            case UnionClause(var query1, var query2):
+                var (normalizedQuery1, changed1) = ApplyNormalizationRules(query1);
+                var (normalizedQuery2, changed2) = ApplyNormalizationRules(query2);
+                return (changed1 || changed2) ? (new UnionClause(normalizedQuery1, normalizedQuery2), true) : (query, false);
+
+            case IntersectClause(var query1, var query2):
+                var (normalizedQuery1I, changed1I) = ApplyNormalizationRules(query1);
+                var (normalizedQuery2I, changed2I) = ApplyNormalizationRules(query2);
+                return (changed1I || changed2I) ? (new IntersectClause(normalizedQuery1I, normalizedQuery2I), true) : (query, false);
+
+            case ExceptClause(var query1, var query2):
+                var (normalizedQuery1E, changed1E) = ApplyNormalizationRules(query1);
+                var (normalizedQuery2E, changed2E) = ApplyNormalizationRules(query2);
+                return (changed1E || changed2E) ? (new ExceptClause(normalizedQuery1E, normalizedQuery2E), true) : (query, false);
+
             // No changes needed
             default:
                 return (query, false);
@@ -965,6 +980,52 @@ internal static partial class SqlCompiler
                 {{subIndent}}{{innerSql}}
                 """;
                 return (GenerateLimitOffsetClause(sql, limitOffset, projectionCtx.DatabaseType), selected, projectionCtx);
+            }
+
+            // Set Operations
+            case UnionClause(var query1, var query2):
+            {
+                var (sql1, tuple1, context1) = Compile(query1, context, scopeLevel);
+                var (sql2, tuple2, context2) = Compile(query2, context1, scopeLevel);
+                
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{sql1}}
+                {{indent}}UNION
+                {{sql2}}
+                """;
+                
+                return (sql, tuple1, context2);
+            }
+
+            case IntersectClause(var query1, var query2):
+            {
+                var (sql1, tuple1, context1) = Compile(query1, context, scopeLevel);
+                var (sql2, tuple2, context2) = Compile(query2, context1, scopeLevel);
+                
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{sql1}}
+                {{indent}}INTERSECT
+                {{sql2}}
+                """;
+                
+                return (sql, tuple1, context2);
+            }
+
+            case ExceptClause(var query1, var query2):
+            {
+                var (sql1, tuple1, context1) = Compile(query1, context, scopeLevel);
+                var (sql2, tuple2, context2) = Compile(query2, context1, scopeLevel);
+                
+                var (indent, subIndent) = GetIndentation(scopeLevel);
+                var sql = $$"""
+                {{sql1}}
+                {{indent}}EXCEPT
+                {{sql2}}
+                """;
+                
+                return (sql, tuple1, context2);
             }
 
             default:
