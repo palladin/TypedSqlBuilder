@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
@@ -9,15 +10,22 @@ namespace TypedSqlBuilder.Core;
 /// </summary>
 public static class SqlQueryExtensions
 {
+    private static readonly ConcurrentDictionary<System.Reflection.MethodInfo, ImmutableArray<string?>> _tupleNamesCache = new();
+
     private static ImmutableArray<string?> GetTupleElementNames(Delegate @delegate)
     {
         var method = @delegate.Method;
-        // Prefer ReturnParameter custom attributes which reliably carry TupleElementNamesAttribute
-        var tupleNamesAttr = method.ReturnParameter?.GetCustomAttributes(typeof(TupleElementNamesAttribute), false)
-            .Cast<TupleElementNamesAttribute>()
-            .FirstOrDefault();
+        
+        // Use cached result if available
+        return _tupleNamesCache.GetOrAdd(method, static method =>
+        {
+            // Prefer ReturnParameter custom attributes which reliably carry TupleElementNamesAttribute
+            var tupleNamesAttr = method.ReturnParameter?.GetCustomAttributes(typeof(TupleElementNamesAttribute), false)
+                .Cast<TupleElementNamesAttribute>()
+                .FirstOrDefault();
 
-        return tupleNamesAttr?.TransformNames?.Where(x => x is not null).ToImmutableArray() ?? [];
+            return tupleNamesAttr?.TransformNames?.Where(x => x is not null).ToImmutableArray() ?? [];
+        });
     }
 
     /// <summary>
