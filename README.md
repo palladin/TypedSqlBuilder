@@ -22,7 +22,7 @@ public class Customer() : SqlTable("customers")
 }
 
 // Build complex queries with fluent syntax
-var (sql, params)  =
+var (sql, params) =
     Db.Customers.From()
                 .Where(c => c.Age > 18)
                 .OrderBy(c => (c.Name, Sort.Asc))

@@ -160,8 +160,6 @@ public class OrderService
         {
             if (item is Order order)
             {
-                Console.WriteLine($"DEBUG ORDER: ID={order.OrderID}, CustomerName='{order.CustomerName}', EmployeeName='{order.EmployeeName}'");
-                
                 if (order.ShippedDate != null)
                     order.Status = "SHIPPED";
                 else if (order.OrderDate != null)
