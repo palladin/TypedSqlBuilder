@@ -10,7 +10,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>TypedSqlBuilder</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-rc.1</Version>
     <Authors>Palladin</Authors>
     <Company>Palladin</Company>
     <Description>A type-safe SQL expression builder DSL for C# that provides fluent syntax for constructing SQL expressions with compile-time type checking. Perfect companion for Dapper and other lightweight ORMs.</Description>
@@ -19,7 +19,7 @@
     <RepositoryUrl>https://github.com/palladin/TypedSqlBuilder</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>sql;dapper;query-builder;type-safe;orm;database;linq;sqlserver;sqlite;postgresql</PackageTags>
-    <PackageReleaseNotes>Initial release of TypedSqlBuilder - A type-safe SQL expression builder for C#</PackageReleaseNotes>
+    <PackageReleaseNotes>Release Candidate 1 for TypedSqlBuilder v1.0.0 - A type-safe SQL expression builder for C#. This RC includes all planned features and is ready for community feedback before the stable 1.0.0 release.</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>

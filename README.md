@@ -1,6 +1,8 @@
 # TypedSqlBuilder
 
 [![Build and Test](https://github.com/palladin/TypedSqlBuilder/actions/workflows/build.yml/badge.svg)](https://github.com/palladin/TypedSqlBuilder/actions/workflows/build.yml)
+[![NuGet Version](https://img.shields.io/nuget/v/TypedSqlBuilder.svg)](https://www.nuget.org/packages/TypedSqlBuilder)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TypedSqlBuilder.svg)](https://www.nuget.org/packages/TypedSqlBuilder)
 
 A type-safe SQL expression builder DSL for C# that provides fluent syntax for constructing SQL expressions with compile-time type checking.
 
@@ -61,6 +63,8 @@ Install TypedSqlBuilder via NuGet:
 ```bash
 dotnet add package TypedSqlBuilder
 ```
+
+> **Note**: Currently in Release Candidate phase. We're gathering community feedback before the stable 1.0.0 release. The API is stable and ready for evaluation and testing in your projects.
 
 ## Motivation
 
