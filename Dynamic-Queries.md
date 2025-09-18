@@ -10,7 +10,7 @@ You need to build dynamic queries where multiple search conditions are combined 
 
 The challenge: How do you combine multiple `Func<Customer, bool>` predicates into a single query condition?
 
-## Solution 1: Expression Trees (Traditional Approach)
+## Expression Trees (Traditional Approach)
 
 ```csharp
 // Build list of expression predicates
@@ -22,26 +22,21 @@ var predicates = new List<Expression<Func<Customer, bool>>>
 };
 
 // Complex composition - manual expression tree manipulation
-Expression<Func<Customer, bool>> combined = null;
-foreach (var predicate in predicates)
-{
-    if (combined == null)
-        combined = predicate;
-    else
-    {
-        var parameter = Expression.Parameter(typeof(Customer), "c");
-        var left = Expression.Invoke(combined, parameter);
-        var right = Expression.Invoke(predicate, parameter);
-        var orExpression = Expression.OrElse(left, right);
-        combined = Expression.Lambda<Func<Customer, bool>>(orExpression, parameter);
-    }
+Expression<Func<Customer, bool>> combined = predicates[0];
+foreach (var predicate in predicates.Skip(1))
+{    
+    var parameter = Expression.Parameter(typeof(Customer), "c");
+    var left = Expression.Invoke(combined, parameter);
+    var right = Expression.Invoke(predicate, parameter);
+    var orExpression = Expression.OrElse(left, right);
+    combined = Expression.Lambda<Func<Customer, bool>>(orExpression, parameter);
 }
 
 // Use with EF Core
 var results = await context.Customers.Where(combined).ToListAsync();
 ```
 
-## Solution 2: TypedSqlBuilder (Functional Composition)
+## TypedSqlBuilder (Functional Composition)
 
 ```csharp
 // Build list of function predicates
